@@ -71,7 +71,10 @@ public class EngineeringChangeOrder
 
     private readonly List<EngineeringChangeLine> _lines = [];
 
-    public IReadOnlyList<EngineeringChangeLine> Lines => _lines;
+    /// <summary>
+    /// Read-only — see <see cref="BomRevision.Lines"/> for why the wrapper is not optional.
+    /// </summary>
+    public IReadOnlyList<EngineeringChangeLine> Lines => _lines.AsReadOnly();
 
     private EngineeringChangeOrder()
     {
@@ -93,13 +96,13 @@ public class EngineeringChangeOrder
     {
         if (string.IsNullOrWhiteSpace(ecoNumber))
         {
-            throw new DomainRuleViolationException(DomainErrorCodes.BlankPartNumber, "ECO number is required.");
+            throw new DomainRuleViolationException(DomainErrorCodes.BlankEcoNumber, "ECO number is required.");
         }
 
         if (baseReleasedRevisionId == Guid.Empty)
         {
             throw new DomainRuleViolationException(
-                DomainErrorCodes.BlankPartNumber,
+                DomainErrorCodes.BaseRevisionRequired,
                 "An ECO must be created against a released base revision.");
         }
 
@@ -142,6 +145,22 @@ public class EngineeringChangeOrder
         if (replacement.Count == 0)
         {
             throw new DomainRuleViolationException(DomainErrorCodes.EcoLinesRequired, "An ECO must contain at least one change line.");
+        }
+
+        // Two lines targeting the same component are rejected rather than merged. Approval
+        // resolves each base line with `FirstOrDefault`, so a second change to the same
+        // target would be silently discarded — the approved revision would then not contain
+        // every change the reviewer actually approved. Rejecting at draft is the cheap place:
+        // the user still has the form open.
+        var seenTargets = new HashSet<Guid>();
+        foreach (var line in replacement)
+        {
+            if (!seenTargets.Add(line.TargetComponentId))
+            {
+                throw new DomainRuleViolationException(
+                    DomainErrorCodes.DuplicateTargetComponent,
+                    "An ECO can change a given component only once. Split it into two ECOs if two separate changes are needed.");
+            }
         }
 
         _lines.Clear();
@@ -188,7 +207,7 @@ public class EngineeringChangeOrder
         if (approvedRevisionId == Guid.Empty)
         {
             throw new DomainRuleViolationException(
-                DomainErrorCodes.BlankPartNumber,
+                DomainErrorCodes.ApprovalRevisionRequired,
                 "Approval must link to the revision it created.");
         }
 

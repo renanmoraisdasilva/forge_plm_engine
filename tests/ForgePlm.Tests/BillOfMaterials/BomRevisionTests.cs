@@ -37,7 +37,7 @@ public class BomRevisionTests
         var ex = Assert.Throws<DomainRuleViolationException>(
             () => BomRevision.CreateApproved(ProductId, "C", [], "Alex Morgan", TestData.Now, sourceEcoId: Guid.NewGuid()));
 
-        Assert.Equal(DomainErrorCodes.EcoLinesRequired, ex.Code);
+        Assert.Equal(DomainErrorCodes.BomLinesRequired, ex.Code);
     }
 
     [Fact]

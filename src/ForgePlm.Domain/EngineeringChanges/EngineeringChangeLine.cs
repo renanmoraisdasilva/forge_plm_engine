@@ -34,12 +34,12 @@ public class EngineeringChangeLine
     {
         if (targetComponentId == Guid.Empty)
         {
-            throw new DomainRuleViolationException(DomainErrorCodes.BlankPartNumber, "A change line must target a component.");
+            throw new DomainRuleViolationException(DomainErrorCodes.TargetComponentRequired, "A change line must target a component.");
         }
 
         if (replacementComponentId == Guid.Empty)
         {
-            throw new DomainRuleViolationException(DomainErrorCodes.BlankPartNumber, "A replacement component is required.");
+            throw new DomainRuleViolationException(DomainErrorCodes.ReplacementComponentRequired, "A replacement component is required.");
         }
 
         if (targetComponentId == replacementComponentId)
@@ -64,7 +64,7 @@ public class EngineeringChangeLine
     {
         if (targetComponentId == Guid.Empty)
         {
-            throw new DomainRuleViolationException(DomainErrorCodes.BlankPartNumber, "A change line must target a component.");
+            throw new DomainRuleViolationException(DomainErrorCodes.TargetComponentRequired, "A change line must target a component.");
         }
 
         return new EngineeringChangeLine

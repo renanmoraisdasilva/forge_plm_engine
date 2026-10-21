@@ -47,7 +47,14 @@ public class BomRevision
 
     private readonly List<BomLine> _lines = [];
 
-    public IReadOnlyList<BomLine> Lines => _lines;
+    /// <summary>
+    /// Read-only. Wrapping in `AsReadOnly()` rather than returning `_lines` typed as
+    /// `IReadOnlyList`: a caller could otherwise cast back to `List&lt;BomLine&gt;` and mutate a
+    /// released revision, which would break the "immutable forever" claim the demo rests on.
+    /// EF populates the `_lines` field directly (see `HasField` + `PropertyAccessMode.Field`
+    /// in the configuration), so the wrapper does not affect materialisation.
+    /// </summary>
+    public IReadOnlyList<BomLine> Lines => _lines.AsReadOnly();
 
     private BomRevision()
     {
@@ -128,8 +135,11 @@ public class BomRevision
 
         if (_lines.Count == 0)
         {
+            // `bom-lines-required`, not `eco-lines-required`: this is a BOM revision with no
+            // lines, a different aggregate from an ECO. Sharing one code made the taxonomy
+            // lie about which object was at fault.
             throw new DomainRuleViolationException(
-                DomainErrorCodes.EcoLinesRequired,
+                DomainErrorCodes.BomLinesRequired,
                 "A BOM revision must contain at least one line.");
         }
     }

@@ -359,4 +359,112 @@ public class EngineeringChangeOrderTests
         Assert.Equal(EngineeringChangeStatus.Applied, eco.Status);
         Assert.Equal(approvedRevisionId, eco.ApprovedRevisionId);
     }
+
+    // --- Review fixes (code review, 2026-10-21) ----------------------------------
+
+    /// <summary>
+    /// Two changes to the same component must be rejected, not silently merged.
+    ///
+    /// Approval resolves each base line with `FirstOrDefault`, so the second line would be
+    /// discarded — producing a revision that does not contain every change the reviewer
+    /// approved. The UI would show two changes; the BOM would carry one.
+    /// </summary>
+    [Fact]
+    public void TwoChangesToTheSameComponentAreRejected()
+    {
+        var baseRevision = TestData.Server100RevB(ProductId);
+        var eco = EngineeringChangeOrder.Create("ECO-2026-0044", ProductId, baseRevision.Id, "title", "reason", "impact", null, "Alex Morgan", TestData.Now);
+
+        var ex = Assert.Throws<DomainRuleViolationException>(() => eco.ReplaceLines(
+        [
+            EngineeringChangeLine.Replace(TestData.Motherboard020, TestData.Motherboard021, null),
+            EngineeringChangeLine.ChangeQuantity(TestData.Motherboard020, 2, null),
+        ]));
+
+        Assert.Equal(DomainErrorCodes.DuplicateTargetComponent, ex.Code);
+    }
+
+    /// <summary>
+    /// The immutability claim must hold against a caller who does not trust it. A released
+    /// revision's lines could previously be mutated by casting the exposed list back to
+    /// `List&lt;BomLine&gt;`, which would quietly rewrite history.
+    /// </summary>
+    [Fact]
+    public void RevisionLinesCannotBeMutatedThroughACast()
+    {
+        var revision = TestData.Server100RevB(ProductId);
+        var before = revision.Lines.Count;
+
+        // `AsReadOnly()` wraps the list, so the cast fails outright: there is never an
+        // object to mutate. Stronger than throwing on the mutation itself.
+        var ex = Assert.Throws<InvalidCastException>(() =>
+            ((List<BomLine>)revision.Lines).Add(BomLine.Create(TestData.Processor001, 1, "Each")));
+
+        Assert.Contains("ReadOnlyCollection", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(before, revision.Lines.Count);
+    }
+
+    /// <summary>Same protection on the ECO's own change lines.</summary>
+    [Fact]
+    public void EcoLinesCannotBeMutatedThroughACast()
+    {
+        var (eco, _) = DraftEco();
+        var before = eco.Lines.Count;
+
+        Assert.Throws<InvalidCastException>(() =>
+            ((List<EngineeringChangeLine>)eco.Lines).Clear());
+
+        Assert.Equal(before, eco.Lines.Count);
+    }
+
+    /// <summary>
+    /// Each failure must report its own code. These all previously returned
+    /// `blank-part-number`, so a UI keying off codes could not tell a missing base revision
+    /// from a missing replacement part.
+    /// </summary>
+    [Fact]
+    public void MissingBaseRevisionReportsItsOwnCode()
+    {
+        var ex = Assert.Throws<DomainRuleViolationException>(() => EngineeringChangeOrder.Create(
+            "ECO-2026-0045", ProductId, Guid.Empty, "title", "reason", "impact", null, "Alex Morgan", TestData.Now));
+
+        Assert.Equal(DomainErrorCodes.BaseRevisionRequired, ex.Code);
+    }
+
+    [Fact]
+    public void BlankEcoNumberReportsItsOwnCode()
+    {
+        var ex = Assert.Throws<DomainRuleViolationException>(() => EngineeringChangeOrder.Create(
+            "   ", ProductId, Guid.NewGuid(), "title", "reason", "impact", null, "Alex Morgan", TestData.Now));
+
+        Assert.Equal(DomainErrorCodes.BlankEcoNumber, ex.Code);
+    }
+
+    [Fact]
+    public void MissingReplacementComponentReportsItsOwnCode()
+    {
+        var ex = Assert.Throws<DomainRuleViolationException>(() =>
+            EngineeringChangeLine.Replace(TestData.Motherboard020, Guid.Empty, null));
+
+        Assert.Equal(DomainErrorCodes.ReplacementComponentRequired, ex.Code);
+    }
+
+    [Fact]
+    public void MissingChangeTargetReportsItsOwnCode()
+    {
+        var ex = Assert.Throws<DomainRuleViolationException>(() =>
+            EngineeringChangeLine.ChangeQuantity(Guid.Empty, 2, null));
+
+        Assert.Equal(DomainErrorCodes.TargetComponentRequired, ex.Code);
+    }
+
+    /// <summary>
+    /// Spec §7 lists `revision-limit-reached` among the `409` conflict types. It used to be
+    /// thrown as a rule violation, so the API would have mapped a conflict to `400`.
+    /// </summary>
+    [Fact]
+    public void ExhaustingRevisionCodesIsAConflictNotAValidationFailure()
+    {
+        Assert.Throws<DomainConflictException>(() => RevisionCode.Next("Z"));
+    }
 }
