@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RootNamespace>ForgePlm.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      Pulled in transitively by Microsoft.EntityFrameworkCore.Design at a version with
+      published advisories (GHSA-2fmv-rv2c-59x7, GHSA-846f-f764-76mx, CVE-2026-84008). The
+      whole 10.0.0–10.0.12 range is affected; 10.0.13 is the patched release for this line.
+      Referencing it explicitly overrides the transitive 9.x/10.0.0 version; the alternative
+      was suppressing NuGetAudit, which would hide the finding rather than fix it.
+    -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
+    <!--
+      Transitive from Microsoft.AspNetCore.OpenApi at 2.0.0, which has GHSA-v5pm-xwqc-g5wc
+      (CVE-2026-49451, stack overflow parsing a circular $ref). We only *generate* OpenAPI and
+      never parse untrusted documents, so we are not exposed — but 2.7.5 is the patched 2.x
+      release, and overriding it is cheaper than justifying a suppression.
+    -->
+    <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ForgePlm.Domain\ForgePlm.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
