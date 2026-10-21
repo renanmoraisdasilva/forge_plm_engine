@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-secondary-fixed": "#131b2e",
+          "on-primary-fixed": "#001d31",
+          "primary-fixed-dim": "#93ccff",
+          "on-surface": "#0b1c30",
+          "surface-container-high": "#dce9ff",
+          "secondary": "#565e74",
+          "tertiary-fixed": "#cde5ff",
+          "tertiary-fixed-dim": "#94ccff",
+          "surface-bright": "#f8f9ff",
+          "on-tertiary-container": "#fdfcff",
+          "inverse-surface": "#213145",
+          "outline": "#707881",
+          "on-primary": "#ffffff",
+          "on-secondary-container": "#5c647a",
+          "on-secondary-fixed-variant": "#3f465c",
+          "tertiary": "#006195",
+          "on-error-container": "#93000a",
+          "on-primary-fixed-variant": "#004b73",
+          "secondary-fixed-dim": "#bec6e0",
+          "outline-variant": "#bfc7d2",
+          "error": "#ba1a1a",
+          "inverse-on-surface": "#eaf1ff",
+          "surface": "#f8f9ff",
+          "surface-tint": "#006398",
+          "on-secondary": "#ffffff",
+          "secondary-fixed": "#dae2fd",
+          "surface-dim": "#cbdbf5",
+          "background": "#f8f9ff",
+          "surface-container": "#e5eeff",
+          "secondary-container": "#dae2fd",
+          "inverse-primary": "#93ccff",
+          "on-background": "#0b1c30",
+          "primary-container": "#007bb9",
+          "surface-variant": "#d3e4fe",
+          "on-tertiary": "#ffffff",
+          "on-error": "#ffffff",
+          "on-tertiary-fixed": "#001d32",
+          "on-surface-variant": "#3f4850",
+          "primary-fixed": "#cce5ff",
+          "tertiary-container": "#287ab3",
+          "primary": "#006194",
+          "on-primary-container": "#fdfcff",
+          "on-tertiary-fixed-variant": "#004b74",
+          "surface-container-low": "#eff4ff",
+          "surface-container-highest": "#d3e4fe",
+          "surface-container-lowest": "#ffffff",
+          "error-container": "#ffdad6"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "space-xs": "0.25rem",
+          "space-lg": "0.75rem",
+          "space-xl": "1rem",
+          "margin": "1rem",
+          "space-sm": "0.375rem",
+          "gutter": "0.75rem",
+          "space-md": "0.5rem"
+        },
+        "fontFamily": {
+          "headline-lg": [
+            "Inter"
+          ],
+          "headline-md": [
+            "Inter"
+          ],
+          "headline-xl": [
+            "Inter"
+          ],
+          "code-sm": [
+            "JetBrains Mono"
+          ],
+          "label-sm": [
+            "Inter"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "label-md": [
+            "Inter"
+          ],
+          "headline-sm": [
+            "Inter"
+          ],
+          "body-md": [
+            "Inter"
+          ],
+          "body-lg": [
+            "Inter"
+          ]
+        },
+        "fontSize": {
+          "headline-lg": [
+            "18px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-md": [
+            "15px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "code-sm": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-sm": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "-0.005em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-md": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-60 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-12 px-space-lg flex items-center gap-space-md bg-surface-container-lowest"><img alt="Forge PLM Logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WSb0IT6jqUJIKOGerFtpuRHCp2cYGNavocZxh7l5GzNhe78gD6eMcKaP9ga1HxyePWKjd_urKi4So5gZF7OBWRKBaN3OVj4jx0RzJrpezT7toV1CMQe-orTnvzMyFYXBGka-aa7gWz3vb4_W5Gp4HHJY3Uer_wmhFrFKYCrKeXPA3p18HsEHh1_qzTfv6xLdXgVJteiP-TqZr8oMSeyhbIRVeavLDc9FCQhMqRCWo6s57MbnA5aRpUZCEo"/><span class="font-headline-md text-headline-md text-on-surface tracking-tight">Forge PLM</span></div><div class="px-space-md py-space-sm"><span class="px-space-md font-label-sm text-label-sm text-secondary tracking-wider uppercase">Engineering Workspace</span></div><nav class="px-space-sm space-y-0.5" data-active-classes="bg-surface-container text-primary font-semibold"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="overview" href="#"><span class="material-symbols-outlined text-[18px]">dashboard</span><span>Overview</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="products" href="#"><span class="material-symbols-outlined text-[18px]">devices</span><span>Products</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="bill-of-materials" href="#"><span class="material-symbols-outlined text-[18px]">account_tree</span><span>Bill of Materials</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="engineering-changes" href="#"><span class="material-symbols-outlined text-[18px]">published_with_changes</span><span>Engineering Changes</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg transition-colors bg-surface-container text-primary font-semibold" data-path="components" href="#"><span class="material-symbols-outlined text-[18px]">memory</span><span>Components</span></a></nav></div><div class="p-space-sm space-y-0.5 bg-surface-container-lowest"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="settings" href="#"><span class="material-symbols-outlined text-[18px]">settings</span><span>Settings</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="help" href="#"><span class="material-symbols-outlined text-[18px]">help</span><span>Help</span></a><div class="mt-space-sm px-space-md py-space-xs"><div class="flex items-center justify-between font-label-sm text-label-sm text-secondary"><span>CORE ENGINE</span><span class="font-code-sm text-code-sm">v3.4.1</span></div></div></div></aside><div class="pl-60 min-h-screen flex flex-col bg-surface"><header class="fixed top-0 left-60 right-0 h-12 bg-surface-container-lowest/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-lg flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-md min-w-0"><div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px]">corporate_fare</span><span class="hover:text-on-surface cursor-pointer">Forge HQ</span><span class="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span><span class="text-on-surface font-headline-sm text-headline-sm truncate">Engineering Workbench</span></div></div><div class="flex-1 max-w-md mx-space-md"><div class="relative flex items-center"><span class="material-symbols-outlined absolute left-space-md text-[18px] text-secondary pointer-events-none">search</span><input class="w-full h-8 pl-9 pr-space-md bg-surface-container-low rounded-lg text-on-surface font-body-sm text-body-sm placeholder:text-secondary focus:outline-none focus:bg-surface-container-lowest transition-all" placeholder="Search products, part numbers, or ECOs..." type="text"/></div></div><div class="flex items-center gap-space-lg"><button aria-label="Notifications" class="relative p-space-xs rounded-lg hover:bg-surface-container-high hover:text-on-surface text-secondary transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-error"></span></button><div class="h-5 w-px bg-surface-container-high"></div><div class="flex items-center gap-space-md pl-space-xs"><div class="flex flex-col text-right"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">Alex Morgan</span><span class="font-label-sm text-label-sm text-secondary leading-tight">Product Engineer</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAi2APML9mxxuVPmZ1goXhUkGktLuE-UUx5Ej6orzwpVLkLgwHsbrv0fRyGiCgtntyieB2ebs6fp_DXziWdwtyZafqsxfxmJGZj30NlUhr0Yja6xKkuxxMLcKj6sHab8OItsPa1c3bpGbgic0YA72Os5PS2vU64Vc0GRuBJVy52Sxr7UdSwr56hyr7RylMPWYWA_BT5oS6CJDJBMhrS3w_j2-wTcJbWF6aOksSxoX74RTv7qcpKzoqGkA"/></div></div></header><main class="flex-1 w-full pt-12 px-space-lg bg-surface"><div class="flex flex-col w-full pb-10 space-y-4">
+<!-- Header Title & Subtitle Area -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-2">
+<div>
+<div class="flex items-center gap-2">
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Components</h1>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-primary font-code-sm text-code-sm font-semibold tracking-wide">TOTAL: 1,428</span>
+</div>
+<p class="font-body-md text-body-md text-secondary mt-0.5">Master repository of approved engineering components, parts, and hardware assemblies.</p>
+</div>
+<!-- Quick Stats Metric Micro-Strip -->
+<div class="flex items-center gap-2 self-start md:self-auto bg-surface-container-lowest p-1.5 rounded-lg shadow-sm">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-low rounded">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Active Lib</span>
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">v14.9</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-low rounded">
+<span class="material-symbols-outlined text-[16px] text-tertiary">verified</span>
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">RoHS / REACH</span>
+<span class="font-code-sm text-code-sm font-semibold text-on-surface">100% OK</span>
+</div>
+</div>
+</div>
+<!-- Top Filter, Category Toolbar & Actions -->
+<div class="bg-surface-container-lowest p-3 rounded-lg shadow-sm space-y-3">
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+<!-- Search and Dropdowns -->
+<div class="flex flex-wrap items-center gap-2 flex-1 min-w-0">
+<!-- Search Input -->
+<div class="relative flex-1 min-w-[260px] max-w-md">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-secondary pointer-events-none">search</span>
+<input class="w-full h-8 pl-8 pr-3 bg-surface-container-low rounded text-on-surface font-body-sm text-body-sm placeholder:text-secondary focus:outline-none focus:bg-surface-container-lowest transition-all" id="componentSearchInput" placeholder="Search component name, part number, or specs..." type="text"/>
+</div>
+<!-- Category Dropdown -->
+<div class="relative min-w-[150px]">
+<select class="w-full h-8 pl-2.5 pr-7 bg-surface-container-low rounded text-on-surface font-body-sm text-body-sm appearance-none focus:outline-none cursor-pointer" id="categoryFilter">
+<option value="all">All Categories</option>
+<option value="Processor">Processor</option>
+<option value="Motherboard">Motherboard</option>
+<option value="Memory">Memory</option>
+<option value="Storage">Storage</option>
+<option value="Networking">Networking</option>
+<option value="Thermal">Thermal</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[18px] text-secondary pointer-events-none">expand_more</span>
+</div>
+<!-- Lifecycle Dropdown -->
+<div class="relative min-w-[140px]">
+<select class="w-full h-8 pl-2.5 pr-7 bg-surface-container-low rounded text-on-surface font-body-sm text-body-sm appearance-none focus:outline-none cursor-pointer" id="lifecycleFilter">
+<option value="all">All Statuses</option>
+<option value="Released">Released</option>
+<option value="Pending">Pending</option>
+<option value="Obsolete">Obsolete</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[18px] text-secondary pointer-events-none">expand_more</span>
+</div>
+<!-- Reset Button -->
+<button class="h-8 px-2.5 rounded bg-surface-container-low text-secondary hover:text-on-surface hover:bg-surface-container font-label-md text-label-md flex items-center gap-1 transition-colors" id="resetFiltersBtn" title="Reset Filters">
+<span class="material-symbols-outlined text-[16px]">restart_alt</span>
+<span>Reset</span>
+</button>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-2 shrink-0">
+<button class="h-8 px-3 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[16px]">file_download</span>
+<span>Export BOM/CSV</span>
+</button>
+<button class="h-8 px-3 rounded bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center gap-1.5 transition-all shadow-sm" id="openNewComponentModal">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>Register New Component</span>
+</button>
+</div>
+</div>
+<!-- Quick Pill Filter Tags -->
+<div class="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 text-secondary">
+<span class="font-label-sm text-label-sm uppercase tracking-wider mr-1 text-outline">Fast Scope:</span>
+<button class="filter-pill active px-2 py-0.5 rounded font-label-sm text-label-sm bg-primary text-on-primary transition-colors" data-category="all">All Items (1,428)</button>
+<button class="filter-pill px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container hover:text-on-surface transition-colors" data-category="Processor">Processors (42)</button>
+<button class="filter-pill px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container hover:text-on-surface transition-colors" data-category="Motherboard">Motherboards (18)</button>
+<button class="filter-pill px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container hover:text-on-surface transition-colors" data-category="Memory">Memory (112)</button>
+<button class="filter-pill px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container hover:text-on-surface transition-colors" data-category="Storage">Storage (88)</button>
+<button class="filter-pill px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container hover:text-on-surface transition-colors" data-category="Networking">Networking (54)</button>
+<button class="filter-pill px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container hover:text-on-surface transition-colors" data-category="Thermal">Thermal (65)</button>
+</div>
+</div>
+<!-- Main Bento Content: High-Density Structured Data Grid + Quick Spec Telemetry Drawer -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+<!-- Structured DataTable Container -->
+<div class="xl:col-span-8 bg-surface-container-lowest rounded-lg shadow-sm overflow-hidden flex flex-col">
+<!-- Table Functional Bar -->
+<div class="h-9 px-3 bg-surface-container-low flex items-center justify-between text-secondary">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm tracking-wider uppercase">Catalog Listing</span>
+<span class="inline-flex items-center px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant font-code-sm text-code-sm">5 of 1,428 visible</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1 text-secondary hover:text-on-surface cursor-pointer">
+<span class="material-symbols-outlined text-[16px]">view_column</span>
+<span class="font-label-sm text-label-sm">Columns</span>
+</div>
+<div class="flex items-center gap-1 text-secondary hover:text-on-surface cursor-pointer">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span class="font-label-sm text-label-sm">Density: High</span>
+</div>
+</div>
+</div>
+<!-- High-Density Data Grid -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse" id="componentsTable">
+<thead>
+<tr class="h-8 bg-surface-container-low/70 text-secondary font-label-sm text-label-sm uppercase tracking-wider select-none">
+<th class="w-8 px-3 text-center">
+<input class="rounded accent-primary w-3.5 h-3.5 cursor-pointer align-middle" type="checkbox"/>
+</th>
+<th class="py-1 px-3 cursor-pointer hover:text-on-surface">
+<div class="flex items-center gap-1">
+<span>Part Number</span>
+<span class="material-symbols-outlined text-[14px]">arrow_downward</span>
+</div>
+</th>
+<th class="py-1 px-3 cursor-pointer hover:text-on-surface">Component Name</th>
+<th class="py-1 px-3">Category</th>
+<th class="py-1 px-3 text-center">Rev</th>
+<th class="py-1 px-3">Lifecycle Status</th>
+<th class="py-1 px-3">Used In</th>
+<th class="py-1 px-3 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-body-sm font-body-sm text-on-surface divide-surface-container">
+<!-- Row 1: CPU-001 -->
+<tr class="h-9 hover:bg-surface-container-low/60 transition-colors group cursor-pointer component-row" data-category="Processor" data-id="CPU-001" data-name="Xeon Processor" data-rev="A" data-specs="16-Core @ 3.2GHz, 125W TDP, Socket LGA-4189" data-status="Released" data-used="SERVER-100, SERVER-200, HPC-800">
+<td class="px-3 text-center">
+<input class="rounded accent-primary w-3.5 h-3.5 cursor-pointer align-middle" type="checkbox"/>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<a class="font-code-sm text-code-sm font-semibold text-primary hover:underline flex items-center gap-1" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[15px] text-tertiary">developer_board</span>
+<span>CPU-001</span>
+</a>
+</td>
+<td class="py-1 px-3 font-headline-sm text-headline-sm text-on-surface font-medium whitespace-nowrap">
+<a class="hover:text-primary transition-colors" href="javascript:void(0)">Xeon Processor</a>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Processor</span>
+</td>
+<td class="py-1 px-3 text-center whitespace-nowrap">
+<span class="font-code-sm text-code-sm font-semibold text-secondary">A</span>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Released
+                </span>
+</td>
+<td class="py-1 px-3">
+<div class="flex items-center gap-1 flex-wrap">
+<span class="font-label-sm text-label-sm font-medium text-secondary whitespace-nowrap">3 products</span>
+<span class="text-outline-variant">·</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container-low px-1 rounded">SERVER-100</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container-low px-1 rounded">SERVER-200</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container-low px-1 rounded">+1</span>
+</div>
+</td>
+<td class="py-1 px-3 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1">
+<button class="h-6 px-2 rounded bg-surface-container hover:bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1 select-component-btn">
+<span>View Details</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+<button class="w-6 h-6 rounded flex items-center justify-center text-secondary hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: MB-020 -->
+<tr class="h-9 hover:bg-surface-container-low/60 transition-colors group cursor-pointer component-row bg-surface-container-lowest" data-category="Motherboard" data-id="MB-020" data-name="Server Motherboard" data-rev="B" data-specs="Dual LGA-4189 Socket, 8x DDR4 DIMM, PCIe Gen4, E-ATX" data-status="Released" data-used="SERVER-100, SERVER-200">
+<td class="px-3 text-center">
+<input class="rounded accent-primary w-3.5 h-3.5 cursor-pointer align-middle" type="checkbox"/>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<a class="font-code-sm text-code-sm font-semibold text-primary hover:underline flex items-center gap-1" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[15px] text-tertiary">memory</span>
+<span>MB-020</span>
+</a>
+</td>
+<td class="py-1 px-3 font-headline-sm text-headline-sm text-on-surface font-medium whitespace-nowrap">
+<a class="hover:text-primary transition-colors" href="javascript:void(0)">Server Motherboard</a>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Motherboard</span>
+</td>
+<td class="py-1 px-3 text-center whitespace-nowrap">
+<span class="font-code-sm text-code-sm font-semibold text-secondary">B</span>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Released
+                </span>
+</td>
+<td class="py-1 px-3">
+<div class="flex items-center gap-1 flex-wrap">
+<span class="font-label-sm text-label-sm font-medium text-secondary whitespace-nowrap">2 products</span>
+<span class="text-outline-variant">·</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container-low px-1 rounded">SERVER-100</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container-low px-1 rounded">SERVER-200</span>
+</div>
+</td>
+<td class="py-1 px-3 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1">
+<button class="h-6 px-2 rounded bg-surface-container hover:bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1 select-component-btn">
+<span>View Details</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+<button class="w-6 h-6 rounded flex items-center justify-center text-secondary hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: MB-021 -->
+<tr class="h-9 hover:bg-surface-container-low/60 transition-colors group cursor-pointer component-row bg-surface-container-lowest" data-category="Motherboard" data-id="MB-021" data-name="Updated Server Motherboard" data-rev="A" data-specs="Enhanced VRM Heatsink, Dual 10GbE LAN, NVMe M.2 onboard" data-status="Released" data-used="SERVER-100 Target">
+<td class="px-3 text-center">
+<input class="rounded accent-primary w-3.5 h-3.5 cursor-pointer align-middle" type="checkbox"/>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<a class="font-code-sm text-code-sm font-semibold text-primary hover:underline flex items-center gap-1" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[15px] text-tertiary">memory</span>
+<span>MB-021</span>
+</a>
+</td>
+<td class="py-1 px-3 font-headline-sm text-headline-sm text-on-surface font-medium whitespace-nowrap">
+<a class="hover:text-primary transition-colors" href="javascript:void(0)">Updated Server Motherboard</a>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Motherboard</span>
+</td>
+<td class="py-1 px-3 text-center whitespace-nowrap">
+<span class="font-code-sm text-code-sm font-semibold text-secondary">A</span>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Released
+                </span>
+</td>
+<td class="py-1 px-3">
+<div class="flex items-center gap-1 flex-wrap">
+<span class="font-label-sm text-label-sm font-medium text-secondary whitespace-nowrap">1 product</span>
+<span class="text-outline-variant">·</span>
+<span class="font-code-sm text-code-sm text-primary bg-surface-container-high px-1 rounded">SERVER-100 Target</span>
+</div>
+</td>
+<td class="py-1 px-3 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1">
+<button class="h-6 px-2 rounded bg-surface-container hover:bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1 select-component-btn">
+<span>View Details</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+<button class="w-6 h-6 rounded flex items-center justify-center text-secondary hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: RAM-032 -->
+<tr class="h-9 hover:bg-surface-container-low/60 transition-colors group cursor-pointer component-row bg-surface-container-lowest" data-category="Memory" data-id="RAM-032" data-name="32GB Memory Module" data-rev="A" data-specs="DDR4 3200MHz ECC Registered RDIMM 1.2V CL22" data-status="Released" data-used="SERVER-100, SERVER-200, STOR-300, NET-400">
+<td class="px-3 text-center">
+<input class="rounded accent-primary w-3.5 h-3.5 cursor-pointer align-middle" type="checkbox"/>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<a class="font-code-sm text-code-sm font-semibold text-primary hover:underline flex items-center gap-1" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[15px] text-tertiary">straighten</span>
+<span>RAM-032</span>
+</a>
+</td>
+<td class="py-1 px-3 font-headline-sm text-headline-sm text-on-surface font-medium whitespace-nowrap">
+<a class="hover:text-primary transition-colors" href="javascript:void(0)">32GB Memory Module</a>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Memory</span>
+</td>
+<td class="py-1 px-3 text-center whitespace-nowrap">
+<span class="font-code-sm text-code-sm font-semibold text-secondary">A</span>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Released
+                </span>
+</td>
+<td class="py-1 px-3">
+<div class="flex items-center gap-1 flex-wrap">
+<span class="font-label-sm text-label-sm font-medium text-secondary whitespace-nowrap">4 products</span>
+<span class="text-outline-variant">·</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container-low px-1 rounded">SERVER-100</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container-low px-1 rounded">STOR-300</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container-low px-1 rounded">+2</span>
+</div>
+</td>
+<td class="py-1 px-3 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1">
+<button class="h-6 px-2 rounded bg-surface-container hover:bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1 select-component-btn">
+<span>View Details</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+<button class="w-6 h-6 rounded flex items-center justify-center text-secondary hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5: SSD-100 -->
+<tr class="h-9 hover:bg-surface-container-low/60 transition-colors group cursor-pointer component-row bg-surface-container-lowest" data-category="Storage" data-id="SSD-100" data-name="Enterprise SSD 1TB" data-rev="A" data-specs="NVMe PCIe Gen3 x4, U.2 2.5-inch, 3 DWPD Endurance" data-status="Released" data-used="SERVER-100, STOR-300, NET-400">
+<td class="px-3 text-center">
+<input class="rounded accent-primary w-3.5 h-3.5 cursor-pointer align-middle" type="checkbox"/>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<a class="font-code-sm text-code-sm font-semibold text-primary hover:underline flex items-center gap-1" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[15px] text-tertiary">storage</span>
+<span>SSD-100</span>
+</a>
+</td>
+<td class="py-1 px-3 font-headline-sm text-headline-sm text-on-surface font-medium whitespace-nowrap">
+<a class="hover:text-primary transition-colors" href="javascript:void(0)">Enterprise SSD 1TB</a>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Storage</span>
+</td>
+<td class="py-1 px-3 text-center whitespace-nowrap">
+<span class="font-code-sm text-code-sm font-semibold text-secondary">A</span>
+</td>
+<td class="py-1 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Released
+                </span>
+</td>
+<td class="py-1 px-3">
+<div class="flex items-center gap-1 flex-wrap">
+<span class="font-label-sm text-label-sm font-medium text-secondary whitespace-nowrap">3 products</span>
+<span class="text-outline-variant">·</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container-low px-1 rounded">SERVER-100</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container-low px-1 rounded">STOR-300</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container-low px-1 rounded">+1</span>
+</div>
+</td>
+<td class="py-1 px-3 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1">
+<button class="h-6 px-2 rounded bg-surface-container hover:bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1 select-component-btn">
+<span>View Details</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+<button class="w-6 h-6 rounded flex items-center justify-center text-secondary hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Compact Technical Pagination -->
+<div class="h-10 px-3 bg-surface-container-low/60 flex items-center justify-between text-secondary">
+<div class="flex items-center gap-2">
+<span class="font-body-sm text-body-sm">Showing <strong class="text-on-surface font-semibold">1-5</strong> of 1,428 parts</span>
+<span class="text-outline-variant">|</span>
+<label class="font-body-sm text-body-sm flex items-center gap-1">
+<span>Per page:</span>
+<select class="h-6 px-1.5 bg-surface-container-lowest rounded text-on-surface font-code-sm text-code-sm focus:outline-none">
+<option>25</option>
+<option>50</option>
+<option>100</option>
+</select>
+</label>
+</div>
+<div class="flex items-center gap-1">
+<button class="w-7 h-7 rounded bg-surface-container-lowest hover:bg-surface-container text-secondary hover:text-on-surface flex items-center justify-center transition-colors disabled:opacity-40" disabled="">
+<span class="material-symbols-outlined text-[16px]">first_page</span>
+</button>
+<button class="w-7 h-7 rounded bg-surface-container-lowest hover:bg-surface-container text-secondary hover:text-on-surface flex items-center justify-center transition-colors disabled:opacity-40" disabled="">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<div class="flex items-center gap-1 px-1">
+<button class="w-7 h-7 rounded bg-primary text-on-primary font-code-sm text-code-sm font-semibold">1</button>
+<button class="w-7 h-7 rounded bg-surface-container-lowest hover:bg-surface-container text-on-surface font-code-sm text-code-sm">2</button>
+<button class="w-7 h-7 rounded bg-surface-container-lowest hover:bg-surface-container text-on-surface font-code-sm text-code-sm">3</button>
+<span class="px-1 text-secondary font-code-sm text-code-sm">...</span>
+<button class="w-7 h-7 rounded bg-surface-container-lowest hover:bg-surface-container text-on-surface font-code-sm text-code-sm">58</button>
+</div>
+<button class="w-7 h-7 rounded bg-surface-container-lowest hover:bg-surface-container text-secondary hover:text-on-surface flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+<button class="w-7 h-7 rounded bg-surface-container-lowest hover:bg-surface-container text-secondary hover:text-on-surface flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[16px]">last_page</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right Side Inspector & Visual Telemetry Panel -->
+<div class="xl:col-span-4 space-y-4">
+<!-- Live Detail Inspector Card -->
+<div class="bg-surface-container-lowest p-3.5 rounded-lg shadow-sm flex flex-col space-y-3" id="inspectorCard">
+<div class="flex items-center justify-between pb-2 bg-surface-container-low px-2.5 py-1.5 rounded">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">biotech</span>
+<span class="font-label-sm text-label-sm font-semibold text-on-surface uppercase tracking-wider">Active Part Inspector</span>
+</div>
+<span class="font-code-sm text-code-sm px-1.5 py-0.2 rounded bg-surface-container-high text-primary" id="inspectorRev">REV A</span>
+</div>
+<!-- Part Title & Identity -->
+<div>
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm font-bold text-primary" id="inspectorPartNo">CPU-001</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-secondary" id="inspectorCategory">Processor</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mt-0.5" id="inspectorTitle">Xeon Processor</h2>
+<p class="font-body-sm text-body-sm text-secondary mt-1" id="inspectorSpecs">16-Core @ 3.2GHz, 125W TDP, Socket LGA-4189</p>
+</div>
+<!-- Visual Technical Graphic Render -->
+<div class="relative w-full h-36 rounded-md overflow-hidden bg-surface-container-low flex items-center justify-center">
+<img class="w-full h-full object-cover" data-alt="Technical engineering CAD blueprint diagram of a high-performance computer CPU microchip on server motherboard, crisp white geometric line work on deep steel blue background, photorealistic industrial hardware visualization" id="inspectorImage" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgPA3tBzG8cbOgZNHdPtWzDEIApkkjIzUKheeK2I3-1hZ27fUBsqYyzk8mCg1RqaxICL0NYfCn3bBHZlyRqGd-zgiG4xBTvv_8CL835njme5hgLW6yLxW1wPxUuVWYuLlviCxVY9TGu09B1GYLF6H9gMEgX5LvGeavVhqp_lyB87qUhighbLCY1_Y2Mfke8RAy0PQ1x69gYWTYfMLKuHkFnP5FFV9bw6h6rC69c-5G-jCuYqIKc0_AGQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent flex items-end p-2.5">
+<span class="font-code-sm text-code-sm text-inverse-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">view_in_ar</span> CAD 3D Model: <span class="font-semibold text-primary-fixed-dim">CPU-001_v14.step</span>
+</span>
+</div>
+</div>
+<!-- Product Where-Used Topology Map -->
+<div class="space-y-1.5">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Assemblies / Where-Used (3)</span>
+<div class="space-y-1 font-body-sm text-body-sm" id="inspectorAssemblies">
+<div class="p-2 rounded bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-tertiary">dns</span>
+<span class="font-medium text-on-surface">SERVER-100 Flagship</span>
+</div>
+<span class="font-code-sm text-code-sm text-secondary">Qty: 2</span>
+</div>
+<div class="p-2 rounded bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-tertiary">dns</span>
+<span class="font-medium text-on-surface">SERVER-200 Enterprise</span>
+</div>
+<span class="font-code-sm text-code-sm text-secondary">Qty: 2</span>
+</div>
+<div class="p-2 rounded bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-tertiary">memory</span>
+<span class="font-medium text-on-surface">HPC-800 Cluster Blade</span>
+</div>
+<span class="font-code-sm text-code-sm text-secondary">Qty: 4</span>
+</div>
+</div>
+</div>
+<!-- Compliance & Lifecycle Badges -->
+<div class="pt-1 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">RoHS 3</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">WEEE</span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-secondary font-label-sm text-label-sm">Class 2 ESD</span>
+</div>
+<button class="h-7 px-2.5 rounded bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">edit</span>
+<span>Edit Part</span>
+</button>
+</div>
+</div>
+<!-- Quick Category Distribution Micro-Chart -->
+<div class="bg-surface-container-lowest p-3.5 rounded-lg shadow-sm space-y-2.5">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Category Allocation</h3>
+<span class="font-code-sm text-code-sm text-secondary">Total: 1,428</span>
+</div>
+<!-- Inline SVG Category Proportion Bar Chart -->
+<div class="space-y-2 pt-1">
+<div class="w-full bg-surface-container-low h-3 rounded-full overflow-hidden flex">
+<div class="bg-primary h-full" style="width: 32%" title="Storage: 32%"></div>
+<div class="bg-tertiary h-full" style="width: 28%" title="Memory: 28%"></div>
+<div class="bg-primary-container h-full" style="width: 18%" title="Networking: 18%"></div>
+<div class="bg-secondary h-full" style="width: 12%" title="Processors: 12%"></div>
+<div class="bg-outline-variant h-full" style="width: 10%" title="Thermal &amp; Other: 10%"></div>
+</div>
+<div class="grid grid-cols-2 gap-2 pt-1 font-body-sm text-body-sm text-secondary">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-sm bg-primary"></span>
+<span>Storage (457)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-sm bg-tertiary"></span>
+<span>Memory (400)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-sm bg-primary-container"></span>
+<span>Networking (257)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-sm bg-secondary"></span>
+<span>Processors (171)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Registration Modal (Hidden by default, triggered by '+ Register New Component') -->
+<div class="fixed inset-0 bg-inverse-surface/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4" id="newComponentModal">
+<div class="bg-surface-container-lowest w-full max-w-xl rounded-lg shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+<!-- Modal Header -->
+<div class="h-12 px-4 bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">add_circle</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Register New Component</h3>
+</div>
+<button class="w-7 h-7 rounded flex items-center justify-center text-secondary hover:text-on-surface hover:bg-surface-container" id="closeModalBtn">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<form class="p-4 space-y-3" id="newComponentForm">
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="font-label-sm text-label-sm text-secondary block mb-1">Part Number <span class="text-error">*</span></label>
+<input class="w-full h-8 px-2.5 bg-surface-container-low rounded text-on-surface font-code-sm text-code-sm focus:outline-none" placeholder="e.g. CPU-002, FAN-010" required="" type="text"/>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-secondary block mb-1">Component Name <span class="text-error">*</span></label>
+<input class="w-full h-8 px-2.5 bg-surface-container-low rounded text-on-surface font-body-sm text-body-sm focus:outline-none" placeholder="e.g. Ultra Low Profile Fan" required="" type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="font-label-sm text-label-sm text-secondary block mb-1">Category <span class="text-error">*</span></label>
+<select class="w-full h-8 px-2 bg-surface-container-low rounded text-on-surface font-body-sm text-body-sm focus:outline-none">
+<option>Processor</option>
+<option>Motherboard</option>
+<option>Memory</option>
+<option>Storage</option>
+<option>Networking</option>
+<option>Thermal</option>
+</select>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-secondary block mb-1">Initial Revision</label>
+<input class="w-full h-8 px-2.5 bg-surface-container-low rounded text-on-surface font-code-sm text-code-sm focus:outline-none" type="text" value="A"/>
+</div>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-secondary block mb-1">Hardware Specifications</label>
+<input class="w-full h-8 px-2.5 bg-surface-container-low rounded text-on-surface font-body-sm text-body-sm focus:outline-none" placeholder="e.g. 120mm PWM, 2200 RPM max, 4-pin header, 12V DC" type="text"/>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-secondary block mb-1">Target Product Assembly</label>
+<input class="w-full h-8 px-2.5 bg-surface-container-low rounded text-on-surface font-body-sm text-body-sm focus:outline-none" placeholder="e.g. SERVER-100, STOR-300" type="text"/>
+</div>
+<!-- Modal Footer Actions -->
+<div class="pt-3 flex items-center justify-end gap-2">
+<button class="h-8 px-3 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md" id="cancelModalBtn" type="button">Cancel</button>
+<button class="h-8 px-4 rounded bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold" type="submit">Save &amp; Check In</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    // Dynamic Table Selection & Inspector Card Updates
+    const rows = document.querySelectorAll('.component-row');
+    const inspectorPartNo = document.getElementById('inspectorPartNo');
+    const inspectorTitle = document.getElementById('inspectorTitle');
+    const inspectorCategory = document.getElementById('inspectorCategory');
+    const inspectorRev = document.getElementById('inspectorRev');
+    const inspectorSpecs = document.getElementById('inspectorSpecs');
+    const inspectorAssemblies = document.getElementById('inspectorAssemblies');
+
+    rows.forEach(row => {
+      row.addEventListener('click', () => {
+        // Clear previous selected style
+        rows.forEach(r => r.classList.remove('bg-surface-container-high/40'));
+        row.classList.add('bg-surface-container-high/40');
+
+        const id = row.getAttribute('data-id');
+        const name = row.getAttribute('data-name');
+        const category = row.getAttribute('data-category');
+        const rev = row.getAttribute('data-rev');
+        const specs = row.getAttribute('data-specs');
+        const used = row.getAttribute('data-used').split(', ');
+
+        inspectorPartNo.textContent = id;
+        inspectorTitle.textContent = name;
+        inspectorCategory.textContent = category;
+        inspectorRev.textContent = 'REV ' + rev;
+        inspectorSpecs.textContent = specs;
+
+        // Populate assemblies list
+        inspectorAssemblies.innerHTML = '';
+        used.forEach(p => {
+          const item = document.createElement('div');
+          item.className = 'p-2 rounded bg-surface-container-low flex items-center justify-between';
+          item.innerHTML = `
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[16px] text-tertiary">dns</span>
+              <span class="font-medium text-on-surface">${p}</span>
+            </div>
+            <span class="font-code-sm text-code-sm text-secondary">Qty: 1+</span>
+          `;
+          inspectorAssemblies.appendChild(item);
+        });
+      });
+    });
+
+    // Real-time text search filter
+    const searchInput = document.getElementById('componentSearchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const lifecycleFilter = document.getElementById('lifecycleFilter');
+    const resetBtn = document.getElementById('resetFiltersBtn');
+    const filterPills = document.querySelectorAll('.filter-pill');
+
+    function applyFilters() {
+      const query = (searchInput.value || '').toLowerCase().trim();
+      const cat = categoryFilter.value;
+      const life = lifecycleFilter.value;
+
+      rows.forEach(row => {
+        const id = row.getAttribute('data-id').toLowerCase();
+        const name = row.getAttribute('data-name').toLowerCase();
+        const category = row.getAttribute('data-category');
+        const status = row.getAttribute('data-status');
+        const specs = (row.getAttribute('data-specs') || '').toLowerCase();
+
+        const matchesQuery = !query || id.includes(query) || name.includes(query) || specs.includes(query);
+        const matchesCategory = (cat === 'all') || (category === cat);
+        const matchesLifecycle = (life === 'all') || (status === life);
+
+        if (matchesQuery && matchesCategory && matchesLifecycle) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+    categoryFilter.addEventListener('change', applyFilters);
+    lifecycleFilter.addEventListener('change', applyFilters);
+
+    resetBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      categoryFilter.value = 'all';
+      lifecycleFilter.value = 'all';
+      filterPills.forEach(p => p.classList.remove('bg-primary', 'text-on-primary'));
+      filterPills[0].classList.add('bg-primary', 'text-on-primary');
+      applyFilters();
+    });
+
+    // Filter pill buttons
+    filterPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        filterPills.forEach(p => {
+          p.classList.remove('bg-primary', 'text-on-primary');
+          p.classList.add('bg-surface-container-low', 'hover:bg-surface-container');
+        });
+        pill.classList.remove('bg-surface-container-low', 'hover:bg-surface-container');
+        pill.classList.add('bg-primary', 'text-on-primary');
+
+        const cat = pill.getAttribute('data-category');
+        categoryFilter.value = cat;
+        applyFilters();
+      });
+    });
+
+    // Modal Interaction
+    const modal = document.getElementById('newComponentModal');
+    const openModalBtn = document.getElementById('openNewComponentModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelModalBtn = document.getElementById('cancelModalBtn');
+    const newComponentForm = document.getElementById('newComponentForm');
+
+    function openModal() { modal.classList.remove('hidden'); }
+    function closeModal() { modal.classList.add('hidden'); }
+
+    if (openModalBtn) openModalBtn.addEventListener('click', openModal);
+    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+    if (cancelModalBtn) cancelModalBtn.addEventListener('click', closeModal);
+
+    if (newComponentForm) {
+      newComponentForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        closeModal();
+      });
+    }
+  })();
+</script></main></div></body></html>

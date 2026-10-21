@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-secondary-fixed": "#131b2e",
+          "on-primary-fixed": "#001d31",
+          "primary-fixed-dim": "#93ccff",
+          "on-surface": "#0b1c30",
+          "surface-container-high": "#dce9ff",
+          "secondary": "#565e74",
+          "tertiary-fixed": "#cde5ff",
+          "tertiary-fixed-dim": "#94ccff",
+          "surface-bright": "#f8f9ff",
+          "on-tertiary-container": "#fdfcff",
+          "inverse-surface": "#213145",
+          "outline": "#707881",
+          "on-primary": "#ffffff",
+          "on-secondary-container": "#5c647a",
+          "on-secondary-fixed-variant": "#3f465c",
+          "tertiary": "#006195",
+          "on-error-container": "#93000a",
+          "on-primary-fixed-variant": "#004b73",
+          "secondary-fixed-dim": "#bec6e0",
+          "outline-variant": "#bfc7d2",
+          "error": "#ba1a1a",
+          "inverse-on-surface": "#eaf1ff",
+          "surface": "#f8f9ff",
+          "surface-tint": "#006398",
+          "on-secondary": "#ffffff",
+          "secondary-fixed": "#dae2fd",
+          "surface-dim": "#cbdbf5",
+          "background": "#f8f9ff",
+          "surface-container": "#e5eeff",
+          "secondary-container": "#dae2fd",
+          "inverse-primary": "#93ccff",
+          "on-background": "#0b1c30",
+          "primary-container": "#007bb9",
+          "surface-variant": "#d3e4fe",
+          "on-tertiary": "#ffffff",
+          "on-error": "#ffffff",
+          "on-tertiary-fixed": "#001d32",
+          "on-surface-variant": "#3f4850",
+          "primary-fixed": "#cce5ff",
+          "tertiary-container": "#287ab3",
+          "primary": "#006194",
+          "on-primary-container": "#fdfcff",
+          "on-tertiary-fixed-variant": "#004b74",
+          "surface-container-low": "#eff4ff",
+          "surface-container-highest": "#d3e4fe",
+          "surface-container-lowest": "#ffffff",
+          "error-container": "#ffdad6"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "space-xs": "0.25rem",
+          "space-lg": "0.75rem",
+          "space-xl": "1rem",
+          "margin": "1rem",
+          "space-sm": "0.375rem",
+          "gutter": "0.75rem",
+          "space-md": "0.5rem"
+        },
+        "fontFamily": {
+          "headline-lg": [
+            "Inter"
+          ],
+          "headline-md": [
+            "Inter"
+          ],
+          "headline-xl": [
+            "Inter"
+          ],
+          "code-sm": [
+            "JetBrains Mono"
+          ],
+          "label-sm": [
+            "Inter"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "label-md": [
+            "Inter"
+          ],
+          "headline-sm": [
+            "Inter"
+          ],
+          "body-md": [
+            "Inter"
+          ],
+          "body-lg": [
+            "Inter"
+          ]
+        },
+        "fontSize": {
+          "headline-lg": [
+            "18px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-md": [
+            "15px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "code-sm": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-sm": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "-0.005em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-md": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-60 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-12 px-space-lg flex items-center gap-space-md bg-surface-container-lowest"><img alt="Forge PLM Logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WSb0IT6jqUJIKOGerFtpuRHCp2cYGNavocZxh7l5GzNhe78gD6eMcKaP9ga1HxyePWKjd_urKi4So5gZF7OBWRKBaN3OVj4jx0RzJrpezT7toV1CMQe-orTnvzMyFYXBGka-aa7gWz3vb4_W5Gp4HHJY3Uer_wmhFrFKYCrKeXPA3p18HsEHh1_qzTfv6xLdXgVJteiP-TqZr8oMSeyhbIRVeavLDc9FCQhMqRCWo6s57MbnA5aRpUZCEo"/><span class="font-headline-md text-headline-md text-on-surface tracking-tight">Forge PLM</span></div><div class="px-space-md py-space-sm"><span class="px-space-md font-label-sm text-label-sm text-secondary tracking-wider uppercase">Engineering Workspace</span></div><nav class="px-space-sm space-y-0.5" data-active-classes="bg-surface-container text-primary font-semibold"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="overview" href="#"><span class="material-symbols-outlined text-[18px]">dashboard</span><span>Overview</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="products" href="#"><span class="material-symbols-outlined text-[18px]">devices</span><span>Products</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="bill-of-materials" href="#"><span class="material-symbols-outlined text-[18px]">account_tree</span><span>Bill of Materials</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg transition-colors bg-surface-container text-primary font-semibold" data-path="engineering-changes" href="#"><span class="material-symbols-outlined text-[18px]">published_with_changes</span><span>Engineering Changes</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="components" href="#"><span class="material-symbols-outlined text-[18px]">memory</span><span>Components</span></a></nav></div><div class="p-space-sm space-y-0.5 bg-surface-container-lowest"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="settings" href="#"><span class="material-symbols-outlined text-[18px]">settings</span><span>Settings</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="help" href="#"><span class="material-symbols-outlined text-[18px]">help</span><span>Help</span></a><div class="mt-space-sm px-space-md py-space-xs"><div class="flex items-center justify-between font-label-sm text-label-sm text-secondary"><span>CORE ENGINE</span><span class="font-code-sm text-code-sm">v3.4.1</span></div></div></div></aside><div class="pl-60 min-h-screen flex flex-col bg-surface"><header class="fixed top-0 left-60 right-0 h-12 bg-surface-container-lowest/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-lg flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-md min-w-0"><div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px]">corporate_fare</span><span class="hover:text-on-surface cursor-pointer">Forge HQ</span><span class="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span><span class="text-on-surface font-headline-sm text-headline-sm truncate">Engineering Workbench</span></div></div><div class="flex-1 max-w-md mx-space-md"><div class="relative flex items-center"><span class="material-symbols-outlined absolute left-space-md text-[18px] text-secondary pointer-events-none">search</span><input class="w-full h-8 pl-9 pr-space-md bg-surface-container-low rounded-lg text-on-surface font-body-sm text-body-sm placeholder:text-secondary focus:outline-none focus:bg-surface-container-lowest transition-all" placeholder="Search products, part numbers, or ECOs..." type="text"/></div></div><div class="flex items-center gap-space-lg"><button aria-label="Notifications" class="relative p-space-xs rounded-lg hover:bg-surface-container-high hover:text-on-surface text-secondary transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-error"></span></button><div class="h-5 w-px bg-surface-container-high"></div><div class="flex items-center gap-space-md pl-space-xs"><div class="flex flex-col text-right"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">Alex Morgan</span><span class="font-label-sm text-label-sm text-secondary leading-tight">Product Engineer</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAi2APML9mxxuVPmZ1goXhUkGktLuE-UUx5Ej6orzwpVLkLgwHsbrv0fRyGiCgtntyieB2ebs6fp_DXziWdwtyZafqsxfxmJGZj30NlUhr0Yja6xKkuxxMLcKj6sHab8OItsPa1c3bpGbgic0YA72Os5PS2vU64Vc0GRuBJVy52Sxr7UdSwr56hyr7RylMPWYWA_BT5oS6CJDJBMhrS3w_j2-wTcJbWF6aOksSxoX74RTv7qcpKzoqGkA"/></div></div></header><main class="flex-1 w-full pt-12 px-space-lg bg-surface"><div class="flex flex-col w-full pb-24">
+<!-- Top Context Header & Breadcrumb -->
+<div class="w-full bg-surface-container-lowest px-6 py-4 shadow-sm mb-6 flex flex-col gap-2">
+<div class="flex items-center gap-2 font-body-sm text-body-sm text-secondary">
+<a class="hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[16px]">published_with_changes</span>
+<span>Engineering Changes</span>
+</a>
+<span class="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span>
+<span class="text-on-surface font-headline-sm text-headline-sm">Create New ECO</span>
+<span class="ml-2 px-2 py-0.5 rounded-full bg-surface-container font-code-sm text-code-sm text-primary tracking-wider font-semibold">ECO-2026-DRAFT</span>
+</div>
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mt-1">
+<div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Create Engineering Change</h1>
+<p class="font-body-md text-body-md text-secondary mt-0.5">
+          Initiate a formal engineering change order to modify product bills of materials or component specifications.
+        </p>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+<span>Draft Auto-Saved <span class="font-code-sm text-code-sm" id="save-timestamp">11:42 AM</span></span>
+</div>
+</div>
+</div>
+</div>
+<!-- Form Content Area -->
+<form class="w-full max-w-7xl mx-auto px-6 space-y-6" id="eco-form" onsubmit="event.preventDefault();">
+<!-- Section 1: General Information -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<div class="px-6 py-4 bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-on-primary font-label-sm text-label-sm">1</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">General Information</h2>
+</div>
+<span class="font-label-sm text-label-sm text-secondary tracking-wider uppercase">Baseline Metadata</span>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Title Field -->
+<div class="lg:col-span-2 flex flex-col gap-1.5">
+<label class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1" for="eco-title">
+<span>Change Order Title</span>
+<span class="text-error font-bold">*</span>
+</label>
+<div class="relative">
+<input class="w-full h-9 px-3 bg-surface-container-low rounded-lg text-on-surface font-body-md text-body-md placeholder:text-secondary focus:outline-none focus:bg-surface-container-lowest transition-colors" id="eco-title" name="title" placeholder="e.g. Replace motherboard controller" required="" type="text" value="Replace motherboard controller"/>
+</div>
+<span class="font-body-sm text-body-sm text-secondary">A concise statement describing the architectural or component modification.</span>
+</div>
+<!-- Affected Product -->
+<div class="flex flex-col gap-1.5">
+<label class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1" for="affected-product">
+<span>Affected Product</span>
+<span class="text-error font-bold">*</span>
+</label>
+<div class="relative">
+<select class="w-full h-9 px-3 pr-8 bg-surface-container-low rounded-lg text-on-surface font-body-md text-body-md appearance-none focus:outline-none focus:bg-surface-container-lowest transition-colors cursor-pointer" id="affected-product" name="product" required="">
+<option selected="" value="SERVER-100">SERVER-100 (Compute Server)</option>
+<option value="SERVER-200">SERVER-200 (Storage Server)</option>
+<option value="STOR-300">STOR-300 (Array Storage)</option>
+<option value="NET-400">NET-400 (Fiber Switch)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-2 pointer-events-none text-secondary text-[20px]">expand_more</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary">Target assembly receiving BOM revisions.</span>
+</div>
+<!-- Change Type -->
+<div class="flex flex-col gap-1.5">
+<label class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1" for="change-type">
+<span>Change Type</span>
+<span class="text-error font-bold">*</span>
+</label>
+<div class="relative">
+<select class="w-full h-9 px-3 pr-8 bg-surface-container-low rounded-lg text-on-surface font-body-md text-body-md appearance-none focus:outline-none focus:bg-surface-container-lowest transition-colors cursor-pointer" id="change-type" name="type" required="">
+<option selected="" value="Component Replacement">Component Replacement</option>
+<option value="Quantity Change">Quantity Change</option>
+<option value="Specification Update">Specification Update</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-2 pointer-events-none text-secondary text-[20px]">expand_more</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary">Governs automated validation rules.</span>
+</div>
+<!-- Requested Effective Date -->
+<div class="flex flex-col gap-1.5">
+<label class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1" for="effective-date">
+<span>Requested Effective Date</span>
+<span class="text-error font-bold">*</span>
+</label>
+<div class="relative">
+<input class="w-full h-9 px-3 bg-surface-container-low rounded-lg text-on-surface font-body-md text-body-md focus:outline-none focus:bg-surface-container-lowest transition-colors cursor-pointer" id="effective-date" name="effectiveDate" required="" type="date" value="2026-11-01"/>
+</div>
+<span class="font-body-sm text-body-sm text-secondary">Target cutover point for production runs.</span>
+</div>
+<!-- Priority / Severity -->
+<div class="flex flex-col gap-1.5">
+<label class="font-headline-sm text-headline-sm text-on-surface">Urgency Level</label>
+<div class="grid grid-cols-3 gap-2 h-9">
+<label class="flex items-center justify-center rounded-lg bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors px-2">
+<input checked="" class="hidden peer" name="urgency" type="radio" value="Standard"/>
+<span class="font-label-md text-label-md text-secondary peer-checked:text-primary peer-checked:font-semibold">Routine</span>
+</label>
+<label class="flex items-center justify-center rounded-lg bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors px-2">
+<input class="hidden peer" name="urgency" type="radio" value="Urgent"/>
+<span class="font-label-md text-label-md text-secondary peer-checked:text-primary peer-checked:font-semibold">Elevated</span>
+</label>
+<label class="flex items-center justify-center rounded-lg bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors px-2">
+<input class="hidden peer" name="urgency" type="radio" value="Critical"/>
+<span class="font-label-md text-label-md text-secondary peer-checked:text-error peer-checked:font-semibold">Critical</span>
+</label>
+</div>
+<span class="font-body-sm text-body-sm text-secondary">Determines CCB review cadence.</span>
+</div>
+<!-- System Architecture Reference -->
+<div class="lg:col-span-2 flex flex-col justify-center px-4 py-2 rounded-lg bg-surface-container-low">
+<div class="flex items-center justify-between text-secondary">
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Active Configuration</span>
+<span class="font-code-sm text-code-sm text-primary">REV_B.112_PROD</span>
+</div>
+<div class="flex items-center gap-4 mt-2">
+<div class="flex items-center gap-1.5 font-body-sm text-body-sm text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-tertiary">inventory_2</span>
+<span>Stock Impact: <strong>140 units</strong></span>
+</div>
+<div class="h-3 w-px bg-surface-container-high"></div>
+<div class="flex items-center gap-1.5 font-body-sm text-body-sm text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">fork_right</span>
+<span>Downstream Kits: <strong>3 assemblies</strong></span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 2: Justification & Impact Analysis -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<div class="px-6 py-4 bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-on-primary font-label-sm text-label-sm">2</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Justification &amp; Impact Analysis</h2>
+</div>
+<span class="font-label-sm text-label-sm text-secondary tracking-wider uppercase">Compliance &amp; Traceability</span>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Reason for Change -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1" for="change-reason">
+<span>Reason for Change</span>
+<span class="text-error font-bold">*</span>
+</label>
+<span class="font-label-sm text-label-sm text-secondary" id="reason-counter">105 / 500</span>
+</div>
+<textarea class="w-full p-3 bg-surface-container-low rounded-lg text-on-surface font-body-md text-body-md placeholder:text-secondary focus:outline-none focus:bg-surface-container-lowest transition-colors resize-none leading-relaxed" id="change-reason" name="reason" placeholder="Document the technical, cost, or regulatory rationale behind this ECO..." required="" rows="4">Replace the current motherboard due to an updated controller specification and improved component availability.</textarea>
+<span class="font-body-sm text-body-sm text-secondary">Explain the root cause and engineering rationale requiring BOM alteration.</span>
+</div>
+<!-- Impact Assessment -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1" for="impact-assessment">
+<span>Impact Assessment</span>
+<span class="text-error font-bold">*</span>
+</label>
+<span class="font-label-sm text-label-sm text-secondary" id="impact-counter">93 / 500</span>
+</div>
+<textarea class="w-full p-3 bg-surface-container-low rounded-lg text-on-surface font-body-md text-body-md placeholder:text-secondary focus:outline-none focus:bg-surface-container-lowest transition-colors resize-none leading-relaxed" id="impact-assessment" name="impact" placeholder="Detail inventory depletion, warranty coverage, test regressions, or certifications..." required="" rows="4">The server BOM is affected. Existing released revision B must remain available for historical reference.</textarea>
+<span class="font-body-sm text-body-sm text-secondary">Document retrofitting, existing inventory handling, and revision archival policy.</span>
+</div>
+</div>
+</div>
+<!-- Section 3: Proposed BOM Change -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<div class="px-6 py-4 bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-on-primary font-label-sm text-label-sm">3</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Proposed BOM Change</h2>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-fixed font-label-sm text-label-sm uppercase">1 Substitution Configured</span>
+</div>
+</div>
+<div class="p-6 space-y-6">
+<!-- Sub-panel: Configure Component Replacement -->
+<div class="p-5 rounded-xl bg-surface-container-low space-y-5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">swap_horiz</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Configure Component Replacement</h3>
+</div>
+<span class="font-code-sm text-code-sm text-secondary">MODE: 1-TO-1 SWAP</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+<!-- Existing Component (Source) -->
+<div class="md:col-span-5 flex flex-col gap-1.5">
+<label class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1" for="existing-component">
+<span>Existing Component (From BOM)</span>
+<span class="text-error font-bold">*</span>
+</label>
+<div class="relative">
+<select class="w-full h-10 px-3 pr-8 bg-surface-container-lowest rounded-lg text-on-surface font-body-md text-body-md appearance-none focus:outline-none focus:bg-surface-container shadow-sm cursor-pointer" id="existing-component" name="existingComponent">
+<option data-name="Server Motherboard" data-rev="Rev B" selected="" value="MB-020">MB-020 — Server Motherboard (Rev B, Qty 1)</option>
+<option data-name="850W Platinum PSU" data-rev="Rev C" value="PSU-850">PSU-850 — 850W Platinum PSU (Rev C, Qty 2)</option>
+<option data-name="Dual Rotor Fan 40mm" data-rev="Rev A" value="FAN-040">FAN-040 — Dual Rotor Fan 40mm (Rev A, Qty 4)</option>
+<option data-name="PCIe 5.0 Riser Card" data-rev="Rev D" value="RIS-010">RIS-010 — PCIe 5.0 Riser Card (Rev D, Qty 2)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-2.5 pointer-events-none text-secondary text-[20px]">expand_more</span>
+</div>
+<div class="flex items-center justify-between text-secondary font-label-sm text-label-sm px-1">
+<span>Current Status: <strong class="text-on-surface">Released</strong></span>
+<span class="font-code-sm text-code-sm">LOC: U1_CHASSIS</span>
+</div>
+</div>
+<!-- Arrow Indicator -->
+<div class="md:col-span-1 flex justify-center py-2 md:py-0">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</div>
+</div>
+<!-- Replacement Component (Target) -->
+<div class="md:col-span-4 flex flex-col gap-1.5">
+<label class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1" for="replacement-component">
+<span>Replacement Component</span>
+<span class="text-error font-bold">*</span>
+</label>
+<div class="relative">
+<select class="w-full h-10 px-3 pr-8 bg-surface-container-lowest rounded-lg text-on-surface font-body-md text-body-md appearance-none focus:outline-none focus:bg-surface-container shadow-sm cursor-pointer" id="replacement-component" name="replacementComponent">
+<option data-name="Updated Server Motherboard" data-rev="Rev A" selected="" value="MB-021">MB-021 — Updated Server Motherboard (Rev A)</option>
+<option data-name="NextGen Dual Controller" data-rev="Proto 1" value="MB-022-PROTO">MB-022-PROTO — NextGen Dual Controller (Proto 1)</option>
+<option data-name="Fallback Motherboard Rev E" data-rev="Rev E" value="MB-019-ECO">MB-019-ECO — Fallback Motherboard (Rev E)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-2.5 pointer-events-none text-secondary text-[20px]">expand_more</span>
+</div>
+<div class="flex items-center justify-between text-secondary font-label-sm text-label-sm px-1">
+<span>Lifecycle: <strong class="text-tertiary">Pre-Release</strong></span>
+<span class="font-code-sm text-code-sm">COMPLIANT: RoHS3</span>
+</div>
+</div>
+<!-- Quantity & Unit -->
+<div class="md:col-span-2 flex flex-col gap-1.5">
+<label class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1" for="component-qty">
+<span>Qty &amp; Unit</span>
+<span class="text-error font-bold">*</span>
+</label>
+<div class="flex items-center">
+<input class="w-16 h-10 px-2.5 bg-surface-container-lowest rounded-l-lg text-center font-code-sm text-code-sm text-on-surface focus:outline-none focus:bg-surface-container shadow-sm" id="component-qty" min="1" name="qty" type="number" value="1"/>
+<span class="h-10 px-3 bg-surface-container flex items-center justify-center font-label-md text-label-md text-secondary rounded-r-lg">
+                  Each
+                </span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary px-1">Ratio: 1:1 direct</span>
+</div>
+</div>
+</div>
+<!-- Live Summary Box dynamically showing proposed modification -->
+<div class="p-4 rounded-xl bg-surface-container flex items-start gap-3.5">
+<div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">sync_alt</span>
+</div>
+<div class="flex flex-col gap-1 flex-1">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-primary tracking-wider uppercase font-semibold">Real-Time Delta Preview</span>
+<span class="font-code-sm text-code-sm text-secondary">EFFECTIVITY IMMEDIATE</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-on-surface" id="live-summary">
+              Summary: Replace 1x MB-020 (Rev B) with 1x MB-021 (Rev A) upon release approval.
+            </p>
+<p class="font-body-sm text-body-sm text-secondary">
+              Once approved, revision index of <span class="font-code-sm text-code-sm">SERVER-100</span> increments to <strong>Rev C</strong>. MB-020 will automatically flag as obsolete for this assembly.
+            </p>
+</div>
+</div>
+<!-- Secondary Visual Component Card: Delta Attributes -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+<div class="p-4 rounded-lg bg-surface-container-low flex flex-col gap-2">
+<span class="font-label-sm text-label-sm text-secondary uppercase">Thermal Dissipation</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface">185W</span>
+<span class="text-tertiary font-label-sm text-label-sm flex items-center">
+<span class="material-symbols-outlined text-[14px]">arrow_downward</span> -15W delta
+              </span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-3/4 rounded-full"></div>
+</div>
+</div>
+<div class="p-4 rounded-lg bg-surface-container-low flex flex-col gap-2">
+<span class="font-label-sm text-label-sm text-secondary uppercase">Target Unit Cost</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface">$412.50</span>
+<span class="text-primary font-label-sm text-label-sm flex items-center">
+<span class="material-symbols-outlined text-[14px]">remove</span> No change
+              </span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-full rounded-full"></div>
+</div>
+</div>
+<div class="p-4 rounded-lg bg-surface-container-low flex flex-col gap-2">
+<span class="font-label-sm text-label-sm text-secondary uppercase">Lead Time Projection</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface">3.5 Weeks</span>
+<span class="text-tertiary font-label-sm text-label-sm flex items-center">
+<span class="material-symbols-outlined text-[14px]">bolt</span> -2.0 Wks
+              </span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-1/2 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</form>
+<!-- Section 4: Form Actions Bar (Sticky bottom footer) -->
+<footer class="fixed bottom-0 left-60 right-0 h-16 bg-surface-container-lowest/95 backdrop-blur-md shadow-[0_-2px_10px_rgba(0,0,0,0.06)] z-40 px-8 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<a class="font-body-md text-body-md text-secondary hover:text-error transition-colors flex items-center gap-1.5" href="#">
+<span class="material-symbols-outlined text-[18px]">close</span>
+<span>Cancel</span>
+</a>
+<div class="h-4 w-px bg-surface-container-high hidden sm:block"></div>
+<span class="font-label-sm text-label-sm text-secondary hidden sm:inline">
+        Fields marked with <span class="text-error font-bold">*</span> are required for CCB routing.
+      </span>
+</div>
+<div class="flex items-center gap-3">
+<button class="h-9 px-4 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-headline-sm text-headline-sm transition-colors flex items-center gap-2" id="btn-draft" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">save</span>
+<span>Save as Draft</span>
+</button>
+<button class="h-9 px-5 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-headline-sm text-headline-sm shadow-sm transition-all flex items-center gap-2 active:scale-95" form="eco-form" id="btn-submit" type="submit">
+<span class="material-symbols-outlined text-[18px]">send</span>
+<span>Submit for Review</span>
+</button>
+</div>
+</footer>
+<!-- Confirmation Toast (Hidden by default) -->
+<div class="fixed top-16 right-8 transform translate-y-[-20px] opacity-0 pointer-events-none transition-all duration-300 z-50 p-4 rounded-xl bg-on-surface text-inverse-on-surface shadow-xl flex items-center gap-3 max-w-sm" id="toast">
+<span class="material-symbols-outlined text-primary-fixed-dim text-[24px]">check_circle</span>
+<div class="flex flex-col text-left">
+<span class="font-headline-sm text-headline-sm" id="toast-title">ECO Draft Saved</span>
+<span class="font-body-sm text-body-sm text-outline-variant" id="toast-desc">All engineering attributes updated.</span>
+</div>
+</div>
+<script>
+    // Live Summary Box dynamic generation
+    const existingCompSelect = document.getElementById('existing-component');
+    const replacementCompSelect = document.getElementById('replacement-component');
+    const qtyInput = document.getElementById('component-qty');
+    const summaryText = document.getElementById('live-summary');
+
+    function updateSummary() {
+      const existingOption = existingCompSelect.options[existingCompSelect.selectedIndex];
+      const replacementOption = replacementCompSelect.options[replacementCompSelect.selectedIndex];
+      const qty = qtyInput.value || 1;
+
+      const existingCode = existingCompSelect.value;
+      const existingRev = existingOption.getAttribute('data-rev') || 'Rev B';
+
+      const replCode = replacementCompSelect.value;
+      const replRev = replacementOption.getAttribute('data-rev') || 'Rev A';
+
+      summaryText.textContent = `Summary: Replace ${qty}x ${existingCode} (${existingRev}) with ${qty}x ${replCode} (${replRev}) upon release approval.`;
+    }
+
+    existingCompSelect.addEventListener('change', updateSummary);
+    replacementCompSelect.addEventListener('change', updateSummary);
+    qtyInput.addEventListener('input', updateSummary);
+
+    // Character counter micro-interactions
+    const reasonEl = document.getElementById('change-reason');
+    const reasonCounter = document.getElementById('reason-counter');
+    reasonEl.addEventListener('input', () => {
+      reasonCounter.textContent = `${reasonEl.value.length} / 500`;
+    });
+
+    const impactEl = document.getElementById('impact-assessment');
+    const impactCounter = document.getElementById('impact-counter');
+    impactEl.addEventListener('input', () => {
+      impactCounter.textContent = `${impactEl.value.length} / 500`;
+    });
+
+    // Toast micro-interaction
+    function showToast(title, message) {
+      const toast = document.getElementById('toast');
+      const toastTitle = document.getElementById('toast-title');
+      const toastDesc = document.getElementById('toast-desc');
+      
+      toastTitle.textContent = title;
+      toastDesc.textContent = message;
+      
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 3500);
+    }
+
+    document.getElementById('btn-draft').addEventListener('click', () => {
+      const now = new Date();
+      document.getElementById('save-timestamp').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      showToast('Draft Saved', 'Engineering change draft is secure.');
+    });
+
+    document.getElementById('eco-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      showToast('Submitted for Review', 'ECO routed to Change Control Board (CCB).');
+    });
+  </script>
+</div></main></div></body></html>

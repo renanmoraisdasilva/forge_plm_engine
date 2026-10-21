@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-secondary-fixed": "#131b2e",
+          "on-primary-fixed": "#001d31",
+          "primary-fixed-dim": "#93ccff",
+          "on-surface": "#0b1c30",
+          "surface-container-high": "#dce9ff",
+          "secondary": "#565e74",
+          "tertiary-fixed": "#cde5ff",
+          "tertiary-fixed-dim": "#94ccff",
+          "surface-bright": "#f8f9ff",
+          "on-tertiary-container": "#fdfcff",
+          "inverse-surface": "#213145",
+          "outline": "#707881",
+          "on-primary": "#ffffff",
+          "on-secondary-container": "#5c647a",
+          "on-secondary-fixed-variant": "#3f465c",
+          "tertiary": "#006195",
+          "on-error-container": "#93000a",
+          "on-primary-fixed-variant": "#004b73",
+          "secondary-fixed-dim": "#bec6e0",
+          "outline-variant": "#bfc7d2",
+          "error": "#ba1a1a",
+          "inverse-on-surface": "#eaf1ff",
+          "surface": "#f8f9ff",
+          "surface-tint": "#006398",
+          "on-secondary": "#ffffff",
+          "secondary-fixed": "#dae2fd",
+          "surface-dim": "#cbdbf5",
+          "background": "#f8f9ff",
+          "surface-container": "#e5eeff",
+          "secondary-container": "#dae2fd",
+          "inverse-primary": "#93ccff",
+          "on-background": "#0b1c30",
+          "primary-container": "#007bb9",
+          "surface-variant": "#d3e4fe",
+          "on-tertiary": "#ffffff",
+          "on-error": "#ffffff",
+          "on-tertiary-fixed": "#001d32",
+          "on-surface-variant": "#3f4850",
+          "primary-fixed": "#cce5ff",
+          "tertiary-container": "#287ab3",
+          "primary": "#006194",
+          "on-primary-container": "#fdfcff",
+          "on-tertiary-fixed-variant": "#004b74",
+          "surface-container-low": "#eff4ff",
+          "surface-container-highest": "#d3e4fe",
+          "surface-container-lowest": "#ffffff",
+          "error-container": "#ffdad6"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "space-xs": "0.25rem",
+          "space-lg": "0.75rem",
+          "space-xl": "1rem",
+          "margin": "1rem",
+          "space-sm": "0.375rem",
+          "gutter": "0.75rem",
+          "space-md": "0.5rem"
+        },
+        "fontFamily": {
+          "headline-lg": [
+            "Inter"
+          ],
+          "headline-md": [
+            "Inter"
+          ],
+          "headline-xl": [
+            "Inter"
+          ],
+          "code-sm": [
+            "JetBrains Mono"
+          ],
+          "label-sm": [
+            "Inter"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "label-md": [
+            "Inter"
+          ],
+          "headline-sm": [
+            "Inter"
+          ],
+          "body-md": [
+            "Inter"
+          ],
+          "body-lg": [
+            "Inter"
+          ]
+        },
+        "fontSize": {
+          "headline-lg": [
+            "18px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-md": [
+            "15px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "code-sm": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-sm": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "-0.005em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-md": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-60 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-12 px-space-lg flex items-center gap-space-md bg-surface-container-lowest"><img alt="Forge PLM Logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WSb0IT6jqUJIKOGerFtpuRHCp2cYGNavocZxh7l5GzNhe78gD6eMcKaP9ga1HxyePWKjd_urKi4So5gZF7OBWRKBaN3OVj4jx0RzJrpezT7toV1CMQe-orTnvzMyFYXBGka-aa7gWz3vb4_W5Gp4HHJY3Uer_wmhFrFKYCrKeXPA3p18HsEHh1_qzTfv6xLdXgVJteiP-TqZr8oMSeyhbIRVeavLDc9FCQhMqRCWo6s57MbnA5aRpUZCEo"/><span class="font-headline-md text-headline-md text-on-surface tracking-tight">Forge PLM</span></div><div class="px-space-md py-space-sm"><span class="px-space-md font-label-sm text-label-sm text-secondary tracking-wider uppercase">Engineering Workspace</span></div><nav class="px-space-sm space-y-0.5" data-active-classes="bg-surface-container text-primary font-semibold"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="overview" href="#"><span class="material-symbols-outlined text-[18px]">dashboard</span><span>Overview</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg transition-colors bg-surface-container text-primary font-semibold" data-path="products" href="#"><span class="material-symbols-outlined text-[18px]">devices</span><span>Products</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="bill-of-materials" href="#"><span class="material-symbols-outlined text-[18px]">account_tree</span><span>Bill of Materials</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="engineering-changes" href="#"><span class="material-symbols-outlined text-[18px]">published_with_changes</span><span>Engineering Changes</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="components" href="#"><span class="material-symbols-outlined text-[18px]">memory</span><span>Components</span></a></nav></div><div class="p-space-sm space-y-0.5 bg-surface-container-lowest"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="settings" href="#"><span class="material-symbols-outlined text-[18px]">settings</span><span>Settings</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="help" href="#"><span class="material-symbols-outlined text-[18px]">help</span><span>Help</span></a><div class="mt-space-sm px-space-md py-space-xs"><div class="flex items-center justify-between font-label-sm text-label-sm text-secondary"><span>CORE ENGINE</span><span class="font-code-sm text-code-sm">v3.4.1</span></div></div></div></aside><div class="pl-60 min-h-screen flex flex-col bg-surface"><header class="fixed top-0 left-60 right-0 h-12 bg-surface-container-lowest/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-lg flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-md min-w-0"><div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px]">corporate_fare</span><span class="hover:text-on-surface cursor-pointer">Forge HQ</span><span class="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span><span class="text-on-surface font-headline-sm text-headline-sm truncate">Engineering Workbench</span></div></div><div class="flex-1 max-w-md mx-space-md"><div class="relative flex items-center"><span class="material-symbols-outlined absolute left-space-md text-[18px] text-secondary pointer-events-none">search</span><input class="w-full h-8 pl-9 pr-space-md bg-surface-container-low rounded-lg text-on-surface font-body-sm text-body-sm placeholder:text-secondary focus:outline-none focus:bg-surface-container-lowest transition-all" placeholder="Search products, part numbers, or ECOs..." type="text"/></div></div><div class="flex items-center gap-space-lg"><button aria-label="Notifications" class="relative p-space-xs rounded-lg hover:bg-surface-container-high hover:text-on-surface text-secondary transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-error"></span></button><div class="h-5 w-px bg-surface-container-high"></div><div class="flex items-center gap-space-md pl-space-xs"><div class="flex flex-col text-right"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">Alex Morgan</span><span class="font-label-sm text-label-sm text-secondary leading-tight">Product Engineer</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAi2APML9mxxuVPmZ1goXhUkGktLuE-UUx5Ej6orzwpVLkLgwHsbrv0fRyGiCgtntyieB2ebs6fp_DXziWdwtyZafqsxfxmJGZj30NlUhr0Yja6xKkuxxMLcKj6sHab8OItsPa1c3bpGbgic0YA72Os5PS2vU64Vc0GRuBJVy52Sxr7UdSwr56hyr7RylMPWYWA_BT5oS6CJDJBMhrS3w_j2-wTcJbWF6aOksSxoX74RTv7qcpKzoqGkA"/></div></div></header><main class="flex-1 w-full pt-12 px-space-lg bg-surface"><div class="flex flex-col w-full pb-space-xl">
+<!-- Sub-header / Command Bar -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md py-space-md">
+<div>
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm text-secondary uppercase tracking-wider mb-0.5">
+<span>Lifecycle Governance</span>
+<span>•</span>
+<span class="text-primary font-code-sm">PLM-CORE</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface">Products</h1>
+<p class="font-body-md text-body-md text-secondary mt-0.5">Manage product definitions and their released configurations.</p>
+</div>
+<!-- Action Group -->
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<button class="flex items-center gap-space-xs h-8 px-space-md rounded bg-surface-container-low text-on-surface hover:bg-surface-container transition-colors font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[16px]">file_download</span>
+<span>Export CSV</span>
+</button>
+<button class="flex items-center gap-space-xs h-8 px-space-md rounded bg-surface-container-low text-on-surface hover:bg-surface-container transition-colors font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[16px]">rule</span>
+<span>Batch Audit</span>
+</button>
+<button class="flex items-center gap-space-xs h-8 px-space-lg rounded bg-primary text-on-primary hover:bg-primary-container transition-colors font-label-md text-label-md shadow-sm" id="create-product-btn" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>+ Create Product</span>
+</button>
+</div>
+</div>
+<!-- Operational Telemetry Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-md my-space-md">
+<div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+<div>
+<div class="font-label-sm text-label-sm text-secondary uppercase">Active Products</div>
+<div class="font-headline-lg text-headline-lg text-on-surface mt-0.5">24</div>
+<div class="font-body-sm text-body-sm text-secondary mt-0.5">Across 3 architecture tiers</div>
+</div>
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+<div>
+<div class="font-label-sm text-label-sm text-secondary uppercase">Released State</div>
+<div class="font-headline-lg text-headline-lg text-on-surface mt-0.5">19 <span class="font-label-sm text-label-sm text-secondary font-normal">/ 24</span></div>
+<div class="font-body-sm text-body-sm text-secondary mt-0.5">79.1% production locked</div>
+</div>
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+<div>
+<div class="font-label-sm text-label-sm text-secondary uppercase">Under Change (ECN)</div>
+<div class="font-headline-lg text-headline-lg text-on-surface mt-0.5">4</div>
+<div class="font-body-sm text-body-sm text-secondary mt-0.5">Pending CCB approvals</div>
+</div>
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">pending_actions</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+<div>
+<div class="font-label-sm text-label-sm text-secondary uppercase">Hardware Integrity</div>
+<div class="font-headline-lg text-headline-lg text-on-surface mt-0.5">99.4%</div>
+<div class="font-body-sm text-body-sm text-secondary mt-0.5">Zero orphaned BOM sub-assemblies</div>
+</div>
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+</div>
+</div>
+</div>
+<!-- Filter & Utility Shelf -->
+<div class="bg-surface-container-lowest rounded-t p-space-md shadow-sm">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<!-- Search and drop downs -->
+<div class="flex flex-wrap items-center gap-space-sm flex-1">
+<!-- Search Field -->
+<div class="relative min-w-[280px] max-w-sm flex-1">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[16px] text-secondary pointer-events-none">search</span>
+<input class="w-full h-8 pl-8 pr- space-md bg-surface-container-low rounded text-on-surface font-body-sm text-body-sm placeholder:text-secondary focus:outline-none focus:bg-surface-container-lowest transition-colors" id="product-search" placeholder="Search by name or part number..." type="text"/>
+</div>
+<!-- Lifecycle Status Filter -->
+<div class="relative">
+<select class="h-8 pl-space-md pr-8 bg-surface-container-low rounded text-on-surface font-body-sm text-body-sm appearance-none cursor-pointer focus:outline-none" id="status-filter">
+<option value="all">All Statuses</option>
+<option value="released">Released</option>
+<option value="in_review">In Review</option>
+<option value="draft">Draft</option>
+<option value="obsolete">Obsolete</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[16px] text-secondary pointer-events-none">expand_more</span>
+</div>
+<!-- Product Category Filter -->
+<div class="relative">
+<select class="h-8 pl-space-md pr-8 bg-surface-container-low rounded text-on-surface font-body-sm text-body-sm appearance-none cursor-pointer focus:outline-none" id="category-filter">
+<option value="all">All Categories</option>
+<option value="server">Server</option>
+<option value="storage">Storage</option>
+<option value="networking">Networking</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[16px] text-secondary pointer-events-none">expand_more</span>
+</div>
+<button class="h-8 px-space-sm rounded hover:bg-surface-container-low text-secondary hover:text-on-surface flex items-center gap-1 font-label-sm text-label-sm" type="button">
+<span class="material-symbols-outlined text-[16px]">filter_alt_off</span>
+<span>Reset</span>
+</button>
+</div>
+<!-- Quick Count & Grid Preferences -->
+<div class="flex items-center justify-between lg:justify-end gap-space-lg">
+<span class="font-body-sm text-body-sm text-secondary select-none">
+          Showing <span class="font-headline-sm text-headline-sm text-on-surface">4</span> of <span class="font-headline-sm text-headline-sm text-on-surface">24</span> products
+        </span>
+<div class="flex items-center gap-1 bg-surface-container-low p-0.5 rounded">
+<button class="w-6 h-6 rounded flex items-center justify-center bg-surface-container-lowest text-primary shadow-xs">
+<span class="material-symbols-outlined text-[15px]">density_small</span>
+</button>
+<button class="w-6 h-6 rounded flex items-center justify-center text-secondary hover:text-on-surface">
+<span class="material-symbols-outlined text-[15px]">density_medium</span>
+</button>
+<button class="w-6 h-6 rounded flex items-center justify-center text-secondary hover:text-on-surface">
+<span class="material-symbols-outlined text-[15px]">view_column</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Structured Enterprise DataTable Container -->
+<div class="bg-surface-container-lowest shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left table-fixed min-w-[880px]">
+<thead>
+<tr class="h-8 bg-surface-container-low text-secondary font-label-sm text-label-sm uppercase tracking-wider select-none">
+<th class="w-10 px-space-md text-center">
+<input class="w-3.5 h-3.5 rounded bg-surface-container-lowest cursor-pointer accent-primary align-middle" type="checkbox"/>
+</th>
+<th class="w-[160px] px-space-md">
+<div class="flex items-center gap-1 cursor-pointer hover:text-on-surface">
+<span>Part Number</span>
+<span class="material-symbols-outlined text-[14px]">arrow_downward</span>
+</div>
+</th>
+<th class="w-[280px] px-space-md">
+<div class="flex items-center gap-1 cursor-pointer hover:text-on-surface">
+<span>Product Name</span>
+<span class="material-symbols-outlined text-[14px] opacity-40">swap_vert</span>
+</div>
+</th>
+<th class="w-[130px] px-space-md">
+<div class="flex items-center gap-1 cursor-pointer hover:text-on-surface">
+<span>Category</span>
+<span class="material-symbols-outlined text-[14px] opacity-40">swap_vert</span>
+</div>
+</th>
+<th class="w-[100px] px-space-md text-center">Current Rev</th>
+<th class="w-[140px] px-space-md">Lifecycle Status</th>
+<th class="w-[130px] px-space-md">
+<div class="flex items-center gap-1 cursor-pointer hover:text-on-surface">
+<span>Last Updated</span>
+<span class="material-symbols-outlined text-[14px] opacity-40">swap_vert</span>
+</div>
+</th>
+<th class="w-[80px] px-space-md text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="text-body-md font-body-md text-on-surface">
+<!-- Row 1: SERVER-100 -->
+<tr class="h-10 hover:bg-surface-container-low transition-colors cursor-pointer group" onclick="window.location.hash='#product-SERVER-100'">
+<td class="px-space-md text-center" onclick="event.stopPropagation()">
+<input class="w-3.5 h-3.5 rounded bg-surface cursor-pointer accent-primary align-middle" type="checkbox"/>
+</td>
+<td class="px-space-md">
+<span class="font-code-sm text-code-sm text-primary font-semibold group-hover:underline">SERVER-100</span>
+</td>
+<td class="px-space-md truncate font-headline-sm text-headline-sm text-on-surface">
+              Compute Server
+            </td>
+<td class="px-space-md">
+<span class="inline-flex items-center gap-1.5 px-space-xs py-0.5 rounded bg-surface-container-low text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[13px]">dns</span>
+<span>Server</span>
+</span>
+</td>
+<td class="px-space-md text-center">
+<span class="font-code-sm text-code-sm px-1.5 py-0.5 rounded bg-surface-container font-semibold">B</span>
+</td>
+<td class="px-space-md">
+<span class="inline-flex items-center gap-1 h-5 px-space-sm rounded bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span>Released</span>
+</span>
+</td>
+<td class="px-space-md font-code-sm text-code-sm text-secondary">
+              Oct 21, 2026
+            </td>
+<td class="px-space-md text-right" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-secondary hover:text-primary hover:bg-surface-container transition-colors" title="View BOM Hierarchy">
+<span class="material-symbols-outlined text-[16px]">account_tree</span>
+</button>
+<button class="p-1 rounded text-secondary hover:text-on-surface hover:bg-surface-container transition-colors" title="Product Actions">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: SERVER-200 -->
+<tr class="h-10 hover:bg-surface-container-low transition-colors cursor-pointer group" onclick="window.location.hash='#product-SERVER-200'">
+<td class="px-space-md text-center" onclick="event.stopPropagation()">
+<input class="w-3.5 h-3.5 rounded bg-surface cursor-pointer accent-primary align-middle" type="checkbox"/>
+</td>
+<td class="px-space-md">
+<span class="font-code-sm text-code-sm text-primary font-semibold group-hover:underline">SERVER-200</span>
+</td>
+<td class="px-space-md truncate font-headline-sm text-headline-sm text-on-surface">
+              Storage Server
+            </td>
+<td class="px-space-md">
+<span class="inline-flex items-center gap-1.5 px-space-xs py-0.5 rounded bg-surface-container-low text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[13px]">dns</span>
+<span>Server</span>
+</span>
+</td>
+<td class="px-space-md text-center">
+<span class="font-code-sm text-code-sm px-1.5 py-0.5 rounded bg-surface-container font-semibold">A</span>
+</td>
+<td class="px-space-md">
+<span class="inline-flex items-center gap-1 h-5 px-space-sm rounded bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span>Released</span>
+</span>
+</td>
+<td class="px-space-md font-code-sm text-code-sm text-secondary">
+              Oct 20, 2026
+            </td>
+<td class="px-space-md text-right" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-secondary hover:text-primary hover:bg-surface-container transition-colors" title="View BOM Hierarchy">
+<span class="material-symbols-outlined text-[16px]">account_tree</span>
+</button>
+<button class="p-1 rounded text-secondary hover:text-on-surface hover:bg-surface-container transition-colors" title="Product Actions">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: STOR-300 -->
+<tr class="h-10 hover:bg-surface-container-low transition-colors cursor-pointer group" onclick="window.location.hash='#product-STOR-300'">
+<td class="px-space-md text-center" onclick="event.stopPropagation()">
+<input class="w-3.5 h-3.5 rounded bg-surface cursor-pointer accent-primary align-middle" type="checkbox"/>
+</td>
+<td class="px-space-md">
+<span class="font-code-sm text-code-sm text-primary font-semibold group-hover:underline">STOR-300</span>
+</td>
+<td class="px-space-md truncate font-headline-sm text-headline-sm text-on-surface">
+              Enterprise Storage Array
+            </td>
+<td class="px-space-md">
+<span class="inline-flex items-center gap-1.5 px-space-xs py-0.5 rounded bg-surface-container-low text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[13px]">database</span>
+<span>Storage</span>
+</span>
+</td>
+<td class="px-space-md text-center">
+<span class="font-code-sm text-code-sm px-1.5 py-0.5 rounded bg-surface-container font-semibold">C</span>
+</td>
+<td class="px-space-md">
+<span class="inline-flex items-center gap-1 h-5 px-space-sm rounded bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span>Released</span>
+</span>
+</td>
+<td class="px-space-md font-code-sm text-code-sm text-secondary">
+              Oct 18, 2026
+            </td>
+<td class="px-space-md text-right" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-secondary hover:text-primary hover:bg-surface-container transition-colors" title="View BOM Hierarchy">
+<span class="material-symbols-outlined text-[16px]">account_tree</span>
+</button>
+<button class="p-1 rounded text-secondary hover:text-on-surface hover:bg-surface-container transition-colors" title="Product Actions">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: NET-400 -->
+<tr class="h-10 hover:bg-surface-container-low transition-colors cursor-pointer group" onclick="window.location.hash='#product-NET-400'">
+<td class="px-space-md text-center" onclick="event.stopPropagation()">
+<input class="w-3.5 h-3.5 rounded bg-surface cursor-pointer accent-primary align-middle" type="checkbox"/>
+</td>
+<td class="px-space-md">
+<span class="font-code-sm text-code-sm text-primary font-semibold group-hover:underline">NET-400</span>
+</td>
+<td class="px-space-md truncate font-headline-sm text-headline-sm text-on-surface">
+              Network Appliance
+            </td>
+<td class="px-space-md">
+<span class="inline-flex items-center gap-1.5 px-space-xs py-0.5 rounded bg-surface-container-low text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[13px]">hub</span>
+<span>Networking</span>
+</span>
+</td>
+<td class="px-space-md text-center">
+<span class="font-code-sm text-code-sm px-1.5 py-0.5 rounded bg-surface-container font-semibold">A</span>
+</td>
+<td class="px-space-md">
+<span class="inline-flex items-center gap-1 h-5 px-space-sm rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>In Review</span>
+</span>
+</td>
+<td class="px-space-md font-code-sm text-code-sm text-secondary">
+              Oct 17, 2026
+            </td>
+<td class="px-space-md text-right" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-secondary hover:text-primary hover:bg-surface-container transition-colors" title="View BOM Hierarchy">
+<span class="material-symbols-outlined text-[16px]">account_tree</span>
+</button>
+<button class="p-1 rounded text-secondary hover:text-on-surface hover:bg-surface-container transition-colors" title="Product Actions">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Pagination & Selection Footer -->
+<div class="h-10 px-space-md bg-surface-container-low flex items-center justify-between font-label-md text-label-md text-secondary select-none">
+<div class="flex items-center gap-space-md">
+<span>Rows per page:</span>
+<select class="bg-surface-container-lowest rounded px-1.5 py-0.5 font-label-sm text-label-sm text-on-surface focus:outline-none cursor-pointer">
+<option>20</option>
+<option>50</option>
+<option>100</option>
+</select>
+<span class="hidden sm:inline">1–4 of 24 items</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="p-1 rounded hover:bg-surface-container text-secondary disabled:opacity-30 disabled:pointer-events-none" disabled="">
+<span class="material-symbols-outlined text-[18px]">first_page</span>
+</button>
+<button class="p-1 rounded hover:bg-surface-container text-secondary disabled:opacity-30 disabled:pointer-events-none" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<div class="flex items-center gap-1 px-1">
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest font-headline-sm text-headline-sm text-on-surface shadow-xs">1</span>
+<span class="px-1.5 py-0.5 rounded hover:bg-surface-container cursor-pointer">2</span>
+</div>
+<button class="p-1 rounded hover:bg-surface-container text-secondary">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+<button class="p-1 rounded hover:bg-surface-container text-secondary">
+<span class="material-symbols-outlined text-[18px]">last_page</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Contextual Quick Details Drawer (Collapsible Preview Slate) -->
+<div class="mt-space-md bg-surface-container-lowest rounded p-space-md shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[18px] text-primary">visibility</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Inspecting Part: SERVER-100 (Compute Server Rev B)</span>
+</div>
+<div class="flex items-center gap-space-md">
+<a class="font-label-md text-label-md text-primary hover:underline flex items-center gap-1" href="#bom-view">
+<span>Open Full BOM</span>
+<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-md pt-space-xs font-body-sm text-body-sm">
+<div class="p-space-sm bg-surface-container-low rounded">
+<span class="font-label-sm text-label-sm text-secondary uppercase block mb-1">Top-Level Spec</span>
+<span class="text-on-surface font-code-sm">2U Dual-Socket Xeon 8480+</span>
+<span class="block text-secondary text-[11px] mt-0.5">Form Factor: EIA-310 19" Rack</span>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded">
+<span class="font-label-sm text-label-sm text-secondary uppercase block mb-1">Active ECN Reference</span>
+<span class="text-on-surface font-code-sm">ECN-2026-0891</span>
+<span class="block text-secondary text-[11px] mt-0.5">Thermal shroud tooling update</span>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded">
+<span class="font-label-sm text-label-sm text-secondary uppercase block mb-1">Approved Suppliers (AML)</span>
+<span class="text-on-surface font-semibold">Foxconn, Celestica</span>
+<span class="block text-secondary text-[11px] mt-0.5">Compliance: RoHS 3, REACH 235</span>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded">
+<span class="font-label-sm text-label-sm text-secondary uppercase block mb-1">Rollout Pipeline</span>
+<div class="w-full bg-surface-container rounded-full h-1.5 mt-2">
+<div class="bg-primary h-1.5 rounded-full w-4/5"></div>
+</div>
+<span class="block text-secondary text-[11px] mt-1.5">Production Gate 4: Ready for Build</span>
+</div>
+</div>
+</div>
+<!-- Inline Interaction Helper Script -->
+<script>
+    (function() {
+      // Row highlighting selection state toggle
+      const rows = document.querySelectorAll('tbody tr');
+      rows.forEach(row => {
+        row.addEventListener('click', () => {
+          rows.forEach(r => r.classList.remove('bg-surface-container-low'));
+          row.classList.add('bg-surface-container-low');
+        });
+      });
+
+      // Quick keyboard handler for search
+      const search = document.getElementById('product-search');
+      if (search) {
+        search.addEventListener('keyup', (e) => {
+          const term = e.target.value.toLowerCase();
+          rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(term) ? '' : 'none';
+          });
+        });
+      }
+    })();
+  </script>
+</div></main></div></body></html>

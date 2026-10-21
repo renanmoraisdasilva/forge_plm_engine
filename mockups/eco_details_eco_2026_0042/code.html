@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-secondary-fixed": "#131b2e",
+          "on-primary-fixed": "#001d31",
+          "primary-fixed-dim": "#93ccff",
+          "on-surface": "#0b1c30",
+          "surface-container-high": "#dce9ff",
+          "secondary": "#565e74",
+          "tertiary-fixed": "#cde5ff",
+          "tertiary-fixed-dim": "#94ccff",
+          "surface-bright": "#f8f9ff",
+          "on-tertiary-container": "#fdfcff",
+          "inverse-surface": "#213145",
+          "outline": "#707881",
+          "on-primary": "#ffffff",
+          "on-secondary-container": "#5c647a",
+          "on-secondary-fixed-variant": "#3f465c",
+          "tertiary": "#006195",
+          "on-error-container": "#93000a",
+          "on-primary-fixed-variant": "#004b73",
+          "secondary-fixed-dim": "#bec6e0",
+          "outline-variant": "#bfc7d2",
+          "error": "#ba1a1a",
+          "inverse-on-surface": "#eaf1ff",
+          "surface": "#f8f9ff",
+          "surface-tint": "#006398",
+          "on-secondary": "#ffffff",
+          "secondary-fixed": "#dae2fd",
+          "surface-dim": "#cbdbf5",
+          "background": "#f8f9ff",
+          "surface-container": "#e5eeff",
+          "secondary-container": "#dae2fd",
+          "inverse-primary": "#93ccff",
+          "on-background": "#0b1c30",
+          "primary-container": "#007bb9",
+          "surface-variant": "#d3e4fe",
+          "on-tertiary": "#ffffff",
+          "on-error": "#ffffff",
+          "on-tertiary-fixed": "#001d32",
+          "on-surface-variant": "#3f4850",
+          "primary-fixed": "#cce5ff",
+          "tertiary-container": "#287ab3",
+          "primary": "#006194",
+          "on-primary-container": "#fdfcff",
+          "on-tertiary-fixed-variant": "#004b74",
+          "surface-container-low": "#eff4ff",
+          "surface-container-highest": "#d3e4fe",
+          "surface-container-lowest": "#ffffff",
+          "error-container": "#ffdad6"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "space-xs": "0.25rem",
+          "space-lg": "0.75rem",
+          "space-xl": "1rem",
+          "margin": "1rem",
+          "space-sm": "0.375rem",
+          "gutter": "0.75rem",
+          "space-md": "0.5rem"
+        },
+        "fontFamily": {
+          "headline-lg": [
+            "Inter"
+          ],
+          "headline-md": [
+            "Inter"
+          ],
+          "headline-xl": [
+            "Inter"
+          ],
+          "code-sm": [
+            "JetBrains Mono"
+          ],
+          "label-sm": [
+            "Inter"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "label-md": [
+            "Inter"
+          ],
+          "headline-sm": [
+            "Inter"
+          ],
+          "body-md": [
+            "Inter"
+          ],
+          "body-lg": [
+            "Inter"
+          ]
+        },
+        "fontSize": {
+          "headline-lg": [
+            "18px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-md": [
+            "15px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "code-sm": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-sm": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "-0.005em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-md": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-60 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-12 px-space-lg flex items-center gap-space-md bg-surface-container-lowest"><img alt="Forge PLM Logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WSb0IT6jqUJIKOGerFtpuRHCp2cYGNavocZxh7l5GzNhe78gD6eMcKaP9ga1HxyePWKjd_urKi4So5gZF7OBWRKBaN3OVj4jx0RzJrpezT7toV1CMQe-orTnvzMyFYXBGka-aa7gWz3vb4_W5Gp4HHJY3Uer_wmhFrFKYCrKeXPA3p18HsEHh1_qzTfv6xLdXgVJteiP-TqZr8oMSeyhbIRVeavLDc9FCQhMqRCWo6s57MbnA5aRpUZCEo"/><span class="font-headline-md text-headline-md text-on-surface tracking-tight">Forge PLM</span></div><div class="px-space-md py-space-sm"><span class="px-space-md font-label-sm text-label-sm text-secondary tracking-wider uppercase">Engineering Workspace</span></div><nav class="px-space-sm space-y-0.5" data-active-classes="bg-surface-container text-primary font-semibold"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="overview" href="#"><span class="material-symbols-outlined text-[18px]">dashboard</span><span>Overview</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="products" href="#"><span class="material-symbols-outlined text-[18px]">devices</span><span>Products</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="bill-of-materials" href="#"><span class="material-symbols-outlined text-[18px]">account_tree</span><span>Bill of Materials</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg transition-colors bg-surface-container text-primary font-semibold" data-path="engineering-changes" href="#"><span class="material-symbols-outlined text-[18px]">published_with_changes</span><span>Engineering Changes</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="components" href="#"><span class="material-symbols-outlined text-[18px]">memory</span><span>Components</span></a></nav></div><div class="p-space-sm space-y-0.5 bg-surface-container-lowest"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="settings" href="#"><span class="material-symbols-outlined text-[18px]">settings</span><span>Settings</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="help" href="#"><span class="material-symbols-outlined text-[18px]">help</span><span>Help</span></a><div class="mt-space-sm px-space-md py-space-xs"><div class="flex items-center justify-between font-label-sm text-label-sm text-secondary"><span>CORE ENGINE</span><span class="font-code-sm text-code-sm">v3.4.1</span></div></div></div></aside><div class="pl-60 min-h-screen flex flex-col bg-surface"><header class="fixed top-0 left-60 right-0 h-12 bg-surface-container-lowest/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-lg flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-md min-w-0"><div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px]">corporate_fare</span><span class="hover:text-on-surface cursor-pointer">Forge HQ</span><span class="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span><span class="text-on-surface font-headline-sm text-headline-sm truncate">Engineering Workbench</span></div></div><div class="flex-1 max-w-md mx-space-md"><div class="relative flex items-center"><span class="material-symbols-outlined absolute left-space-md text-[18px] text-secondary pointer-events-none">search</span><input class="w-full h-8 pl-9 pr-space-md bg-surface-container-low rounded-lg text-on-surface font-body-sm text-body-sm placeholder:text-secondary focus:outline-none focus:bg-surface-container-lowest transition-all" placeholder="Search products, part numbers, or ECOs..." type="text"/></div></div><div class="flex items-center gap-space-lg"><button aria-label="Notifications" class="relative p-space-xs rounded-lg hover:bg-surface-container-high hover:text-on-surface text-secondary transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-error"></span></button><div class="h-5 w-px bg-surface-container-high"></div><div class="flex items-center gap-space-md pl-space-xs"><div class="flex flex-col text-right"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">Alex Morgan</span><span class="font-label-sm text-label-sm text-secondary leading-tight">Product Engineer</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAi2APML9mxxuVPmZ1goXhUkGktLuE-UUx5Ej6orzwpVLkLgwHsbrv0fRyGiCgtntyieB2ebs6fp_DXziWdwtyZafqsxfxmJGZj30NlUhr0Yja6xKkuxxMLcKj6sHab8OItsPa1c3bpGbgic0YA72Os5PS2vU64Vc0GRuBJVy52Sxr7UdSwr56hyr7RylMPWYWA_BT5oS6CJDJBMhrS3w_j2-wTcJbWF6aOksSxoX74RTv7qcpKzoqGkA"/></div></div></header><main class="flex-1 w-full pt-12 px-space-lg bg-surface"><div class="flex flex-col w-full">
+<!-- Top Navigation & Breadcrumbs Bar -->
+<div class="flex items-center justify-between py-space-sm mb-space-sm">
+<div class="flex items-center gap-space-md min-w-0">
+<a class="inline-flex items-center gap-1 font-body-sm text-body-sm text-primary hover:text-primary-container transition-colors py-1 px-space-xs rounded hover:bg-surface-container" href="#">
+<span class="material-symbols-outlined text-[16px]">arrow_back</span>
+<span>Back to Engineering Changes</span>
+</a>
+<span class="text-secondary">/</span>
+<div class="flex items-center gap-1 font-code-sm text-code-sm text-secondary">
+<span>ECOs</span>
+<span class="text-outline-variant">/</span>
+<span class="font-semibold text-on-surface">ECO-2026-0042</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md text-secondary font-code-sm text-code-sm">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">history</span>
+        Audit Log ID: #98421
+      </span>
+<span class="w-1 h-1 rounded-full bg-secondary"></span>
+<span class="text-on-surface">CCB Baseline Locked</span>
+</div>
+</div>
+<!-- Primary Engineering Header Card -->
+<div class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm mb-space-lg">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg">
+<div class="flex flex-col gap-space-xs min-w-0">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="font-code-sm text-code-sm bg-surface-container text-on-surface px-space-sm py-0.5 rounded font-semibold tracking-wide">
+            ECO-2026-0042
+          </span>
+<!-- Status Badge: Pending Review -->
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim animate-pulse"></span>
+            Pending Review
+          </span>
+<!-- Priority: High Priority -->
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded font-label-sm text-label-sm bg-error-container text-on-error-container">
+<span class="material-symbols-outlined text-[13px]">priority_high</span>
+            High Priority
+          </span>
+<!-- Type: Component Replacement -->
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded font-label-sm text-label-sm bg-surface-container-high text-primary">
+<span class="material-symbols-outlined text-[13px]">swap_horiz</span>
+            Component Replacement
+          </span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface mt-space-xs tracking-tight">
+          Replace motherboard controller
+        </h1>
+<!-- Metadata Row -->
+<div class="flex flex-wrap items-center gap-x-space-lg gap-y-1 mt-1 font-body-sm text-body-sm text-secondary">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-primary">dns</span>
+<span class="text-secondary">Affected Product:</span>
+<span class="font-code-sm text-code-sm text-on-surface font-semibold">SERVER-100</span>
+<span class="text-secondary">(Compute Server)</span>
+</div>
+<span class="text-outline-variant">|</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">person</span>
+<span class="text-secondary">Submitted By:</span>
+<span class="text-on-surface font-medium">Alex Morgan</span>
+</div>
+<span class="text-outline-variant">|</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">calendar_today</span>
+<span class="text-secondary">Created:</span>
+<span class="text-on-surface">Oct 20, 2026</span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-wrap items-center gap-space-sm shrink-0">
+<button class="inline-flex items-center gap-1.5 h-8 px-space-md bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md rounded-lg transition-colors" id="quick-inspect-btn">
+<span class="material-symbols-outlined text-[16px] text-primary">layers</span>
+<span>Inspect CAD / Spec Sheet</span>
+</button>
+<button class="inline-flex items-center gap-1.5 h-8 px-space-md bg-error-container text-on-error-container hover:bg-opacity-80 font-label-md text-label-md rounded-lg transition-colors" id="quick-reject-btn">
+<span class="material-symbols-outlined text-[16px]">close</span>
+<span>Reject</span>
+</button>
+<button class="inline-flex items-center gap-1.5 h-8 px-space-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-lg transition-colors shadow-sm" id="quick-approve-btn">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Approve ECO</span>
+</button>
+</div>
+</div>
+<!-- Workflow & Status Stepper -->
+<div class="mt-space-xl pt-space-lg bg-surface-container-low rounded-lg p-space-md">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">ECO Lifecycle Pipeline</span>
+<div class="flex items-center gap-1 text-primary font-code-sm text-code-sm">
+<span class="material-symbols-outlined text-[14px]">event_repeat</span>
+<span>Target Release Gate: Nov 1, 2026</span>
+</div>
+</div>
+<div class="relative grid grid-cols-1 md:grid-cols-4 gap-space-sm">
+<!-- Step 1: Draft -->
+<div class="flex items-center gap-space-sm bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
+<div class="w-6 h-6 rounded-full bg-primary-fixed flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<div class="min-w-0">
+<div class="font-headline-sm text-headline-sm text-on-surface leading-tight">1. Draft</div>
+<div class="font-label-sm text-label-sm text-secondary">Authoring Complete</div>
+</div>
+</div>
+<!-- Step 2: Submitted -->
+<div class="flex items-center gap-space-sm bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
+<div class="w-6 h-6 rounded-full bg-primary-fixed flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<div class="min-w-0">
+<div class="font-headline-sm text-headline-sm text-on-surface leading-tight">2. Submitted</div>
+<div class="font-label-sm text-label-sm text-secondary">Impact Scoped</div>
+</div>
+</div>
+<!-- Step 3: Review & Approval (ACTIVE) -->
+<div class="flex items-center gap-space-sm bg-surface-container-highest p-space-sm rounded-lg shadow-sm">
+<div class="relative w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">rate_review</span>
+<span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary-fixed-dim animate-ping"></span>
+</div>
+<div class="min-w-0">
+<div class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1 leading-tight">
+<span>3. Review &amp; CCB</span>
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+</div>
+<div class="font-label-sm text-label-sm text-primary font-semibold">Active: Decision Pending</div>
+</div>
+</div>
+<!-- Step 4: Released / Applied -->
+<div class="flex items-center gap-space-sm bg-surface-container p-space-sm rounded-lg opacity-75">
+<div class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-secondary shrink-0">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+</div>
+<div class="min-w-0">
+<div class="font-headline-sm text-headline-sm text-secondary leading-tight">4. Release / Applied</div>
+<div class="font-label-sm text-label-sm text-secondary">Auto Nov 1, 2026</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 mt-space-sm pt-space-xs text-secondary font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">info</span>
+<span>Approval authorizes the configuration change immediately; physical release deployment triggers on Effective Date (Nov 1, 2026).</span>
+</div>
+</div>
+</div>
+<!-- Two-Column Main Content -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start pb-space-xl">
+<!-- Left Area (70% ~ 8 cols) -->
+<div class="lg:col-span-8 flex flex-col gap-space-lg">
+<!-- Section 1: Change Summary & Engineering Scope -->
+<div class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm">
+<div class="flex items-center justify-between pb-space-sm mb-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">assignment</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Change Summary &amp; Scope</h2>
+</div>
+<span class="font-code-sm text-code-sm text-secondary">CCB-REQ-77401</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg mb-space-lg">
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Reason for Change</span>
+<p class="font-body-md text-body-md text-on-surface">
+              Replace the current motherboard due to an updated controller specification and improved component availability across Tier-1 vendors.
+            </p>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Impact Assessment</span>
+<p class="font-body-md text-body-md text-on-surface">
+              The server BOM is affected. Existing released revision B must remain available for historical reference and legacy warranty servicing.
+            </p>
+</div>
+</div>
+<!-- Technical Metadata Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-space-md pt-space-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary">Effective Date</span>
+<span class="font-headline-sm text-headline-sm text-on-surface mt-0.5">November 1, 2026</span>
+<span class="font-label-sm text-label-sm text-primary">Scheduled Release</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary">Change Type</span>
+<span class="font-headline-sm text-headline-sm text-on-surface mt-0.5">Component Replacement</span>
+<span class="font-label-sm text-label-sm text-secondary">1:1 Interchangeable</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary">Affected Assembly</span>
+<span class="font-headline-sm text-headline-sm text-on-surface mt-0.5 truncate">SERVER-100 Baseboard</span>
+<span class="font-code-sm text-code-sm text-secondary">ASY-9940-02</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary">Firmware Lock</span>
+<span class="font-headline-sm text-headline-sm text-on-surface mt-0.5">FW v4.8.2 Certified</span>
+<span class="font-label-sm text-label-sm text-secondary">Checksum Verified</span>
+</div>
+</div>
+</div>
+<!-- Section 2: Before and After BOM Comparison -->
+<div class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm mb-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">compare_arrows</span>
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">BOM Configuration Diff</h2>
+<p class="font-body-sm text-body-sm text-secondary">Comparing Active Rev B against Proposed Rev C Target</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs bg-surface-container p-0.5 rounded-lg text-secondary font-label-sm text-label-sm">
+<span class="px-space-sm py-1 bg-surface-container-lowest text-on-surface font-semibold rounded shadow-sm">Side-by-Side</span>
+<span class="px-space-sm py-1 cursor-pointer hover:text-on-surface">Unified View</span>
+</div>
+</div>
+<!-- Immutable Baseline Banner -->
+<div class="bg-surface-container-low p-space-md rounded-lg flex items-start gap-space-md mb-space-lg">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">verified_user</span>
+<div class="flex flex-col gap-0.5">
+<span class="font-headline-sm text-headline-sm text-on-surface">Immutable baseline notice</span>
+<p class="font-body-sm text-body-sm text-secondary">
+              This change replaces a component via controlled engineering release, leaving Rev B historical record intact and auditable. Downstream ERP work orders will reference Rev C post-effective cutoff.
+            </p>
+</div>
+</div>
+<!-- Side-by-Side Cards Comparison -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md mb-space-lg">
+<!-- BEFORE CARD -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col gap-space-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">Current Released Configuration</span>
+<span class="px-space-xs py-0.5 rounded font-code-sm text-code-sm bg-surface-container text-secondary">Rev B</span>
+</div>
+<div class="flex items-center justify-between bg-surface-container-lowest p-space-md rounded-lg">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-8 h-8 rounded bg-error-container text-on-error-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">remove_circle</span>
+</div>
+<div class="min-w-0">
+<div class="font-code-sm text-code-sm font-semibold text-secondary line-through">MB-020</div>
+<div class="font-body-md text-body-md text-on-surface font-medium truncate">Server Motherboard</div>
+</div>
+</div>
+<span class="px-space-sm py-0.5 rounded font-label-sm text-label-sm bg-surface-container text-secondary font-medium shrink-0">
+                Active Released
+              </span>
+</div>
+<!-- Before Specs Table -->
+<div class="space-y-1 font-body-sm text-body-sm">
+<div class="flex justify-between py-1 px-space-xs">
+<span class="text-secondary">Controller Spec:</span>
+<span class="font-code-sm text-code-sm text-on-surface">Intel C621A PCH (Standard)</span>
+</div>
+<div class="flex justify-between py-1 px-space-xs bg-surface-container-lowest rounded">
+<span class="text-secondary">Quantity:</span>
+<span class="font-medium text-on-surface">1 Each</span>
+</div>
+<div class="flex justify-between py-1 px-space-xs">
+<span class="text-secondary">Vendor Avail.:</span>
+<span class="text-error font-medium">EOL Warning (Q1 2027)</span>
+</div>
+<div class="flex justify-between py-1 px-space-xs bg-surface-container-lowest rounded">
+<span class="text-secondary">Unit Cost:</span>
+<span class="font-code-sm text-code-sm text-on-surface">$412.00 USD</span>
+</div>
+</div>
+</div>
+<!-- AFTER CARD -->
+<div class="bg-surface-container-high p-space-md rounded-xl flex flex-col gap-space-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Proposed Configuration</span>
+<span class="px-space-xs py-0.5 rounded font-code-sm text-code-sm bg-primary text-on-primary font-semibold">Rev C (Target)</span>
+</div>
+<div class="flex items-center justify-between bg-surface-container-lowest p-space-md rounded-lg">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-8 h-8 rounded bg-primary-fixed text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+</div>
+<div class="min-w-0">
+<div class="font-code-sm text-code-sm font-semibold text-primary">MB-021</div>
+<div class="font-body-md text-body-md text-on-surface font-semibold truncate">Updated Server Motherboard</div>
+</div>
+</div>
+<span class="px-space-sm py-0.5 rounded font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed font-medium shrink-0">
+                Pending Approval
+              </span>
+</div>
+<!-- After Specs Table -->
+<div class="space-y-1 font-body-sm text-body-sm">
+<div class="flex justify-between py-1 px-space-xs">
+<span class="text-secondary">Controller Spec:</span>
+<span class="font-code-sm text-code-sm text-primary font-semibold">Intel C621A-v2 (Optimized)</span>
+</div>
+<div class="flex justify-between py-1 px-space-xs bg-surface-container-lowest rounded">
+<span class="text-secondary">Quantity:</span>
+<span class="font-medium text-on-surface">1 Each</span>
+</div>
+<div class="flex justify-between py-1 px-space-xs">
+<span class="text-secondary">Vendor Avail.:</span>
+<span class="text-primary font-medium">Active High Volume (2031)</span>
+</div>
+<div class="flex justify-between py-1 px-space-xs bg-surface-container-lowest rounded">
+<span class="text-secondary">Unit Cost:</span>
+<span class="font-code-sm text-code-sm text-primary font-semibold">$398.50 USD (-3.2%)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Spec Comparison & CAD Visual Attachment Mock -->
+<div class="bg-surface-container-low rounded-lg p-space-md">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface">Associated Engineering Documents (2)</span>
+<span class="font-label-sm text-label-sm text-primary cursor-pointer hover:underline">Download All Artifacts</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<div class="flex items-center justify-between p-space-sm bg-surface-container-lowest rounded-lg">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-primary text-[20px]">description</span>
+<div class="min-w-0">
+<div class="font-headline-sm text-headline-sm text-on-surface truncate">SPEC-MB021-V2.pdf</div>
+<div class="font-label-sm text-label-sm text-secondary">2.4 MB • Engineering Drawing</div>
+</div>
+</div>
+<button class="p-1 text-secondary hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+</div>
+<div class="flex items-center justify-between p-space-sm bg-surface-container-lowest rounded-lg">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-primary text-[20px]">schema</span>
+<div class="min-w-0">
+<div class="font-headline-sm text-headline-sm text-on-surface truncate">CAD_STEP_SERVER100_REV_C.step</div>
+<div class="font-label-sm text-label-sm text-secondary">48.1 MB • 3D Solid Model</div>
+</div>
+</div>
+<button class="p-1 text-secondary hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Area (30% ~ 4 cols) -->
+<div class="lg:col-span-4 flex flex-col gap-space-lg">
+<!-- Interactive Approval Action Panel -->
+<div class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm relative overflow-hidden" id="approval-panel">
+<div class="flex items-center justify-between pb-space-sm mb-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">how_to_reg</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Reviewer Action</h3>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-container text-on-surface px-space-xs py-0.5 rounded font-semibold">Chief Architect</span>
+</div>
+<div class="bg-surface-container-low p-space-sm rounded-lg mb-space-md font-body-sm text-body-sm text-on-surface">
+<strong>Authority:</strong> CCB Level-2 Sign-off required. Approval locks the proposed revision into the production release pipeline.
+        </div>
+<form class="flex flex-col gap-space-md" id="eco-action-form" onsubmit="return false;">
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1" for="reviewer-remarks">
+              Reviewer Remarks / Engineering Conditions
+            </label>
+<textarea class="w-full p-space-sm bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-secondary focus:outline-none focus:bg-surface-container-lowest transition-colors resize-none" id="reviewer-remarks" placeholder="e.g., Validated thermal envelope on test bench TB-09. Approved with zero deviations..." rows="3"></textarea>
+</div>
+<div class="flex items-center gap-2">
+<input checked="" class="w-4 h-4 text-primary rounded bg-surface-container-low focus:ring-0" id="sign-off-confirm" type="checkbox"/>
+<label class="font-body-sm text-body-sm text-on-surface select-none cursor-pointer" for="sign-off-confirm">
+              I certify this change satisfies ISO/IEC 15288 PLM standards.
+            </label>
+</div>
+<div class="flex flex-col gap-space-sm pt-space-xs">
+<button class="w-full h-9 bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm" id="submit-approve-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Authorize &amp; Approve ECO</span>
+</button>
+<button class="w-full h-8 bg-surface-container hover:bg-error-container hover:text-on-error-container text-on-surface font-label-md text-label-md rounded-lg flex items-center justify-center gap-2 transition-colors" id="submit-reject-btn" type="button">
+<span class="material-symbols-outlined text-[16px]">cancel</span>
+<span>Reject ECO (Requires Reason)</span>
+</button>
+</div>
+</form>
+<div class="mt-space-md pt-space-sm text-center">
+<p class="font-label-sm text-label-sm text-secondary">
+            BOM will be tagged for <strong class="text-on-surface">Nov 1, 2026</strong> scheduled release.
+          </p>
+</div>
+<!-- Success Toast Notification (Hidden by default) -->
+<div class="hidden absolute inset-0 bg-surface-container-lowest p-space-xl flex flex-col items-center justify-center text-center" id="action-toast">
+<div class="w-12 h-12 rounded-full bg-primary-fixed text-primary flex items-center justify-center mb-space-sm">
+<span class="material-symbols-outlined text-[28px]">check_circle</span>
+</div>
+<h4 class="font-headline-md text-headline-md text-on-surface mb-1">ECO Authorized</h4>
+<p class="font-body-sm text-body-sm text-secondary mb-space-md">
+            Approved by Alex Morgan. Released scheduled for Nov 1, 2026.
+          </p>
+<button class="h-7 px-space-md bg-surface-container text-on-surface rounded font-label-sm text-label-sm hover:bg-surface-container-high transition-colors" id="reset-action-btn">
+            Modify Decision
+          </button>
+</div>
+</div>
+<!-- Section 3: Approval Activity & Timeline -->
+<div class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm">
+<div class="flex items-center justify-between pb-space-sm mb-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">timeline</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Audit &amp; Timeline</h3>
+</div>
+<span class="font-code-sm text-code-sm text-secondary">UTC-07:00</span>
+</div>
+<!-- Vertical Timeline Track -->
+<div class="relative pl-6 space-y-space-lg before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-container-high">
+<!-- Event 1: Created -->
+<div class="relative">
+<span class="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-primary-fixed text-primary flex items-center justify-center ring-4 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[10px]">add</span>
+</span>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">ECO Created</span>
+<span class="font-body-sm text-body-sm text-secondary">Initiated by Alex Morgan</span>
+<span class="font-code-sm text-code-sm text-secondary mt-0.5">Oct 20, 2026, 10:15 AM</span>
+</div>
+</div>
+<!-- Event 2: Submitted -->
+<div class="relative">
+<span class="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-primary-fixed text-primary flex items-center justify-center ring-4 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[10px]">send</span>
+</span>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Submitted for Review</span>
+<span class="font-body-sm text-body-sm text-secondary">Scope validation completed</span>
+<span class="font-code-sm text-code-sm text-secondary mt-0.5">Oct 20, 2026, 11:30 AM</span>
+</div>
+</div>
+<!-- Event 3: Pending Reviewer Decision -->
+<div class="relative">
+<span class="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center ring-4 ring-surface-container-lowest animate-pulse">
+<span class="material-symbols-outlined text-[10px]">pending</span>
+</span>
+<div class="flex flex-col">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-headline-sm text-on-surface">Awaiting Decision</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim"></span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary">
+                Assigned: CCB / Chief Architect
+              </span>
+<span class="font-label-sm text-label-sm text-primary font-medium mt-0.5">Current Stage</span>
+</div>
+</div>
+<!-- Event 4: Future Release -->
+<div class="relative opacity-60">
+<span class="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-surface-container text-secondary flex items-center justify-center ring-4 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[10px]">flag</span>
+</span>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-secondary">Scheduled Production Cutover</span>
+<span class="font-code-sm text-code-sm text-secondary mt-0.5">Nov 1, 2026, 00:00 UTC</span>
+</div>
+</div>
+</div>
+<div class="mt-space-lg pt-space-sm bg-surface-container-low p-space-sm rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary">lock</span>
+<span class="font-label-sm text-label-sm text-secondary">Cryptographic Signatures (2/2)</span>
+</div>
+<span class="font-code-sm text-code-sm text-primary font-semibold">VALID</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Client-side Interactive Behavior for Technical Demo -->
+<script>
+    (function initEcoInteraction() {
+      const approveBtn = document.getElementById('submit-approve-btn');
+      const quickApproveBtn = document.getElementById('quick-approve-btn');
+      const rejectBtn = document.getElementById('submit-reject-btn');
+      const quickRejectBtn = document.getElementById('quick-reject-btn');
+      const toast = document.getElementById('action-toast');
+      const resetBtn = document.getElementById('reset-action-btn');
+      const remarks = document.getElementById('reviewer-remarks');
+
+      function triggerApprove() {
+        if (!toast) return;
+        toast.classList.remove('hidden');
+        toast.querySelector('h4').textContent = 'ECO Authorized';
+        toast.querySelector('p').textContent = remarks && remarks.value 
+          ? 'Authorized with notes: "' + remarks.value.substring(0, 45) + '..."' 
+          : 'Approved by CCB Chief Architect. Release scheduled for Nov 1, 2026.';
+      }
+
+      function triggerReject() {
+        if (!toast) return;
+        toast.classList.remove('hidden');
+        toast.querySelector('h4').textContent = 'ECO Rejected';
+        toast.querySelector('p').textContent = 'Rejected back to Author for controller specification clarifications.';
+      }
+
+      if (approveBtn) approveBtn.addEventListener('click', triggerApprove);
+      if (quickApproveBtn) quickApproveBtn.addEventListener('click', triggerApprove);
+      if (rejectBtn) rejectBtn.addEventListener('click', triggerReject);
+      if (quickRejectBtn) quickRejectBtn.addEventListener('click', triggerReject);
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+          toast.classList.add('hidden');
+        });
+      }
+
+      const inspectBtn = document.getElementById('quick-inspect-btn');
+      if (inspectBtn) {
+        inspectBtn.addEventListener('click', function() {
+          alert('Opening Forge CAD Spec Viewer for MB-021 vs MB-020 3D comparison package...');
+        });
+      }
+    })();
+  </script>
+</div></main></div></body></html>
