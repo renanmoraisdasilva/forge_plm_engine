@@ -70,7 +70,7 @@ public class ProductApiTests(PostgresFixture fixture) : IAsyncLifetime
         await _database.DisposeAsync();
     }
 
-    /// <summary>The seeded baseline: one product, seven components, one released revision.</summary>
+    /// <summary>The seeded baseline: one product, nineteen components, one released revision.</summary>
     private async Task<ProductDto> SeededProductAsync()
     {
         var response = await _client.GetAsync("/api/products");
@@ -194,7 +194,7 @@ public class ProductApiTests(PostgresFixture fixture) : IAsyncLifetime
         var page = await _client.GetFromJsonAsync<PagedResponse<ComponentDto>>("/api/components");
 
         Assert.NotNull(page);
-        Assert.Equal(7, page.Total);
+        Assert.Equal(19, page.Total);
         Assert.Contains(page.Items, c => c.PartNumber == "MB-020");
         Assert.Contains(page.Items, c => c.PartNumber == "MB-021");
     }

@@ -1,3 +1,4 @@
+using ForgePlm.Api.Application;
 using ForgePlm.Api.Contracts;
 using ForgePlm.Api.Persistence;
 using ForgePlm.Domain.Products;
@@ -18,7 +19,28 @@ public static class ProductEndpoints
             .WithName("GetProduct")
             .WithSummary("One product, or 404.");
 
+        app.MapPost("/api/products", CreateAsync)
+            .WithName("CreateProduct")
+            .WithSummary("Create a product and record ProductCreated in the audit trail.");
+
         return app;
+    }
+
+    private static async Task<IResult> CreateAsync(
+        CreateProduct useCase,
+        CreateProductRequest request,
+        CancellationToken cancellationToken)
+    {
+        var product = await useCase.ExecuteAsync(
+            new NewProduct(
+                request.PartNumber,
+                request.Name,
+                request.Category,
+                request.LifecycleStatus,
+                request.Actor),
+            cancellationToken);
+
+        return Results.Created($"/api/products/{product.Id}", product.ToDto());
     }
 
     /// <param name="search">Matches part number or name, case-insensitively.</param>

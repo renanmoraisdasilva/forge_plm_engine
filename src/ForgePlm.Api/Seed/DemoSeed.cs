@@ -33,6 +33,18 @@ public static class DemoSeed
     public static readonly Guid Ssd100Id = Guid.Parse("00000014-0000-0000-0000-000000000014");
     public static readonly Guid Nic010Id = Guid.Parse("00000015-0000-0000-0000-000000000015");
     public static readonly Guid Fan005Id = Guid.Parse("00000016-0000-0000-0000-000000000016");
+    public static readonly Guid Cpu002Id = Guid.Parse("00000017-0000-0000-0000-000000000017");
+    public static readonly Guid Cpu003Id = Guid.Parse("00000018-0000-0000-0000-000000000018");
+    public static readonly Guid Cpu004Id = Guid.Parse("00000019-0000-0000-0000-000000000019");
+    public static readonly Guid Mb022Id = Guid.Parse("0000001a-0000-0000-0000-00000000001a");
+    public static readonly Guid Ram064Id = Guid.Parse("0000001b-0000-0000-0000-00000000001b");
+    public static readonly Guid Ram128Id = Guid.Parse("0000001c-0000-0000-0000-00000000001c");
+    public static readonly Guid Ssd200Id = Guid.Parse("0000001d-0000-0000-0000-00000000001d");
+    public static readonly Guid Ssd400Id = Guid.Parse("0000001e-0000-0000-0000-00000000001e");
+    public static readonly Guid Nic025Id = Guid.Parse("0000001f-0000-0000-0000-00000000001f");
+    public static readonly Guid Nic100Id = Guid.Parse("00000020-0000-0000-0000-000000000020");
+    public static readonly Guid Fan006Id = Guid.Parse("00000021-0000-0000-0000-000000000021");
+    public static readonly Guid Fan007Id = Guid.Parse("00000022-0000-0000-0000-000000000022");
 
     /// <summary>The audit rows describing the seeded baseline: the product, then its released revision.</summary>
     public static readonly Guid BaselineProductAuditId = Guid.Parse("00000003-0000-0000-0000-000000000003");
@@ -50,6 +62,18 @@ public static class DemoSeed
         await InsertIfMissing(db, Ssd100Id, id => Component.Create("SSD-100", "Enterprise SSD 1TB", "Storage", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
         await InsertIfMissing(db, Nic010Id, id => Component.Create("NIC-010", "10Gb Network Adapter", "Networking", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
         await InsertIfMissing(db, Fan005Id, id => Component.Create("FAN-005", "Cooling Fan Assembly", "Thermal", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
+        await InsertIfMissing(db, Cpu002Id, id => Component.Create("CPU-002", "Intel Xeon Silver 12-Core Processor", "Processor", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
+        await InsertIfMissing(db, Cpu003Id, id => Component.Create("CPU-003", "Intel Xeon Gold 24-Core Processor", "Processor", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
+        await InsertIfMissing(db, Cpu004Id, id => Component.Create("CPU-004", "AMD EPYC 32-Core Processor", "Processor", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
+        await InsertIfMissing(db, Mb022Id, id => Component.Create("MB-022", "Dual-Socket Xeon Server Motherboard", "Motherboard", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
+        await InsertIfMissing(db, Ram064Id, id => Component.Create("RAM-064", "64GB DDR5 ECC Registered Memory Module", "Memory", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
+        await InsertIfMissing(db, Ram128Id, id => Component.Create("RAM-128", "128GB DDR5 ECC Registered Memory Module", "Memory", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
+        await InsertIfMissing(db, Ssd200Id, id => Component.Create("SSD-200", "Enterprise NVMe SSD 2TB", "Storage", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
+        await InsertIfMissing(db, Ssd400Id, id => Component.Create("SSD-400", "Enterprise NVMe SSD 4TB", "Storage", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
+        await InsertIfMissing(db, Nic025Id, id => Component.Create("NIC-025", "Dual-Port 25GbE Network Adapter", "Networking", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
+        await InsertIfMissing(db, Nic100Id, id => Component.Create("NIC-100", "Dual-Port 100GbE Network Adapter", "Networking", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
+        await InsertIfMissing(db, Fan006Id, id => Component.Create("FAN-006", "Hot-Swap High-Pressure Cooling Fan", "Thermal", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
+        await InsertIfMissing(db, Fan007Id, id => Component.Create("FAN-007", "Redundant High-Performance Cooling Fan", "Thermal", ComponentLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
 
         await InsertIfMissing(db, Server100Id, id => Product.Create("SERVER-100", "Compute Server", "Server", ProductLifecycleStatus.Active, BaselineEffectiveAtUtc, id), cancellationToken);
 

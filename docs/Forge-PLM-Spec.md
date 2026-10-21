@@ -497,12 +497,24 @@ Create deterministic seed data for the demo.
 
 ### Components
 - `CPU-001` — Xeon Processor — category `Processor` — Active
+- `CPU-002` — Intel Xeon Silver 12-Core Processor — category `Processor` — Active
+- `CPU-003` — Intel Xeon Gold 24-Core Processor — category `Processor` — Active
+- `CPU-004` — AMD EPYC 32-Core Processor — category `Processor` — Active
 - `MB-020` — Server Motherboard — category `Motherboard` — Active
 - `MB-021` — Updated Server Motherboard — category `Motherboard` — Active
+- `MB-022` — Dual-Socket Xeon Server Motherboard — category `Motherboard` — Active
 - `RAM-032` — 32GB Memory Module — category `Memory` — Active
+- `RAM-064` — 64GB DDR5 ECC Registered Memory Module — category `Memory` — Active
+- `RAM-128` — 128GB DDR5 ECC Registered Memory Module — category `Memory` — Active
 - `SSD-100` — Enterprise SSD 1TB — category `Storage` — Active
+- `SSD-200` — Enterprise NVMe SSD 2TB — category `Storage` — Active
+- `SSD-400` — Enterprise NVMe SSD 4TB — category `Storage` — Active
 - `NIC-010` — 10Gb Network Adapter — category `Networking` — Active
+- `NIC-025` — Dual-Port 25GbE Network Adapter — category `Networking` — Active
+- `NIC-100` — Dual-Port 100GbE Network Adapter — category `Networking` — Active
 - `FAN-005` — Cooling Fan Assembly — category `Thermal` — Active
+- `FAN-006` — Hot-Swap High-Pressure Cooling Fan — category `Thermal` — Active
+- `FAN-007` — Redundant High-Performance Cooling Fan — category `Thermal` — Active
 
 ### Product
 - `SERVER-100` — Compute Server — category `Server` — Active

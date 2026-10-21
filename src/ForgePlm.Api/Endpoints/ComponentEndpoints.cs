@@ -1,3 +1,4 @@
+using ForgePlm.Api.Application;
 using ForgePlm.Api.Contracts;
 using ForgePlm.Api.Persistence;
 using ForgePlm.Domain.Components;
@@ -23,7 +24,28 @@ public static class ComponentEndpoints
             .WithName("GetComponent")
             .WithSummary("One component, or 404.");
 
+        app.MapPost("/api/components", CreateAsync)
+            .WithName("CreateComponent")
+            .WithSummary("Create a component and record ComponentCreated in the audit trail.");
+
         return app;
+    }
+
+    private static async Task<IResult> CreateAsync(
+        CreateComponent useCase,
+        CreateComponentRequest request,
+        CancellationToken cancellationToken)
+    {
+        var component = await useCase.ExecuteAsync(
+            new NewComponent(
+                request.PartNumber,
+                request.Name,
+                request.Category,
+                request.LifecycleStatus,
+                request.Actor),
+            cancellationToken);
+
+        return Results.Created($"/api/components/{component.Id}", component.ToDto());
     }
 
     /// <param name="search">Matches part number or name, case-insensitively.</param>

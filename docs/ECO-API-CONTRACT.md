@@ -262,8 +262,8 @@ D-06).
 
 ## Out of scope for both agents
 
-- `POST /api/products` and `POST /api/components` — spec marks them API-completeness only, and
-  nothing on the demo path calls them. **Slice 8.**
+- `POST /api/products` and `POST /api/components` are API-only endpoints and are not used by the
+  protected demo path.
 - Any DELETE endpoint — excluded by §16.
 - Authentication. The `actor` field is a demo affordance (D-06); production identity would come
   from authenticated claims, and the UI should say so.

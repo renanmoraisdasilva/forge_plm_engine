@@ -28,7 +28,7 @@ public class PersistenceTests(PostgresFixture fixture)
     ///
     /// This caught a real bug during Slice 2. The seed helper took an id for the existence
     /// check and a separate factory that minted its own Guid, so the audit row was re-inserted
-    /// on every startup: 7 components (correct, they passed the id through) but 2, then 3,
+    /// on every startup: 19 components (correct, they passed the id through) but 2, then 3,
     /// audit events. The fix made the factory receive the id, so the mistake is unrepresentable.
     /// </summary>
     [Fact]
@@ -58,7 +58,7 @@ public class PersistenceTests(PostgresFixture fixture)
         Assert.Equal("SERVER-100", product.PartNumber);
         Assert.Equal(ProductLifecycleStatus.Active, product.LifecycleStatus);
 
-        Assert.Equal(7, await db.Components.CountAsync());
+        Assert.Equal(19, await db.Components.CountAsync());
 
         var revision = await db.BomRevisions.SingleAsync();
         Assert.Equal("B", revision.RevisionCode);
