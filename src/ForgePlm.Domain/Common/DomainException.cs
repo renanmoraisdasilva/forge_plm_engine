@@ -58,10 +58,12 @@ public static class DomainErrorCodes
     public const string BaseRevisionRequired = "base-revision-required";
     public const string TargetComponentRequired = "target-component-required";
     public const string ReplacementComponentRequired = "replacement-component-required";
+    public const string ComponentRequired = "component-required";
     public const string ApprovalRevisionRequired = "approval-revision-required";
     public const string EcoLinesRequired = "eco-lines-required";
     public const string BomLinesRequired = "bom-lines-required";
     public const string DuplicateTargetComponent = "duplicate-target-component";
+    public const string InvalidFilterValue = "invalid-filter-value";
 
     // --- State conflicts (409) --------------------------------------------------
     public const string InvalidRevisionCode = "invalid-revision-code";
@@ -78,7 +80,11 @@ public static class DomainErrorCodes
     // --- Database-enforced conflicts (409) --------------------------------------
     // Never thrown by the domain. Emitted by the API when a PostgreSQL 23505 maps to a
     // conflict. Declared here so the mapping has one home and the contract stays closed.
+    // The values match the index names they correspond to — see ErrorResponseMapper.
     public const string DuplicatePartNumber = "duplicate-part-number";
     public const string DuplicateEcoNumber = "duplicate-eco-number";
+    public const string DuplicateRevisionCode = "duplicate-revision-code";
+    public const string DuplicateComponentInRevisionLine = "duplicate-component-in-revision-line";
+    public const string ConflictingReleasedRevision = "conflicting-released-revision";
     public const string ConcurrencyConflict = "concurrency-conflict";
 }

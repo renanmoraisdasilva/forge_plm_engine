@@ -33,8 +33,10 @@ public class BomLine
     {
         if (componentId == Guid.Empty)
         {
+            // `component-required`, not `blank-part-number`: a missing component reference is
+            // not a part-number formatting problem, and the two are distinguishable to a client.
             throw new DomainRuleViolationException(
-                DomainErrorCodes.BlankPartNumber,
+                DomainErrorCodes.ComponentRequired,
                 "A BOM line must reference a component.");
         }
 
