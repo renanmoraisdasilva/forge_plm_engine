@@ -153,7 +153,7 @@ public class EcoApiTests(PostgresFixture fixture) : IAsyncLifetime
         Assert.NotNull(approved.ApprovedRevisionId);
         Assert.Equal("Jordan Lee", approved.DecidedBy);
 
-        // ADR-003: approval is not release. The product still points at revision B.
+        // Approval is not release. The product still points at revision B (spec §15.7).
         var afterApproval = await CurrentRevisionAsync();
         Assert.Equal("B", afterApproval.Revision.RevisionCode);
         Assert.Equal("Released", afterApproval.Revision.Status);
@@ -318,7 +318,7 @@ public class EcoApiTests(PostgresFixture fixture) : IAsyncLifetime
     }
 
     /// <summary>
-    /// D-04b: release requires a date, and a future date is recorded while taking effect
+    /// Release requires a date, and a future date is recorded while taking effect
     /// immediately. The missing-date case is a 400 and leaves the ECO approved and unreleased.
     /// </summary>
     [Fact]

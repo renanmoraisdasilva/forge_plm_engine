@@ -95,7 +95,7 @@ Avoid using `ECN`, `CCB`, `baseline`, `production gate`, and other organization-
 - .NET 10 / ASP.NET Core Web API
 - C#
 - Entity Framework Core with the Npgsql provider
-- **PostgreSQL 18**, run through the committed `docker-compose.yml` (see ADR-001). No SQL Server support, no dual-provider abstraction.
+- **PostgreSQL 18**, run through the committed `docker-compose.yml`. No SQL Server support or dual-provider abstraction.
 - Minimal APIs grouped by feature. Controllers are not used.
 - OpenAPI enabled in development
 - xUnit for tests, including integration tests against the same PostgreSQL container
@@ -106,7 +106,7 @@ Avoid using `ECN`, `CCB`, `baseline`, `production gate`, and other organization-
 - Tailwind CSS compiled at build time. The mockups load Tailwind from a CDN; the real application must not.
 - Use the Stitch-generated pages as a **visual** reference (tokens, density, status chips, tables) — never as a source of domain data or scope.
 - Keep API calls in a small typed client/service layer, separate from UI components.
-- In development the Vite dev server proxies `/api` to the API. For the demo the built SPA is served by the API host so the application runs on a single origin (ADR-002).
+- In development the Vite dev server proxies `/api` to the API. For the demo the built SPA is served by the API host so the application runs on a single origin.
 
 ### Architecture style
 
@@ -118,7 +118,7 @@ Do not add MediatR, AutoMapper, a generic repository layer, or a domain-event fr
 
 ### Project layout
 
-Three backend projects plus the frontend (ADR-002):
+Three backend projects plus the frontend:
 
 ```text
 ForgePlm.sln
@@ -301,7 +301,7 @@ Use value objects where they improve correctness without overengineering.
 Recommended:
 - `PartNumber` value object or normalized validated string type
 - `Quantity` value object if useful for enforcing positivity
-- Strongly typed IDs are not used. Ordinary `Guid` primaries (A-03 in `docs/DECISIONS.md`).
+- Strongly typed IDs are not used. Ordinary `Guid` primaries (decision 8 in §15).
 
 Enums:
 - `ProductLifecycleStatus`: `Draft`, `Active`, `Retired`
@@ -479,7 +479,7 @@ Use the Stitch screenshots as visual reference, but remove unnecessary detail. I
 
 Do not implement the overview dashboard, detailed component inspector, CAD views, supplier cards, compliance widgets, analytics, or bulk actions in the first version.
 
-**Actor switch:** a small persistent control in the app header with two seeded identities — `Alex Morgan` (engineer/author) and `Jordan Lee` (reviewer). It is not authentication: the selected name travels in the request body and is read through an `IActorProvider` boundary so real authenticated claims can replace it later (§7, ADR-005).
+**Actor switch:** a small persistent control in the app header with two seeded identities — `Alex Morgan` (engineer/author) and `Jordan Lee` (reviewer). It is not authentication: the selected name travels in the request body and is read through an `IActorProvider` boundary so real authenticated claims can replace it later (§7, §16).
 
 UI behavior:
 - Use loading, empty, success, and error states.
@@ -636,7 +636,7 @@ When code and this specification conflict, do not silently ignore the conflict. 
 
 ## 15. Decisions resolved in Phase 0
 
-These were open in the first draft and were settled during the requirements interview on 2026-10-21. The full register, with rationale and consequences, lives in `docs/DECISIONS.md`; the load-bearing choices have ADRs in `docs/adr/`.
+These were open in the first draft and were settled during the requirements interview on 2026-10-21. Implementation-specific details are in `docs/DECISIONS.md`; the concurrency rationale and measured release-ordering behavior are recorded in `docs/adr/ADR-004-concurrency-xmin-partial-index.md`.
 
 1. **Database:** PostgreSQL 18, run through the committed `docker-compose.yml`. The same container hosts a dedicated integration-test database. No SQL Server support. *(Owner decision, overriding the "SQL Server or PostgreSQL" option.)*
 2. **Revision identifiers:** `A`, `B`, `C`, … assigned per product. The code fails with a domain error rather than rolling over after `Z`.
@@ -645,7 +645,7 @@ These were open in the first draft and were settled during the requirements inte
 5. **Effectivity:** one UTC timestamp recorded at release. Release always takes effect immediately; a future timestamp is stored as intent and displayed as "Scheduled". No scheduler, no serial/lot effectivity.
 6. **BOM depth:** single-level BOM, with the model left open to hierarchical expansion.
 7. **Release policy:** a revision is approved first, then explicitly released. This is intentional and must remain consistent across the API and UI.
-8. **Code structure:** three backend projects (`ForgePlm.Api`, `ForgePlm.Domain`, `ForgePlm.Tests`) with Minimal APIs, plus a separate Vite/React/TypeScript frontend. *(ADR-002.)*
+8. **Code structure:** three backend projects (`ForgePlm.Api`, `ForgePlm.Domain`, `ForgePlm.Tests`) with Minimal APIs, plus a separate Vite/React/TypeScript frontend.
 9. **Concurrency:** `xmin` token on `Product` plus a partial unique index guaranteeing one `Released` revision per product; conflicts map to `409`. *(ADR-004.)*
 
 ## 16. Known limitations and shortcuts

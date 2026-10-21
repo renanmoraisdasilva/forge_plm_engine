@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ForgePlm.Api.Application;
 
 /// <summary>
-/// Release ECO (spec §8, ADR-003/ADR-004).
+/// Release ECO (spec §8 and §15.5; concurrency details in ADR-004).
 ///
 /// <para>
 /// <b>Ordering is load-bearing.</b> `ux_bom_revisions_one_released_per_product` is a partial
@@ -27,7 +27,7 @@ namespace ForgePlm.Api.Application;
 /// <para>
 /// Release takes effect immediately. `EffectiveAtUtc` is a recorded label: a future value is
 /// stored and displayed as "Scheduled", and nothing may filter on it to decide what is current
-/// (D-04b). There is no scheduler.
+/// (spec §15.5). There is no scheduler.
 /// </para>
 /// </summary>
 public sealed class ReleaseEngineeringChange(ForgePlmDbContext db)

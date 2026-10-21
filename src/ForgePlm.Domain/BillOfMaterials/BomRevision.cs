@@ -34,7 +34,7 @@ public class BomRevision
     public BomRevisionStatus Status { get; private set; }
 
     /// <summary>
-    /// Set at release. Under D-04b this is a recorded label, not a trigger: the revision is
+    /// Set at release. This is a recorded label, not a trigger: the revision is
     /// current from the moment it is released, and a future timestamp means "scheduled",
     /// never "not yet effective". Nothing may filter on this to decide what is current.
     /// </summary>

@@ -177,7 +177,7 @@ public class EcoWorkflowTests(PostgresFixture fixture)
 
     /// <summary>
     /// IT-04 — release supersedes the previous revision and releases the new one atomically.
-    /// A future effective date is stored and takes effect immediately (D-04b).
+    /// A future effective date is stored and takes effect immediately (spec §15.5).
     /// </summary>
     [Fact]
     public async Task IT04_ReleaseSupersedesTheOldRevisionAndReleasesTheNewOne()

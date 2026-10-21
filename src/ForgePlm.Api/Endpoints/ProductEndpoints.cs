@@ -92,7 +92,7 @@ public static class ProductEndpoints
     ///
     /// `ToLower().Contains()` rather than Npgsql's `ILike`, because `ILike` treats `%` and `_`
     /// in the user's input as wildcards — searching for `SERVER_100` would match `SERVER-100`.
-    /// Escaping that correctly is more code than this needs, and ADR-001 rules out a second
+    /// Escaping that correctly is more code than this needs, and spec §4 rules out a second
     /// provider anyway, so there is nothing to buy by being provider-specific here.
     /// </summary>
     private static IQueryable<Product> ApplySearch(IQueryable<Product> query, string? term)

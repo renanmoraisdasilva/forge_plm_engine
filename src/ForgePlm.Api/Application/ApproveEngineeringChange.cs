@@ -15,7 +15,7 @@ namespace ForgePlm.Api.Application;
 /// approval path: a half-created revision would be worse than a refused approval, because the
 /// product history would then disagree with the audit trail.
 ///
-/// Approval does <b>not</b> release the revision (ADR-003). The new revision is `Approved`;
+/// Approval does <b>not</b> release the revision (spec §15.7). The new revision is `Approved`;
 /// release is a separate, explicitly confirmed action.
 /// </summary>
 public sealed class ApproveEngineeringChange(ForgePlmDbContext db)

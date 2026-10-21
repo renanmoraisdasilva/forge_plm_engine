@@ -31,7 +31,7 @@ public class AuditEvent
 
     public DateTime OccurredAtUtc { get; private set; }
 
-    /// <summary>Demo identity only. Not authentication — see ADR-005.</summary>
+    /// <summary>Demo identity only. This is not authentication; see spec §16.</summary>
     public string Actor { get; private set; } = string.Empty;
 
     public string Action { get; private set; } = string.Empty;

@@ -17,7 +17,7 @@ namespace ForgePlm.Api.Persistence;
 /// </summary>
 internal static class PersistenceModel
 {
-    /// <summary>Snake_case names throughout, so the schema stays readable in `psql` (ADR-001).</summary>
+    /// <summary>Snake_case names throughout, so the schema stays readable in `psql`.</summary>
     public static void ApplySnakeCaseNaming(ModelBuilder modelBuilder)
     {
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())

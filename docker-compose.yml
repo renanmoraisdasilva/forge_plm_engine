@@ -12,7 +12,7 @@
 #
 # This is the demo/run mode. Development does NOT use it — see the header of Dockerfile.
 #
-# Administration (there is no psql on the host — ADR-001):
+# Administration (there is no psql on the host):
 #   docker compose exec db psql -U forge -d forge_plm
 
 services:

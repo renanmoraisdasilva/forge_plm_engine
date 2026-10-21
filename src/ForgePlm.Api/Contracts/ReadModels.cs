@@ -11,9 +11,9 @@ namespace ForgePlm.Api.Contracts;
 /// because `BomRevision.Lines` is an aggregate-internal collection: serialising the entity
 /// would hand the client a graph the domain deliberately does not expose as mutable.
 ///
-/// Lifecycle enums go out as strings. Storing them as strings in the database (A-02's
-/// neighbour) already decided the persistence side, and strings keep the contract readable and
-/// stable if a value is ever renamed — a numeric enum would silently change meaning.
+/// Lifecycle enums go out as strings. Storing them as strings in the database keeps the
+/// contract readable and stable if a value is ever renamed — a numeric enum would silently
+/// change meaning.
 /// </summary>
 public sealed record ProductDto(
     Guid Id,

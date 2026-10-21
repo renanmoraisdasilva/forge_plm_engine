@@ -1,14 +1,14 @@
 # ADR-004: Concurrency via `xmin` token plus a partial unique index
 
 - **Status:** Accepted, 2026-10-21
-- **Deciders:** Product owner (D-05 chose the database; this ADR fixes the mechanism)
+- **Deciders:** Product owner (PostgreSQL is specified in §4; this ADR fixes the concurrency mechanism)
 - **Related:** spec §8, §11 (IT-06, IT-07, IT-10)
 
 ## Context
 
 §8 requires that two competing ECOs based on the same released revision cannot both release as the next current revision, and warns against claiming concurrency safety without tests. The specification suggested "a product-level version token plus a transaction and a unique database constraint/index strategy".
 
-With PostgreSQL (ADR-001), there is a native mechanism for a version token that requires no schema column and no application bookkeeping: the `xmin` system column.
+With PostgreSQL (spec §4), there is a native mechanism for a version token that requires no schema column and no application bookkeeping: the `xmin` system column.
 
 ## Decision
 
@@ -48,7 +48,7 @@ Related constraints, also in the schema:
   cannot express one, and hand-editing the migration would leave the model snapshot disagreeing with
   the database. Case-insensitivity instead comes from the domain upper-casing at every entry point,
   so the plain index is equivalent in practice. Residual risk: a direct SQL insert bypassing the
-  domain could introduce a case variant. Pinned by IT-09's two tests; see decision **A-02**.
+  domain could introduce a case variant. Pinned by IT-09's two tests; see [part-number uniqueness notes](../DECISIONS.md#part-number-uniqueness).
 
 ## Release ordering (measured 2026-10-21)
 
@@ -91,8 +91,8 @@ review that was quietly agreed with.
 
 **Costs / honesty requirements**
 
-- `xmin` is PostgreSQL-specific. That is acceptable: ADR-001 rules out a second provider, and no abstraction exists to pretend otherwise.
-- `DbUpdateConcurrencyException` must be caught in exactly one place and mapped to a consistent `409` (A-10). Swallowing it, or retrying silently, would break the "return conflicts for stale data instead of silently rebasing" principle in §14.
+- `xmin` is PostgreSQL-specific. That is acceptable: spec §4 rules out a second provider, and no abstraction exists to pretend otherwise.
+- `DbUpdateConcurrencyException` must be caught in exactly one place and mapped to a consistent `409`. Swallowing it, or retrying silently, would break the "return conflicts for stale data instead of silently rebasing" principle in §14.
 - The application must not claim the index is the only defence, nor the token. Both are tested; IT-06 proves the user-visible behaviour, IT-10 proves the schema invariant.
 
 **Rejected alternatives**

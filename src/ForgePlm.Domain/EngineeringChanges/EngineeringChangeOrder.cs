@@ -49,7 +49,7 @@ public class EngineeringChangeOrder
     public string ImpactAssessment { get; private set; } = string.Empty;
 
     /// <summary>
-    /// What the author intends, carried through to the release form. Under D-04b it is a
+    /// What the author intends, carried through to the release form. It is a
     /// label: releasing still takes effect immediately.
     /// </summary>
     public DateTime? RequestedEffectiveAtUtc { get; private set; }

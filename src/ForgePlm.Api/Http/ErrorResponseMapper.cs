@@ -7,7 +7,8 @@ using Npgsql;
 namespace ForgePlm.Api.Http;
 
 /// <summary>
-/// The one place failures become RFC 7807 responses (spec §7, decisions A-10 and A-21).
+/// The one place failures become RFC 7807 responses (spec §7; implementation notes in
+/// docs/DECISIONS.md).
 ///
 /// Written before any endpoint exists on purpose. The mapping is the API contract's most
 /// cross-cutting part; inventing it per-endpoint is how a codebase ends up returning 400 for

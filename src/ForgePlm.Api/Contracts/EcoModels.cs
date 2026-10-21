@@ -5,7 +5,7 @@ namespace ForgePlm.Api.Contracts;
 
 /// <summary>
 /// Request and response shapes for engineering changes (spec §7,
-/// `docs/ECO-API-CONTRACT.md` — frozen for the parallel build).
+/// `docs/ECO-API-CONTRACT.md`).
 ///
 /// Requests carry only what a client may decide. `ecoNumber`, `baseReleasedRevisionId` and
 /// the creator are absent on purpose: the first two are resolved by the server, and the
@@ -42,7 +42,7 @@ public sealed record ApproveEcoRequest(string? Actor, string? Comment);
 public sealed record RejectEcoRequest(string? Actor, string? RejectionReason);
 
 /// <summary>
-/// Release takes effect immediately (ADR-003/D-04b). A future timestamp is stored and
+/// Release takes effect immediately (spec §15.5). A future timestamp is stored and
 /// displayed as "Scheduled"; nothing schedules anything.
 /// </summary>
 public sealed record ReleaseEcoRequest(string? Actor, DateTime? EffectiveAtUtc);

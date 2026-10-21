@@ -7,7 +7,7 @@ namespace ForgePlm.Tests.Integration;
 
 /// <summary>
 /// Creates a dedicated PostgreSQL database per test (spec §11), applies migrations, and drops it
-/// afterwards. Runs against the same container as the demo (ADR-001), so these are honest
+/// afterwards. Runs against the same container as the demo (spec §4), so these are honest
 /// relational tests — not the in-memory provider, which §11 forbids for any claim about
 /// transactions, uniqueness or concurrency.
 ///
@@ -18,7 +18,7 @@ namespace ForgePlm.Tests.Integration;
 /// </summary>
 public sealed class PostgresFixture : IAsyncLifetime
 {
-    /// <summary>Host/credentials for the Compose container, from ADR-001.</summary>
+    /// <summary>Host/credentials for the Compose PostgreSQL container.</summary>
     private const string AdminConnectionString =
         "Host=localhost;Port=5432;Database=postgres;Username=forge;Password=forge_dev_password;Include Error Detail=true";
 

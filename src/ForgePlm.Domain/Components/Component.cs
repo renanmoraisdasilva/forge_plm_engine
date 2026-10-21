@@ -71,7 +71,7 @@ public class Component
     /// reference it are unaffected — they retain their reference (spec §5.2).
     ///
     /// A `400` because the request proposed a part that is not usable — the same status the
-    /// frozen ECO contract gives `component-not-active`. Nothing about the world can change
+    /// ECO API reference gives `component-not-active`. Nothing about the world can change
     /// this request into a valid one; the author has to pick a different part.
     /// </summary>
     public void EnsureCanBeUsedInNewBom()

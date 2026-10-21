@@ -27,7 +27,7 @@ builder.Services.AddScoped<ReleaseEngineeringChange>();
 builder.Services.AddScoped<CreateProduct>();
 builder.Services.AddScoped<CreateComponent>();
 
-// A-10/A-21: one mapping from failure to RFC 7807, registered as the framework's exception
+// One centralized mapping from failure to RFC 7807, registered as the framework's exception
 // handler so no endpoint can forget it. Endpoints simply let domain exceptions propagate.
 builder.Services.AddExceptionHandler<ForgePlmExceptionHandler>();
 builder.Services.AddProblemDetails();
