@@ -11,16 +11,34 @@ Forge PLM is a product lifecycle management prototype for tracking products, rel
 Start with the seeded `SERVER-100` product at released revision B. Propose replacing motherboard `MB-020` with `MB-021`, submit the ECO, review the exact BOM difference, approve it, then release the approved revision when it is ready.
 
 ```mermaid
-flowchart LR
-    B["Starting baseline<br/>Rev B: current released revision"]
-    B -->|Create ECO (Engineer)| D["ECO: Draft<br/>Rev B remains the current released revision<br/>No new revision"]
-    D -->|Submit (Engineer)| S["ECO: Submitted<br/>Rev B remains the current released revision"]
-    S -->|Approve (Reviewer)| A["ECO: Approved<br/>Rev C created as an approved revision<br/>Rev B remains the current released revision"]
-    A -->|Separate release action| L["ECO: Applied<br/>Rev C becomes the current released revision<br/>Rev B: Superseded"]
-    S -->|Reject (Reviewer)| R["ECO: Rejected<br/>No revision created<br/>Rev B remains the current released revision"]
+flowchart TB
+    B["Starting BOM<br/>Rev B: Released · current"]
+    D["Draft<br/>No revision<br/>Rev B unchanged"]
+    S["Submitted<br/>No revision<br/>Rev B unchanged"]
+    A["Approved<br/>Rev C: Approved<br/>Rev B unchanged"]
+    L["Applied<br/>Rev C: Released · current<br/>Rev B: Superseded"]
+    R["Rejected<br/>No revision<br/>Rev B unchanged"]
+
+    B -->|Engineer creates ECO| D
+    D -->|Engineer submits| S
+    S -->|Reviewer approves| A
+    A -->|Release separately| L
+    S -->|Reviewer rejects| R
+
+    classDef baseline fill:#dbeafe,stroke:#2563eb,color:#172554,stroke-width:2px
+    classDef unchanged fill:#f8fafc,stroke:#64748b,color:#0f172a
+    classDef approved fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef released fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef rejected fill:#fee2e2,stroke:#dc2626,color:#7f1d1d,stroke-width:2px
+
+    class B baseline
+    class D,S unchanged
+    class A approved
+    class L released
+    class R rejected
 ```
 
-Approval creates an approved candidate revision; revision B remains the current released revision until release. The separate release action makes revision C the current released revision and supersedes B. Rejection creates no revision, leaving B as the current released revision. The ECO detail page keeps the request, side-by-side BOM comparison, workflow state, and audit history together.
+“Current” means the current released revision. Approval creates Rev C but keeps B current; release makes C current and supersedes B. Rejection creates no revision. The ECO detail page keeps the request, BOM comparison, workflow state, and audit history together.
 
 ## Screens
 
