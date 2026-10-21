@@ -32,7 +32,11 @@ public static class RevisionCode
 
         if (normalised[0] == MaxCode)
         {
-            throw new DomainRuleViolationException(
+            // Spec §7 lists `revision-limit-reached` among the `409` conflict types, not the
+            // `400` validation codes: the request is well-formed, the product's revision
+            // history is simply exhausted. Throwing a rule violation here made the API map a
+            // conflict to 400.
+            throw new DomainConflictException(
                 DomainErrorCodes.RevisionLimitReached,
                 "Revision codes stop at Z; this prototype does not roll over to AA.");
         }

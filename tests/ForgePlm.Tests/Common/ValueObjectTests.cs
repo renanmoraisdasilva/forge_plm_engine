@@ -67,7 +67,9 @@ public class RevisionCodeTests
     [Fact]
     public void DT11_RevisionCodeFailsPastZInsteadOfRollingOver()
     {
-        var ex = Assert.Throws<DomainRuleViolationException>(() => RevisionCode.Next("Z"));
+        // Spec §7 lists `revision-limit-reached` among the `409` conflict types, so this is a
+        // conflict, not a validation failure.
+        var ex = Assert.Throws<DomainConflictException>(() => RevisionCode.Next("Z"));
         Assert.Equal(DomainErrorCodes.RevisionLimitReached, ex.Code);
     }
 
