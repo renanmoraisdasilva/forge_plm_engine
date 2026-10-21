@@ -86,7 +86,10 @@ public class EngineeringChangeLine
     {
         if (baseRevision.FindLine(TargetComponentId) is null)
         {
-            throw new DomainConflictException(
+            // A `400`, not a `409`: the base revision is an immutable snapshot captured at
+            // creation, so a target that is not in it can never become valid later. The ECO
+            // screen shows this as a field error. `FROZEN-ECO-API-CONTRACT` classifies it 400.
+            throw new DomainRuleViolationException(
                 DomainErrorCodes.TargetNotInBaseRevision,
                 $"The target component is not present in base revision {baseRevision.RevisionCode}, so it cannot be changed.");
         }

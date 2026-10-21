@@ -68,12 +68,16 @@ public class Component
     /// Rule from spec §5.2/§5.3: a retired (or otherwise non-active) component cannot be
     /// added to a newly proposed or newly released BOM. Historical revisions that already
     /// reference it are unaffected — they retain their reference (spec §5.2).
+    ///
+    /// A `400` because the request proposed a part that is not usable — the same status the
+    /// frozen ECO contract gives `component-not-active`. Nothing about the world can change
+    /// this request into a valid one; the author has to pick a different part.
     /// </summary>
     public void EnsureCanBeUsedInNewBom()
     {
         if (!IsActive)
         {
-            throw new DomainConflictException(
+            throw new DomainRuleViolationException(
                 DomainErrorCodes.ComponentNotActive,
                 $"Component {PartNumber} is {LifecycleStatus} and cannot be used in a new BOM revision.");
         }

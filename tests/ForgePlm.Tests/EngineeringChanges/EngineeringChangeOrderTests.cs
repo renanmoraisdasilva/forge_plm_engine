@@ -91,6 +91,81 @@ public class EngineeringChangeOrderTests
     }
 
     [Fact]
+    public void ADraftEcoCanBeEdited()
+    {
+        var (eco, _) = DraftEco();
+
+        eco.UpdateDraft(
+            "A better title",
+            "A revised reason.",
+            "A revised impact assessment.",
+            TestData.Now.AddDays(2),
+            [EngineeringChangeLine.ChangeQuantity(TestData.Memory032, 16, "Double the memory")]);
+
+        Assert.Equal("A better title", eco.Title);
+        Assert.Equal("A revised reason.", eco.ReasonForChange);
+        Assert.Equal("A revised impact assessment.", eco.ImpactAssessment);
+        Assert.Equal(TestData.Now.AddDays(2), eco.RequestedEffectiveAtUtc);
+        Assert.Equal(16, eco.Lines.Single().NewQuantity);
+    }
+
+    [Fact]
+    public void DT12_ASubmittedEcoCannotBeEdited()
+    {
+        var (eco, _) = SubmittedEco();
+
+        var ex = Assert.Throws<DomainConflictException>(() => eco.UpdateDraft(
+            "A better title",
+            "reason",
+            "impact",
+            null,
+            [EngineeringChangeLine.ChangeQuantity(TestData.Memory032, 16, null)]));
+
+        Assert.Equal(DomainErrorCodes.InvalidTransition, ex.Code);
+    }
+
+    [Fact]
+    public void ABadDraftEditDoesNotChangeTheEco()
+    {
+        var (eco, _) = DraftEco();
+        var originalTitle = eco.Title;
+        var originalLineCount = eco.Lines.Count;
+
+        var ex = Assert.Throws<DomainRuleViolationException>(() => eco.UpdateDraft(
+            "  ",
+            "reason",
+            "impact",
+            null,
+            [EngineeringChangeLine.ChangeQuantity(TestData.Memory032, 16, null)]));
+
+        Assert.Equal(DomainErrorCodes.BlankTitle, ex.Code);
+        Assert.Equal(originalTitle, eco.Title);
+        Assert.Equal(originalLineCount, eco.Lines.Count);
+    }
+
+    [Fact]
+    public void ABadDraftLineSetDoesNotChangeTheEco()
+    {
+        var (eco, _) = DraftEco();
+        var originalTitle = eco.Title;
+        var originalLineCount = eco.Lines.Count;
+
+        var ex = Assert.Throws<DomainRuleViolationException>(() => eco.UpdateDraft(
+            "A better title",
+            "reason",
+            "impact",
+            null,
+            [
+                EngineeringChangeLine.Replace(TestData.Motherboard020, TestData.Motherboard021, null),
+                EngineeringChangeLine.Replace(TestData.Motherboard020, TestData.Memory032, null),
+            ]));
+
+        Assert.Equal(DomainErrorCodes.DuplicateTargetComponent, ex.Code);
+        Assert.Equal(originalTitle, eco.Title);
+        Assert.Equal(originalLineCount, eco.Lines.Count);
+    }
+
+    [Fact]
     public void AnEcoMustHaveALineBeforeItCanBeSubmitted()
     {
         var baseRevision = TestData.Server100RevB(ProductId);
@@ -131,7 +206,7 @@ public class EngineeringChangeOrderTests
         var eco = EngineeringChangeOrder.Create("ECO-2026-0044", ProductId, baseRevision.Id, "title", "reason", "impact", null, "Alex Morgan", TestData.Now);
         eco.ReplaceLines([EngineeringChangeLine.ChangeQuantity(Guid.NewGuid(), 4, null)]);
 
-        var ex = Assert.Throws<DomainConflictException>(() => eco.Submit(baseRevision, TestData.Now));
+        var ex = Assert.Throws<DomainRuleViolationException>(() => eco.Submit(baseRevision, TestData.Now));
 
         Assert.Equal(DomainErrorCodes.TargetNotInBaseRevision, ex.Code);
     }

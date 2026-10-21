@@ -106,16 +106,7 @@ public class EngineeringChangeOrder
                 "An ECO must be created against a released base revision.");
         }
 
-        var normalisedTitle = (title ?? string.Empty).Trim();
-        if (normalisedTitle.Length == 0)
-        {
-            throw new DomainRuleViolationException(DomainErrorCodes.BlankTitle, "ECO title cannot be blank.");
-        }
-
-        if (normalisedTitle.Length > MaxTitleLength)
-        {
-            throw new DomainRuleViolationException(DomainErrorCodes.NameTooLong, $"ECO title cannot exceed {MaxTitleLength} characters.");
-        }
+        var normalisedTitle = EnsureTitle(title);
 
         return new EngineeringChangeOrder
         {
@@ -131,6 +122,32 @@ public class EngineeringChangeOrder
             CreatedBy = EnsureNotBlankActor(createdBy),
             CreatedAtUtc = utcNow,
         };
+    }
+
+    /// <summary>
+    /// Edits the parts of a draft an author may still change (spec §5.4: "Draft ECOs can be
+    /// edited; submitted/approved/rejected/applied ECOs cannot"). Product, base revision and
+    /// creator are deliberately absent: rebasing or re-attributing an ECO are not edits.
+    /// </summary>
+    public void UpdateDraft(
+        string? title,
+        string? reasonForChange,
+        string? impactAssessment,
+        DateTime? requestedEffectiveAtUtc,
+        IEnumerable<EngineeringChangeLine> lines)
+    {
+        EnsureDraft();
+
+        // Validate and replace the lines before assigning any field: a rejected line set must
+        // leave the draft exactly as it was, not half-edited. ReplaceLines only mutates after
+        // every rule has passed.
+        var normalisedTitle = EnsureTitle(title);
+        ReplaceLines(lines);
+
+        Title = normalisedTitle;
+        ReasonForChange = (reasonForChange ?? string.Empty).Trim();
+        ImpactAssessment = (impactAssessment ?? string.Empty).Trim();
+        RequestedEffectiveAtUtc = requestedEffectiveAtUtc;
     }
 
     /// <summary>
@@ -313,6 +330,23 @@ public class EngineeringChangeOrder
             createdBy,
             utcNow,
             sourceEcoId: Id);
+    }
+
+    private static string EnsureTitle(string? title)
+    {
+        var normalised = (title ?? string.Empty).Trim();
+
+        if (normalised.Length == 0)
+        {
+            throw new DomainRuleViolationException(DomainErrorCodes.BlankTitle, "ECO title cannot be blank.");
+        }
+
+        if (normalised.Length > MaxTitleLength)
+        {
+            throw new DomainRuleViolationException(DomainErrorCodes.NameTooLong, $"ECO title cannot exceed {MaxTitleLength} characters.");
+        }
+
+        return normalised;
     }
 
     private void EnsureDraft()

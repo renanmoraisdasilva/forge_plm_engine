@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+using ForgePlm.Api.Application;
 using ForgePlm.Api.Endpoints;
 using ForgePlm.Api.Http;
 using ForgePlm.Api.Persistence;
@@ -8,6 +10,20 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ForgePlmDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("ForgePlm")));
+
+// Spec §7 / contract: enums are strings on the wire, in both directions. The read DTOs already
+// project enums as strings; this makes request bodies bind the same vocabulary (`ReplaceComponent`,
+// not `0`) and rejects unknown or numeric values instead of silently coercing them.
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
+
+// One service per use case (spec §8). Scoped because each coordinates one DbContext.
+builder.Services.AddScoped<CreateEngineeringChange>();
+builder.Services.AddScoped<UpdateEngineeringChange>();
+builder.Services.AddScoped<SubmitEngineeringChange>();
+builder.Services.AddScoped<ApproveEngineeringChange>();
+builder.Services.AddScoped<RejectEngineeringChange>();
+builder.Services.AddScoped<ReleaseEngineeringChange>();
 
 // A-10/A-21: one mapping from failure to RFC 7807, registered as the framework's exception
 // handler so no endpoint can forget it. Endpoints simply let domain exceptions propagate.
@@ -59,6 +75,10 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapProductEndpoints();
 app.MapComponentEndpoints();
 app.MapBomRevisionEndpoints();
+
+// Slices 4–6 — engineering changes, and the audit read their use cases write.
+app.MapEcoEndpoints();
+app.MapAuditEndpoints();
 
 app.Run();
 

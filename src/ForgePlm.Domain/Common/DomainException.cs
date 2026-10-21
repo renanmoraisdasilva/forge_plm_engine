@@ -64,6 +64,7 @@ public static class DomainErrorCodes
     public const string BomLinesRequired = "bom-lines-required";
     public const string DuplicateTargetComponent = "duplicate-target-component";
     public const string InvalidFilterValue = "invalid-filter-value";
+    public const string EffectiveDateRequired = "effective-date-required";
 
     // --- State conflicts (409) --------------------------------------------------
     public const string InvalidRevisionCode = "invalid-revision-code";
@@ -76,6 +77,7 @@ public static class DomainErrorCodes
     public const string ComponentNotActive = "component-not-active";
     public const string ProductRetired = "product-retired";
     public const string RejectionReasonRequired = "rejection-reason-required";
+    public const string NoReleasedRevision = "no-released-revision";
 
     // --- Database-enforced conflicts (409) --------------------------------------
     // Never thrown by the domain. Emitted by the API when a PostgreSQL 23505 maps to a

@@ -94,6 +94,21 @@ public class Product
         }
     }
 
+    /// <summary>
+    /// Records that the product's controlled configuration changed (approval, release).
+    ///
+    /// This does two jobs deliberately:
+    ///   * it maintains <see cref="UpdatedAtUtc"/>, which was creation-only until now;
+    ///   * it forces an UPDATE of the product row, which is what makes the `xmin`
+    ///     concurrency token observable to the approve/release transactions (ADR-004).
+    ///     Approve and release do not otherwise modify the product, so without a write the
+    ///     token would never be checked and two competing releases could both see "no change".
+    ///
+    /// This method changes no lifecycle state and applies no rule. The rules for *who may*
+    /// cause a configuration change live on the ECO and revision aggregates.
+    /// </summary>
+    public void MarkConfigurationChanged(DateTime utcNow) => UpdatedAtUtc = utcNow;
+
     private static string EnsureNameNotBlank(string? name)
     {
         var normalised = (name ?? string.Empty).Trim();

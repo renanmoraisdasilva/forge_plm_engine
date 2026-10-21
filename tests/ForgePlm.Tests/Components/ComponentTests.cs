@@ -33,7 +33,7 @@ public class ComponentTests
     {
         var component = Component.Create("MB-020", "Server Motherboard", "Motherboard", status, TestData.Now);
 
-        var ex = Assert.Throws<DomainConflictException>(component.EnsureCanBeUsedInNewBom);
+        var ex = Assert.Throws<DomainRuleViolationException>(component.EnsureCanBeUsedInNewBom);
 
         Assert.Equal(DomainErrorCodes.ComponentNotActive, ex.Code);
     }

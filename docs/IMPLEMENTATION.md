@@ -2,11 +2,11 @@
 
 **Living document.** Updated at the end of every slice. Never claims a test passed unless it was actually run.
 
-- **Last updated:** 2026-10-21 (end of Slice 2, including containerisation)
-- **Current phase:** Slice 2 complete — persistence + one-command Docker delivery
+- **Last updated:** 2026-10-21 (end of Slices 4–6)
+- **Current phase:** Slices 1–6 complete — ECO write path and audit read; Slice 7 (frontend) next
 - **Build state:** `dotnet build ForgePlm.slnx` — succeeded, 0 warnings, 0 errors (`TreatWarningsAsErrors` is on)
-- **Test state:** `dotnet test ForgePlm.slnx` - **111 passed, 0 failed** (33 s; 90 domain + 11 integration + 10 API against real PostgreSQL)
-- **Run state:** `docker compose up -d --wait` — cold start verified from an empty volume; both containers healthy, seed applied, `/health` answering on port 5199
+- **Test state:** `dotnet test ForgePlm.slnx` — **137 passed, 0 failed** (1 m 34 s; 94 domain + 22 integration against real PostgreSQL + 21 API)
+- **Run state:** `docker compose up -d --wait` — both containers healthy on port 5199. The ECO write path was exercised through HTTP against the local pipeline (see `EcoApiTests.TheProtectedDemoPathWorksEndToEnd`); the container was not rebuilt after the last code change.
 
 > Note: .NET 10 writes the solution as `ForgePlm.slnx` (XML solution format), not `.sln`. Use `dotnet build ForgePlm.slnx`.
 
@@ -42,11 +42,11 @@ Definition of done: `Forge-PLM-Spec.md` §12.
 | **2. Persistence** | Npgsql + `ForgePlmDbContext`; entity configurations and constraints; migrations; idempotent seed; `docker-compose.yml` | ✅ **complete — 7 integration tests passing** |
 | **2b. Containerised delivery** | Multi-stage Dockerfile for the API; `backend` service in compose; config-gated migrate-on-startup; `.dockerignore`; SPA-serving guard | ✅ **complete — cold start verified** |
 | **3. Product & BOM read endpoints** | Products list/detail, BOM revisions, current revision, revision lines; pagination; ProblemDetails | ✅ **complete — 10 API tests passing** |
-| **4. ECO creation & submission** | Create ECO (captures base released revision), edit draft, submit; actor switch plumbing | ⬜ not started |
-| **5. Approval transaction** | Approve ECO → copy base lines → apply changes → new `Approved` revision, all in one transaction; stale-base 409 | ⬜ not started |
-| **6. Rejection & release** | Reject with reason; release → supersede + effective date + `Applied`; concurrency conflict test | ⬜ not started |
+| **4. ECO creation & submission** | Create ECO (captures base released revision), edit draft, submit; actor switch plumbing | ✅ **complete** |
+| **5. Approval transaction** | Approve ECO → copy base lines → apply changes → new `Approved` revision, all in one transaction; stale-base 409 | ✅ **complete** |
+| **6. Rejection & release** | Reject with reason; release → supersede + effective date + `Applied`; concurrency conflict test | ✅ **complete** |
 | **7. Frontend** | Vite + React + TS + Tailwind; shell, Products list, Product detail, ECO list, ECO detail, Create/Edit ECO | ⬜ not started |
-| **8. Tests, errors, README** | Postgres-backed integration tests; error states; README with commands, decisions, limitations | ⬜ not started |
+| **8. Tests, errors, README** | Postgres-backed integration tests; error states; README with commands, decisions, limitations | 🟡 backend half complete; README pending |
 
 Slices are delivered in order. Nothing in the protected journey is cut to save a slice.
 
@@ -117,19 +117,20 @@ Status: ⬜ not written · 🟡 written, not run · ✅ run and passing · ❌ r
 | Quantity change keeps the component and sets the new quantity | `EngineeringChangeOrderTests.AQuantityChangeProducesTheNewQuantityAndKeepsTheComponent` | ✅ |
 | Approved revision links back to its ECO | `TheApprovedRevisionLinksBackToItsEco` | ✅ |
 | Only an approved ECO can be applied | `OnlyAnApprovedEcoCanBeApplied`, `MarkingAppliedKeepsTheApprovedRevisionLink` | ✅ |
+| A draft ECO can be edited; a submitted one cannot; a rejected edit changes nothing | `ADraftEcoCanBeEdited`, `DT12_ASubmittedEcoCannotBeEdited`, `ABadDraftEditDoesNotChangeTheEco`, `ABadDraftLineSetDoesNotChangeTheEco` | ✅ |
 | Audit event records actor/action/entity/time; actor is mandatory | `AuditEventTests.*` | ✅ |
 
 ### Integration tests (spec §11, "Minimum application/integration tests") — real PostgreSQL
 
 | # | Spec requirement | Status |
 |---|---|---|
-| IT-01 | Creating an ECO captures the current released revision | ⬜ |
-| IT-02 | Approval creates a new revision with the requested change applied | ⬜ |
-| IT-03 | The old released revision remains unchanged after approval | ⬜ |
-| IT-04 | Release supersedes the previous revision and releases the new one atomically | ⬜ |
-| IT-05 | Rejecting an ECO does not create a new BOM revision | ⬜ |
-| IT-06 | Two competing ECOs based on the same revision cannot both release | ⬜ |
-| IT-07 | Failed approval/release rolls back all associated changes | ⬜ |
+| IT-01 | Creating an ECO captures the current released revision | ✅ `EcoWorkflowTests.IT01_*`, `EcoApiTests.AStaleClientCannotChooseTheBaseRevisionOrTheEcoNumber` |
+| IT-02 | Approval creates a new revision with the requested change applied | ✅ `EcoWorkflowTests.IT02_IT03_*` |
+| IT-03 | The old released revision remains unchanged after approval | ✅ `EcoWorkflowTests.IT02_IT03_*` |
+| IT-04 | Release supersedes the previous revision and releases the new one atomically | ✅ `EcoWorkflowTests.IT04_*` |
+| IT-05 | Rejecting an ECO does not create a new BOM revision | ✅ `EcoWorkflowTests.IT05_*` |
+| IT-06 | Two competing ECOs based on the same revision cannot both release | ✅ `EcoWorkflowTests.IT06_*` (2 tests: competing release + xmin), `EcoApiTests.TwoCompetingEcosCannotBothRelease` |
+| IT-07 | Failed approval/release rolls back all associated changes | ✅ `EcoWorkflowTests.IT07_*` (2 tests, PostgreSQL triggers) |
 | IT-08 | Seed data is idempotent (second application changes nothing) | ✅ |
 | IT-09 | Unique part-number constraint is enforced case-insensitively by the database | ⚠️ see note |
 | IT-10 | At most one `Released` revision per product, enforced by the partial unique index | ✅ |
@@ -149,11 +150,20 @@ Status: ⬜ not written · 🟡 written, not run · ✅ run and passing · ❌ r
 > EF Core gives no ordering guarantee for two updates to the same table. That is the right *risk*
 > but the wrong *prediction*: measured on 2026-10-21 against EF Core 10 + PostgreSQL 18, a single
 > `SaveChanges` doing both updates did **not** fail — stably across five runs — because EF happened
-> to issue the supersede first. That is an accident of batching, not a contract, so Slice 6 will
-> still sequence the two statements inside one explicit transaction. Both halves are now pinned by
+> to issue the supersede first. That is an accident of batching, not a contract, so Slice 6
+> sequences the two statements inside one explicit transaction. Both halves are now pinned by
 > `IT11_ReleasingTheNewRevisionBeforeSupersedingTheOldOneViolatesTheIndex` (the constraint is real)
 > and `IT11_OrderedTwoStepReleasePersistsAtomicallyInOneTransaction` (the design that satisfies it).
 > See [`adr/ADR-004`](adr/ADR-004-concurrency-xmin-partial-index.md).
+
+> **IT-06 and IT-10 ran against PostgreSQL, not InMemory.** The suite has no InMemory provider at
+> all (ADR-001/ADR-004), so every integration test creates a real database, applies the real
+> migration, and asserts from a fresh `DbContext`. The evidence is in the run, not the claim:
+> `dotnet test --filter "FullyQualifiedName~IT06|FullyQualifiedName~IT10"` passed 3/3 (2 IT-06
+> tests + IT-10) on 2026-10-21. IT-06 has two halves: two ECOs approved from the same base cannot
+> both release (`stale-base-revision`), and two contexts that read the same product cannot both
+> commit because `xmin` rejects the loser with `DbUpdateConcurrencyException`. IT-10 proves the
+> partial unique index refuses a second `Released` row even when the domain is bypassed.
 
 ### Frontend
 
@@ -216,7 +226,8 @@ These are small, but each one is a place where a later slice could quietly disag
 
 - `Product.Category` and `Component.Category` default to **empty string** when omitted. The UI will need to decide whether to render a placeholder; the domain deliberately does not invent a category.
 - `EngineeringChangeOrder.MarkApplied` uses `DecidedAtUtc ??= utcNow`, so approval time wins over release time. Correct, but subtle.
-- No test covers a *concurrent* approval yet — that is IT-06/IT-10 in Slice 6, and cannot honestly be claimed until it runs against PostgreSQL.
+- **No test covers a *concurrent* approval yet** — that is IT-06/IT-10, delivered in Slice 6 and
+  now proved against PostgreSQL (see §4 and §10).
 
 ---
 
@@ -315,10 +326,10 @@ count unchanged, because `Migrate()` is a no-op once applied and the seed checks
   case-insensitivity comes from domain normalisation. Residual risk: a direct SQL insert that
   bypassed the domain could introduce a case variant. All writes in this system go through the
   domain, so the risk is bounded and recorded.
-- `Product.UpdatedAtUtc` is set at creation and never updated — there are no update endpoints
-  yet. Slice 3+ must maintain it or drop the column.
-- No concurrency test yet. `xmin` is configured and migrated, but IT-06/IT-10's
-  competing-ECO proof is Slice 6 and cannot be claimed until it runs.
+- `Product.UpdatedAtUtc` was creation-only after Slice 2; Slice 5/6 now maintains it
+  through `MarkConfigurationChanged`.
+- No concurrency test in Slice 2. IT-06/IT-10 were delivered in Slice 6 and pass against
+  PostgreSQL.
 - `dotnet ef database update` logs a red-looking `fail:` line on a genuinely fresh database
   (the history-table query runs before the table exists), then succeeds. Harmless, but noisy
   enough to be worth knowing about.
@@ -348,7 +359,7 @@ That does not make the review moot. EF Core guarantees ordering only for *depend
 updates to the same table carry no such guarantee, so the result is an accident of batching that a
 patch release could change. And the constraint itself is real and cannot be deferred: PostgreSQL
 allows `DEFERRABLE` only on table constraints, not on a partial index, so there is no schema-side
-escape. Slice 6 will therefore sequence supersede → save → release → save inside one explicit
+escape. Slice 6 therefore sequences supersede → save → release → save inside one explicit
 transaction, and both halves are pinned by tests:
 
 - `IT11_ReleasingTheNewRevisionBeforeSupersedingTheOldOneViolatesTheIndex` — the constraint is live,
@@ -501,17 +512,152 @@ subject — the same shape as the Slice 2 seed-duplication finding. Worth rememb
 
 ### Known rough edges carried forward
 
-- `Product.UpdatedAtUtc` is still creation-only. There are no update endpoints, so either Slice 4+
-  maintains it or the column is dropped.
-- The 409 paths (`23505`, `DbUpdateConcurrencyException`) are implemented and unit-testable but
-  not yet reachable through an endpoint, because no write endpoint exists. They are exercised in
-  Slices 5 and 6; until then they are code that compiles and is mapped, not code that is proved.
+- `Product.UpdatedAtUtc` was still creation-only at the end of Slice 3. Slice 5/6 now maintains it
+  through `MarkConfigurationChanged`, and approval/release write the product row so `xmin`
+  participates.
+- The 409 paths (`23505`, `DbUpdateConcurrencyException`) were implemented but unreachable until a
+  write endpoint existed. They are now exercised by `EcoApiTests.TwoCompetingEcosCannotBothRelease`
+  and `EcoWorkflowTests.IT06_*`.
 - No OpenAPI document is committed. It is generated in Development only (spec §4) and is not part
   of the contract.
 
 ---
 
-## 10. Session log
+## 10. Slices 4–6 — ECO write path and audit read (2026-10-21)
+
+The backend half of the demo is complete: a draft can be created, edited, submitted, approved,
+rejected and released, and every action writes its audit row in the same transaction as the
+state change.
+
+```text
+src/ForgePlm.Api/Application/
+  EcoCommands.cs               # NewEco / NewEcoLine / EcoEdit, line factory, UTC normalisation
+  EcoNumberGenerator.cs        # ECO-{yyyy}-{NNNN} from the year's highest number
+  EcoRules.cs                  # current released revision, replacement activity, next revision code
+  CreateEngineeringChange.cs   # server-resolved base revision + bounded number retry
+  UpdateEngineeringChange.cs   # draft-only PUT with explicit line reconciliation
+  SubmitEngineeringChange.cs
+  ApproveEngineeringChange.cs  # ten-step transaction
+  RejectEngineeringChange.cs
+  ReleaseEngineeringChange.cs  # supersede -> save -> release -> save
+  EcoQueries.cs                # list/detail projections with denormalised component refs
+  AuditQueries.cs
+src/ForgePlm.Api/Contracts/EcoModels.cs
+src/ForgePlm.Api/Endpoints/EcoEndpoints.cs
+src/ForgePlm.Api/Endpoints/AuditEndpoints.cs
+src/ForgePlm.Domain/EngineeringChanges/EngineeringChangeOrder.cs   # + UpdateDraft, EnsureTitle
+src/ForgePlm.Domain/Products/Product.cs                            # + MarkConfigurationChanged
+tests/ForgePlm.Tests/Integration/EcoWorkflowTests.cs               # IT-01…IT-07 (11 tests)
+tests/ForgePlm.Tests/Api/EcoApiTests.cs                            # 11 HTTP tests
+```
+
+Endpoints implemented (`docs/ECO-API-CONTRACT.md`):
+
+| Method | Path |
+|---|---|
+| GET | `/api/ecos?search=&status=&productId=&page=&pageSize=` |
+| GET | `/api/ecos/{ecoId}` |
+| POST | `/api/ecos` |
+| PUT | `/api/ecos/{ecoId}` |
+| POST | `/api/ecos/{ecoId}/submit` |
+| POST | `/api/ecos/{ecoId}/approve` |
+| POST | `/api/ecos/{ecoId}/reject` |
+| POST | `/api/ecos/{ecoId}/release` |
+| GET | `/api/audit?entityType=&entityId=&page=&pageSize=` |
+
+There is still no DELETE endpoint anywhere, and still no authentication: `actor` is the demo's
+two-person switch (D-06), not an identity.
+
+### The two server-owned values
+
+`baseReleasedRevisionId` is **not** a request field. Creation resolves the product's current
+released revision in the same read that validates the product is active, so a stale client cannot
+propose a change against a superseded revision. IT-01 is true by construction, and
+`AStaleClientCannotChooseTheBaseRevisionOrTheEcoNumber` proves a client cannot smuggle either
+value in through an unexpected JSON property.
+
+The ECO number is generated server-side as `ECO-{yyyy}-{NNNN}`. The generator reads the highest
+number for the current year and increments it, but the **unique index is the guarantee**, not the
+read: creation catches a `23505` on `ux_ecos_eco_number`, clears the change tracker and retries,
+up to five attempts. A collision means another transaction committed between the read and the
+insert; the next attempt sees it.
+
+### The approval and release transactions
+
+Approval is the ten steps of spec §8 inside one explicit transaction: load the ECO and its lines,
+check status and staleness, re-check that replacements are still active, build the new revision
+from a copy of the base lines, add it, record the decision and its revision link, write the audit
+event, then one `SaveChanges` and one commit. The new revision is `Approved`, never `Released`
+(D-04a). Any failure leaves neither a partial revision nor an approval record.
+
+Release sequences `supersede -> save -> release -> save -> commit` in one explicit transaction.
+The partial unique index cannot be deferred, so the old revision must stop being `Released` before
+the new one becomes `Released` (ADR-004, IT-11). A future effective date is stored and displayed
+as "Scheduled"; release still takes effect immediately, and there is no scheduler (D-04b).
+
+### Design decisions taken inside Slices 4–6
+
+| Decision | Why |
+|---|---|
+| **One application service class per use case**, registered scoped, with a thin endpoint that binds, delegates and returns a DTO | The endpoint cannot become the place where business rules accumulate, and each use case is directly drivable from an integration test without HTTP. |
+| **Endpoints never catch exceptions** | `ForgePlmExceptionHandler` already owns status mapping. A `catch` in a handler is how the same failure starts returning two different statuses. |
+| **A `null` use-case result means 404** | "Not found" is not an error code in the domain taxonomy; it is the absence of an aggregate. Every endpoint maps it the same way. |
+| **`JsonStringEnumConverter(allowIntegerValues: false)` is global** | The contract says enums are strings, and rejecting integers prevents a client sending `1` and silently getting `ChangeQuantity`. Applied to request binding and response serialisation in one option. |
+| **Draft editing is `UpdateDraft` on the aggregate**, not a set of property setters in the service | Title, reason, impact, requested date and lines all change together; the aggregate validates the whole edit and raises `invalid-transition` for a non-draft before anything is written. |
+| **`Product.MarkConfigurationChanged(now)`** | Approval and release must load and write the product row, otherwise `xmin` is not part of the transaction and ADR-004's guard does not exist. It also fixes Slice 2's carried-forward issue: `UpdatedAtUtc` is now maintained. |
+| **`effective-date-required` was added** | The release body requires a date, and no existing code meant "you omitted the effective date". It is an additive clarification, not a shape change; the frozen contract named only `no-released-revision` as a required new code. |
+| **`component-not-active` and `target-component-not-in-base-revision` are 400s** | The contract lists both under 400, but they were thrown as `DomainConflictException` (409). The throw sites in `Component.EnsureCanBeUsedInNewBom` and `EngineeringChangeLine.EnsureTargetExistsIn` were aligned to `DomainRuleViolationException`; the existing tests that expected 409 were corrected with them. |
+
+### Bugs the tests found
+
+1. **A new child with an application-assigned key is tracked as `Modified`, not `Added`.**
+   Replacing a draft's lines through the tracked navigation made EF treat each new line as an
+   existing row: it issued an `UPDATE` that matched nothing, and `SaveChanges` threw
+   `DbUpdateConcurrencyException` on a request that should have succeeded. The fix states the
+   intent explicitly in `UpdateEngineeringChange` — `RemoveRange` the old lines, `AddRange` the new
+   ones — instead of relying on navigation change detection. Caught by
+   `ADraftCanBeEditedAndASubmittedEcoCannot`.
+2. **`UpdateDraft` could half-apply an edit.** It assigned title/reason/impact before replacing the
+   lines, so a line set rejected for `duplicate-target-component` left the aggregate with a new
+   title and the old lines. Validation and line replacement now happen before any field is
+   assigned; `ABadDraftLineSetDoesNotChangeTheEco` pins it.
+3. **PostgreSQL timestamps are microsecond precision.** IT-04's effective-date assertion initially
+   failed by two ticks after a round trip. The test now compares within 1 ms, which is the
+   precision the database actually stores, rather than weakening the rule being tested.
+
+### Protected demo path
+
+`EcoApiTests.TheProtectedDemoPathWorksEndToEnd` drives the real HTTP pipeline:
+
+```text
+Products -> SERVER-100 (released B)
+  -> POST /api/ecos      (replace MB-020 with MB-021)
+  -> POST .../submit
+  -> POST .../approve    (revision C is Approved; B is still Released)
+  -> POST .../release    (C Released, B Superseded, ECO Applied)
+  -> GET /api/audit      (EcoCreated -> EcoSubmitted -> EcoApproved -> RevisionReleased)
+```
+
+### Known rough edges carried forward
+
+- **`reasonForChange` is contract-required but not enforced as non-blank.** The domain stores an
+  omitted value as an empty string. There is no code for it in the frozen contract, and inventing
+  a second validation vocabulary at the API layer was judged worse than accepting the gap until
+  Slice 8. The UI marks the field required.
+- **Text longer than 4000 characters reaches PostgreSQL** and surfaces as a 500
+  (`22001 string_data_right_truncation`) rather than a 400. The length limit is a database column,
+  not a domain check, for `reasonForChange` and `impactAssessment`.
+- **A draft ECO cannot be cancelled.** There is no DELETE endpoint (A-06), so an unwanted draft
+  stays in the list. The contract says so; the UI should not imply otherwise.
+- **No scheduler exists.** A future effective date is a label; "current" is decided by revision
+  status, never by the date.
+- **The container was not rebuilt after the last domain change.** The HTTP path was verified
+  through `WebApplicationFactory`, and `docker compose` is healthy, but the image predates the
+  final `UpdateDraft` ordering fix.
+
+---
+
+## 11. Session log
 
 | Date | What happened |
 |---|---|
@@ -520,4 +666,5 @@ subject — the same shape as the Slice 2 seed-duplication finding. Worth rememb
 | 2026-10-21 | **Containerised delivery (D-07).** Owner instruction: one `docker compose` command must start everything. Added a multi-stage `Dockerfile` for the API, a `backend` service in compose (`depends_on: service_healthy`, env-var connection string pointing at `db`, healthcheck via `curl`), and `.dockerignore`. Migrate-on-startup moved from an `IsDevelopment()` check to the `Database:ApplyOnStartup` config flag, because the container runs as `Production` and still needs its schema. Added the SPA static-file pipeline with a guard so `MapFallbackToFile` is only registered when `wwwroot/index.html` exists — the backend starts cleanly before Slice 7 builds a frontend. Two containers, not three: the API serves the SPA (A-16). Host port 5199 matches dev. **Verified by a true cold start** (`down -v`, then `up -d --wait`): both containers healthy, seed applied, `/health` answering. Restart confirmed idempotent. 91 tests still passing. |
 | 2026-10-21 | **Slice 2 — persistence.** `ForgePlm.Api` (Minimal API host), `ForgePlmDbContext` + per-aggregate configurations, snake_case naming pass, `InitialCreate` migration, fixed-GUID idempotent seed, `docker-compose.yml` for PostgreSQL 18. **91 tests pass, 0 fail** (84 domain + 7 integration against real PostgreSQL); build clean. Four real findings along the way: (1) PostgreSQL 18's Docker image **refuses to start** with data at the old `/var/lib/postgresql/data` mount and wants `/var/lib/postgresql` — fixed in compose and commented; (2) Npgsql EF Core 10 **removed `UseXminAsConcurrencyToken()`**, so ADR-004's three underlying calls were replicated by hand and verified against the generated migration; (3) the seed duplicated its audit row every startup because the helper took an id for the existence check while the factory minted its own — fixed and made unrepresentable; (4) **IT-09's claim was false** — the unique index is case-sensitive, so A-02 was amended and the test split into the two facts that are actually true. Two NuGet advisories were fixed by overriding transitive packages rather than suppressing the audit. |
 | 2026-10-21 | **Code review response.** Four items from an independent review. Two were verified and fixed in the domain: the error taxonomy returned `blank-part-number` for six unrelated failures (8 codes added, 6 throw sites corrected, `duplicate-part-number` added to close the contract before endpoints exist, `revision-limit-reached` moved to `409` per spec �7); and `Lines` exposed the backing list, so a released revision could be mutated through a cast (now `_lines.AsReadOnly()`, EF unaffected because it uses field access). Two were tested rather than taken on trust: the predicted release-ordering failure **did not reproduce** � a single `SaveChanges` superseding and releasing did not throw across five runs, though the constraint is real and cannot be deferred, so Slice 6 still ships the ordered design and both halves are pinned by IT-11; and duplicate ECO targets were confirmed to be silently merged by `FirstOrDefault`, now rejected at `ReplaceLines`. **101 tests pass, 0 fail; build clean.** |
-| 2026-10-21 | **Slice 3 - product & BOM read endpoints.** Products and components list/detail, BOM revision history, current revision, revision lines - 8 endpoints, all returning DTOs rather than EF entities, with the `{ items, total, page, pageSize }` shape �7 requires. Built the RFC 7807 mapping **before** the endpoints: `ErrorResponseMapper` plus an `IExceptionHandler`, so a new endpoint cannot forget it. Two findings: (1) registering `AddExceptionHandler` alone was **not enough** - `WebApplication.CreateBuilder` adds the developer exception page in Development, which sits outer in the pipeline and swallowed every exception, so a bad filter returned a 500 with a stack trace where the contract promised a 400; fixed with an explicit `UseExceptionHandler()`. (2) The new API tests failed intermittently (`3D000: database does not exist`, ~2 in 3 runs) because each test constructed its own `PostgresFixture`, whose `DisposeAsync` sweeps **every** test database on the server - so each test dropped the database a parallel test was using. Fixed by joining `PostgresCollection`; verified over five consecutive full-suite runs. **111 tests pass, 0 fail; build clean.** |
+| 2026-10-21 | **Slice 3 - product & BOM read endpoints.** Products and components list/detail, BOM revision history, current revision, revision lines - 8 endpoints, all returning DTOs rather than EF entities, with the `{ items, total, page, pageSize }` shape �7 requires. Built the RFC 7807 mapping **before** the endpoints: `ErrorResponseMapper` plus an `IExceptionHandler`, so a new endpoint cannot forget it. Two findings: (1) registering `AddExceptionHandler` alone was **not enough** - `WebApplication.CreateBuilder` adds the developer exception page in Development, which sits outer in the pipeline and swallowed every exception, so a bad filter returned a 500 with a stack trace where the contract promised a 400; fixed with an explicit `UseExceptionHandler()`. (2) The new API tests failed intermittently (`3D000: database does not exist`, ~2 in 3 runs) because each test constructed its own `PostgresFixture`, whose `DisposeAsync` sweeps **every** test database on the server - so each test dropped the database a parallel test was using. Fixed by joining `PostgresCollection`; verified over five consecutive full-suite runs. **111 tests pass, 0 fail; build clean.** |
+| 2026-10-21 | **Slices 4–6 — ECO write path and audit read.** Create/edit/submit/approve/reject/release plus `GET /api/audit`, implemented to the frozen `ECO-API-CONTRACT.md`. ECO numbers and base revisions are server-resolved; creation retries a number collision up to five times. Approval runs the ten-step §8 transaction; release sequences supersede → save → release → save because the partial unique index cannot be deferred. Every action writes its audit row in the same transaction. **137 tests pass, 0 fail** (94 domain + 22 integration against real PostgreSQL + 21 API); IT-06 and IT-10 were re-run explicitly against PostgreSQL (3/3). Findings: EF tracks a new child with an application-assigned key as `Modified`, so line replacement needs explicit `RemoveRange`/`AddRange`; `UpdateDraft` had to validate lines before assigning fields; PostgreSQL stores microseconds, so the IT-04 date assertion uses a 1 ms tolerance. The frozen contract's 400s for `component-not-active` and `target-component-not-in-base-revision` required changing two domain throw sites; `effective-date-required` was added as an additive code. `Product.UpdatedAtUtc` is now maintained. **Build clean, 0 warnings.** |
