@@ -4,7 +4,6 @@ import type { BomLine, BomRevision } from '../api/types';
 import { listAllRevisionLines } from '../api/productsApi';
 import { AuditTimeline } from '../components/AuditTimeline';
 import { BomDiff } from '../components/BomDiff';
-import { EcoModeNote } from '../components/EcoModeNote';
 import { EcoStepper } from '../components/EcoStepper';
 import { Button } from '../components/ui/Button';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
@@ -31,7 +30,7 @@ interface Notice {
 export function EcoDetail() {
   const { ecoId = '' } = useParams();
   const navigate = useNavigate();
-  const { products, eco, ecoMode } = useApi();
+  const { products, eco } = useApi();
   const { actor } = useActor();
 
   const [dialog, setDialog] = useState<DialogKind | null>(null);
@@ -242,8 +241,6 @@ export function EcoDetail() {
           </>
         }
       />
-
-      <EcoModeNote mode={ecoMode} />
 
       {notice ? (
         <div

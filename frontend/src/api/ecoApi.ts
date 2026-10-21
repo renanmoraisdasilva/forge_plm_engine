@@ -14,12 +14,7 @@ import type {
   UpdateEcoRequest,
 } from './types';
 
-/**
- * The ECO surface of docs/ECO-API-CONTRACT.md.
- *
- * Both implementations — the live one and the mock used until Agent B lands Slices 4–6 —
- * satisfy this interface, so swapping them is a one-line binding change.
- */
+/** The ECO surface of docs/ECO-API-CONTRACT.md, served by the live API. */
 export interface EcoApi {
   listEcos(params?: ListEcosParams): Promise<PagedResponse<EcoSummary>>;
   getEco(ecoId: string): Promise<EcoDetail>;

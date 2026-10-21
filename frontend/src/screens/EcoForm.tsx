@@ -11,7 +11,6 @@ import type {
   Product,
 } from '../api/types';
 import { listAllRevisionLines } from '../api/productsApi';
-import { EcoModeNote } from '../components/EcoModeNote';
 import { Button } from '../components/ui/Button';
 import { PageHeader } from '../components/ui/PageHeader';
 import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/ui/States';
@@ -77,7 +76,7 @@ export function EcoForm() {
   const { ecoId } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { products, eco, ecoMode } = useApi();
+  const { products, eco } = useApi();
   const { actor } = useActor();
 
   const [selectedProductId, setSelectedProductId] = useState('');
@@ -417,8 +416,6 @@ export function EcoForm() {
           </>
         }
       />
-
-      <EcoModeNote mode={ecoMode} />
 
       {formError ? (
         <div className="mb-3 rounded border border-danger-line bg-danger-bg/60 px-3 py-2 text-[12px] text-danger-text" role="alert">

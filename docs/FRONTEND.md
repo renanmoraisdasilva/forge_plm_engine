@@ -1,101 +1,133 @@
 # Forge PLM — Frontend Slice Record (Slice 7)
 
 - **Written:** 2026-10-21
-- **Owner:** Agent A (frontend). Agent B owns `IMPLEMENTATION.md`; a later session merges this into it.
-- **Read alongside:** [`HANDOFF.md`](HANDOFF.md) §8, [`ECO-API-CONTRACT.md`](ECO-API-CONTRACT.md) (frozen),
+- **Owner:** Agent A (frontend). Agent B owns `IMPLEMENTATION.md`; the merge is still open (§6).
+- **Status:** converged — every screen calls the live API. The contract mock, the mode probe and
+  the `VITE_ECO_API_MODE` switch were removed once Slices 4–6 landed.
+- **Read alongside:** [`HANDOFF.md`](HANDOFF.md) §8, [`ECO-API-CONTRACT.md`](ECO-API-CONTRACT.md),
   [`DECISIONS.md`](DECISIONS.md), `mockups/precision_industrial_engineering/DESIGN.md` (visual source only).
 
 ---
 
 ## 1. What shipped
 
-The SPA lives in `frontend/` (not the spec's `web/`), per HANDOFF §8 and the staging scope for this slice.
+The SPA lives in `frontend/` (not the spec's `web/`), per HANDOFF §8.
 
-| Area | Status |
+| Screen | State |
 |---|---|
 | App shell, sidebar (Products, Engineering Changes), actor switch | Done |
-| Screen **A** Products list — search, status filter, pager | Live API |
-| Screen **B** Product detail — BOM / Revisions / Related Changes tabs | Live API |
-| Screen **C** ECO list | Contract mock (live when Slice 4 lands) |
-| Screen **D** ECO detail — stepper, BOM diff, audit timeline, actions | Contract mock |
-| Screen **E** Create / Edit ECO — lines editor | Contract mock |
-| API client — typed fetch, ProblemDetails, `code` / `conflictType` | Done |
+| **A** Products list — search, status filter, pager | Live API |
+| **B** Product detail — BOM / Revisions / Related Changes | Live API |
+| **C** ECO list — search, status filter, pager | Live API |
+| **D** ECO detail — stepper, BOM diff, audit timeline, actions | Live API |
+| **E** Create / Edit ECO — lines editor | Live API |
 
-**Stack:** Vite 8, React 19, TypeScript 7, Tailwind 4 (build-time via `@tailwindcss/vite`, per D-01),
-react-router-dom 7, Vitest 5, self-hosted `@fontsource` Inter + JetBrains Mono (Inter + JetBrains
-Mono per DESIGN.md).
+**Stack:** Vite 8, React 19, TypeScript 7, Tailwind 4 (build-time via `@tailwindcss/vite`, D-01),
+react-router-dom 7, Vitest 5, self-hosted `@fontsource` Inter + JetBrains Mono.
 
-### Live vs mock resolution
+### Live wiring
 
-ECO mode is auto-detected at start-up by probing `GET /api/ecos?pageSize=1`: **2xx → live**,
-anything else (including the 404 the backend still returns today) → `MockEcoApi`. `VITE_ECO_API_MODE=live|mock`
-overrides the probe. The mock reads **live** products and BOM from the read API and only synthesises the
-ECO domain, and the UI says so with a visible **“MOCK ECO API”** note on screens C/D/E. No code change is
-needed to go live — the screens swap automatically once Agent B's endpoints exist.
+`src/api/index.ts` binds `LiveProductsApi` and `LiveEcoApi` directly; there is no mode detection
+and no environment variable. Both use relative `/api` paths. In development Vite proxies `/api`
+to `http://localhost:5199` (`vite.config.ts`), so there is no CORS configuration anywhere.
+
+The client DTOs in `src/api/types.ts` match the backend records in
+`src/ForgePlm.Api/Contracts/EcoModels.cs` one-for-one, including the server-resolved
+`ecoNumber`, `baseReleasedRevisionId` and `baseRevisionCode`.
 
 ---
 
-## 2. Contract compliance highlights
+## 2. Contract compliance
 
-- **FE-02:** every action button is *disabled* when invalid for the current status, never offered then
-  rejected. The status matrix lives in `src/lib/ecoStatus.ts`. Release is visible only when the ECO is
-  `Approved`; `Applied` is terminal.
-- **FE-03:** Approve / Reject / Release each pass through a confirmation dialog that shows the **current
-  actor** read from the header switch at confirmation time.
-- **A-15:** UTC is stored and sent; local time is displayed; the UTC value is reachable on hover
+- **FE-02:** invalid actions are *disabled* per status, never offered then rejected. The matrix
+  is in `src/lib/ecoStatus.ts`. Release is visible only when the ECO is `Approved`; `Applied` is
+  terminal.
+- **FE-03:** Approve / Reject / Release each pass through a confirmation dialog showing the
+  **current actor** from the header switch at confirmation time.
+- **A-15:** UTC is stored and sent; local time is displayed; UTC is exposed on hover
   (`src/lib/format.ts`, `Timestamp`).
-- Approval creates a revision in **Approved** status and says so explicitly — it does **not** release.
-  Release is a separate action; the release dialog requires an effective date and states that release
-  takes effect immediately.
-- Part numbers are monospaced; tables are dense; status chips come from the DESIGN.md palette.
-
-Every mockup element with no domain source was deleted (KPI tiles/percentages, Export CSV, Batch Audit,
-CAD/spec viewer, supplier + compliance cards, CCB authority copy, the ISO/IEC 15288 checkbox, signature
-badges, ERP/MES notes, notifications, avatar, global search, invented identifiers). Mockup copy that
-contradicted the spec on approval/release semantics was rewritten, not ported.
+- Approval creates a revision in **Approved** status and says so explicitly — it does **not**
+  release. Release is separate and requires an effective date; the dialog states that release
+  takes effect immediately even with a future date.
+- Part numbers are monospaced; tables are dense; status chips use the DESIGN.md palette.
+- The mockup-only surface with no domain source stays deleted (KPI tiles, Export CSV, Batch Audit,
+  CAD/spec viewer, supplier/compliance cards, CCB/ISO copy, signatures, ERP/MES notes,
+  notifications, avatar, global search, invented identifiers).
 
 ---
 
 ## 3. Verification
 
-- `npm run build` (`tsc --noEmit && vite build`) → **passes**.
-- `npm test` (Vitest) → **4 files, 42 tests, all passing** (`ecoStatus`, `format`, `http`, `mockEcoApi`).
-- Protected demo path (D-02c) driven in a real browser against the running app + live API, with the mock
-  ECO adapter: **Products → SERVER-100 (rev B) → Create ECO (MB-020 → MB-021) → submit → approve →
-  release → audit timeline.** Confirmed along the way: the BOM diff shows one changed line of six; the
-  approve dialog shows “Acting as Alex Morgan” and the “does not release” copy; after approval the
-  Submit/Approve/Reject buttons disable and Release appears; after release the notice reads “…released
-  and the previous revision is superseded” and no further actions are offered.
+Run from `frontend/`:
 
-Screens A and B were also verified visually against the live read API.
+- `npm run build` (`tsc --noEmit && vite build`) → **passes**.
+- `npm test` → **4 files, 37 tests, all passing** (`ecoStatus`, `format`, `http`, `ecoApi`).
+  `ecoApi.test.ts` pins each live endpoint path, method and body now that the mock contract
+  test is gone.
+
+The API container was rebuilt from the committed tree; `/api/products`, `/api/ecos` and
+`/api/audit` all return 200. The protected demo path (D-02c) was then driven in a real browser:
+
+**Products → SERVER-100 (rev B) → Create ECO (MB-020 → MB-021) → submit → approve → release →
+audit timeline.**
+
+Observed live, with no mock note anywhere:
+
+- The approve dialog shows “Acting as Alex Morgan” plus the “it is not released” copy.
+- After approval Submit/Approve/Reject disable and Release appears; after release the ECO is
+  **Applied**, the stepper is fully checked, and no action remains.
+- Product detail now advances to **revision C**, its BOM shows **MB-021**, the Revisions tab shows
+  C `Released` and B `Superseded`, and Related Changes lists ECO-2026-0001.
+- A second ECO exercised **draft edit (PUT)** (quantity 3 → 4, persisted), **submit**, and
+  **reject** with a required reason (banner “Rejected by Alex Morgan: …”, no revision created).
+- The ECO list shows both ECOs with correct statuses, formatting and pager.
 
 ---
 
 ## 4. Decisions taken inside the frontend
 
 1. **`frontend/`** as the directory (HANDOFF §8), not `web/`.
-2. **ECO mode probe** instead of a hardcoded mock, so the swap to live needs no edit. See §1.
-3. **`.gitignore` status chips:** `Applied` uses the info-blue token so it reads differently from the
-   green `Approved`; `Retired` is neutral. The mockup had no distinct colour for `Applied`.
-4. `node_modules/`, `dist/`, `.vite/` were already ignored; no separate `.gitignore` commit was needed.
+2. **Live-only binding.** The probe existed only to survive a missing backend; with Slices 4–6
+   landed it was deleted rather than left as dead configuration.
+3. **No environment file.** The API base is relative and the dev proxy is in `vite.config.ts`.
+4. **`.gitignore` status chips:** `Applied` uses info-blue to distinguish it from green
+   `Approved`; `Retired` is neutral.
 
 ---
 
-## 5. Rough edges
+## 5. Known limitations (inside the frontend)
 
-- **Mock revisions are not persisted.** An ECO created in mock mode produces an Approved revision in
-  memory only, so screen B's **Revisions** tab will not show it. That resolves the moment live ECO
-  endpoints land.
-- The mock resets on page reload; the UI warns about this.
-- `src/App.tsx` has two separate imports from `react-router-dom`. Harmless; tidy later.
-- Screens C/D/E have not been exercised against the real endpoints yet, because those endpoints do not
-  exist. The mock is contract-faithful but a contract is not an implementation.
+- The UI has not been exercised for: a future effective date (the `Scheduled` label), a stale
+  base revision / 409 conflict surfaced from a real race, status and search filters beyond
+  rendering, and pagination past one page. The code paths exist; only the happy path and reject
+  were driven end to end.
+- Approval, rejection and release do not enforce separation of duties. The actor switch is
+  client-side by design (D-06); the backend accepts the same actor for every step.
+- Verification is manual browser work; there is no Playwright/E2E suite.
+- `resolveApi` is still `async` although the binding is synchronous. Harmless, kept to avoid
+  churn in the provider.
 
 ---
 
-## 6. Convergence checklist (for when Slices 4–6 land)
+## 6. What is missing (handover)
 
-1. Confirm the mode probe flips to live (or set `VITE_ECO_API_MODE=live`).
-2. Re-run the protected demo path end to end against the real API.
-3. Delete `src/api/mockEcoApi.ts` and its test once live calls are proven.
-4. Merge this slice record into `IMPLEMENTATION.md`.
+1. **The container does not serve the SPA.** `src/ForgePlm.Api/Dockerfile` still has the
+   placeholder “SLICE 7 goes here” build stage, and `Program.cs` only maps the fallback when a
+   `wwwroot/index.html` exists. `http://localhost:5199/` is a 404; the SPA runs only through the
+   Vite dev server. Wiring a node stage that builds `frontend/` into `wwwroot` closes demo mode
+   (A-16). That file is in Agent B's ownership, so it was left untouched.
+2. **`docs/IMPLEMENTATION.md` is stale.** It still says “Slice 7 (frontend) next”; this record
+   needs merging into it by whoever owns that file.
+3. **`Product.UpdatedAtUtc` is still creation-only**, the known rough edge from HANDOFF §10.
+4. Optional hardening: an E2E test for the protected path, and UI coverage of the 409/stale-base
+   branches.
+
+---
+
+## 7. Read this before changing the ECO screens
+
+- Never send an action the status matrix disallows; disable it instead (FE-02).
+- Keep Approve / Reject / Release behind `ConfirmDialog` and keep the actor in it (FE-03).
+- Keep the approval notice explicit that the revision is **not** released.
+- The base BOM comparison reads revision lines from the product endpoints, not from the ECO
+  payload; the payload deliberately carries only the proposed lines and denormalised refs.

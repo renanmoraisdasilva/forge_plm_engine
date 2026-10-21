@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { AppShell } from './components/AppShell';
 import { Button } from './components/ui/Button';
 import { EmptyBlock } from './components/ui/States';
@@ -9,7 +9,6 @@ import { ProductDetail } from './screens/ProductDetail';
 import { ProductsList } from './screens/ProductsList';
 import { ActorProvider } from './state/ActorProvider';
 import { ApiProvider } from './state/ApiProvider';
-import { useNavigate } from 'react-router-dom';
 
 function NotFound() {
   const navigate = useNavigate();

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ECO_STATUSES } from '../api/ecoApi';
 import type { EcoStatus } from '../api/types';
-import { EcoModeNote } from '../components/EcoModeNote';
 import { Button } from '../components/ui/Button';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Pager } from '../components/ui/Pager';
@@ -16,7 +15,7 @@ const PAGE_SIZE = 50;
 
 /** Screen C. Built against the frozen contract; live once the endpoints exist. */
 export function EcoList() {
-  const { eco, ecoMode } = useApi();
+  const { eco } = useApi();
   const navigate = useNavigate();
 
   const [searchInput, setSearchInput] = useState('');
@@ -50,8 +49,6 @@ export function EcoList() {
           </Button>
         }
       />
-
-      <EcoModeNote mode={ecoMode} />
 
       <div className="overflow-hidden rounded border border-line bg-surface">
         <div className="flex h-12 flex-wrap items-center gap-2 border-b border-line px-3">

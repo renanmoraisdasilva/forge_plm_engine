@@ -20,7 +20,7 @@ const TABS: Array<{ id: Tab; label: string }> = [
 /** Screen B. Header, three tabs, Create ECO. Live reads only. */
 export function ProductDetail() {
   const { productId = '' } = useParams();
-  const { products, ecoMode } = useApi();
+  const { products } = useApi();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('bom');
 
@@ -210,13 +210,13 @@ export function ProductDetail() {
           )
         ) : null}
 
-        {tab === 'related' ? <RelatedChanges productId={product.id} ecoMode={ecoMode} /> : null}
+        {tab === 'related' ? <RelatedChanges productId={product.id} /> : null}
       </div>
     </div>
   );
 }
 
-function RelatedChanges({ productId, ecoMode }: { productId: string; ecoMode: 'live' | 'mock' }) {
+function RelatedChanges({ productId }: { productId: string }) {
   const { eco } = useApi();
   const navigate = useNavigate();
   const { data, error, loading, reload } = useAsync<PagedResponse<EcoSummary>>(
@@ -226,12 +226,6 @@ function RelatedChanges({ productId, ecoMode }: { productId: string; ecoMode: 'l
 
   return (
     <div>
-      {ecoMode === 'mock' ? (
-        <div className="border-b border-line bg-muted px-3 py-1.5 text-[11px] text-ink-muted">
-          ECO endpoints are not live yet; this list uses the contract mock adapter.
-        </div>
-      ) : null}
-
       {error ? (
         <ErrorBlock error={error} onRetry={reload} />
       ) : loading && !data ? (
