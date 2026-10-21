@@ -4,7 +4,7 @@
 
 Forge PLM is a product lifecycle management prototype for tracking products, released bills of materials, and engineering change orders (ECOs). Its central rule is that approval and release are separate decisions: approving an ECO creates a candidate revision, while a later release makes that revision current and preserves the previous baseline for history.
 
-![ECO review screen showing the workflow, a before-and-after BOM comparison, and its audit trail](docs/images/eco-review.png)
+![Forge PLM walkthrough cycling through the product catalog, released BOM, and ECO review](docs/images/forge-plm-demo.gif)
 
 ## Follow a change through the app
 
@@ -12,15 +12,15 @@ Start with the seeded `SERVER-100` product at released revision B. Propose repla
 
 ```mermaid
 flowchart LR
-    P["Product + released BOM"] --> D["Draft ECO<br/>describe the change"]
-    D --> S["Submit<br/>freeze for review"]
-    S --> A["Approve<br/>create candidate revision"]
-    S --> R["Reject<br/>record reason"]
-    A --> L["Release<br/>make revision current"]
-    L --> H["Audit trail<br/>retain each transition"]
+    B["Starting baseline<br/>Rev B: current released revision"]
+    B -->|Create ECO (Engineer)| D["ECO: Draft<br/>Rev B remains the current released revision<br/>No new revision"]
+    D -->|Submit (Engineer)| S["ECO: Submitted<br/>Rev B remains the current released revision"]
+    S -->|Approve (Reviewer)| A["ECO: Approved<br/>Rev C created as an approved revision<br/>Rev B remains the current released revision"]
+    A -->|Separate release action| L["ECO: Applied<br/>Rev C becomes the current released revision<br/>Rev B: Superseded"]
+    S -->|Reject (Reviewer)| R["ECO: Rejected<br/>No revision created<br/>Rev B remains the current released revision"]
 ```
 
-Approval does not change the current BOM. Release is a separate action that makes the approved revision current and supersedes the previous released revision. Rejected changes leave the released configuration intact. The ECO detail page keeps the request, side-by-side BOM comparison, workflow state, and audit history together.
+Approval creates an approved candidate revision; revision B remains the current released revision until release. The separate release action makes revision C the current released revision and supersedes B. Rejection creates no revision, leaving B as the current released revision. The ECO detail page keeps the request, side-by-side BOM comparison, workflow state, and audit history together.
 
 ## Screens
 
