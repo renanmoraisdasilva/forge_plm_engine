@@ -29,9 +29,17 @@ RUN dotnet publish src/ForgePlm.Api/ForgePlm.Api.csproj \
     -o /app/publish \
     /p:UseAppHost=false
 
-# SLICE 7 goes here: a node stage that builds the Vite SPA and copies the output into
-# /app/publish/wwwroot, so this single image serves both the API and the UI (A-16).
-# Left out until the frontend exists, because a build stage with nothing to build fails.
+# Build the Vite SPA with the lockfile so the demo image always contains the UI.
+FROM node:22-alpine AS frontend
+WORKDIR /frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
+# Publish the SPA beside the API so ASP.NET serves it from the same origin.
+FROM build AS publish
+COPY --from=frontend /frontend/dist /app/publish/wwwroot
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
@@ -43,7 +51,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=build /app/publish .
+COPY --from=publish /app/publish .
 
 # .NET 8+ images default to a non-root user and port 8080; both are set explicitly so the
 # image does not depend on the base image's defaults staying the same.

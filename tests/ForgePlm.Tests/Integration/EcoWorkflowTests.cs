@@ -414,6 +414,16 @@ public class EcoWorkflowTests(PostgresFixture fixture)
         await SubmitAsync(database, eco.Id);
         var approved = await ApproveAsync(database, eco.Id);
 
+        int priorReleaseAuditCount;
+        await using (var baseline = database.CreateDbContext())
+        {
+            priorReleaseAuditCount = await baseline.AuditEvents.AsNoTracking()
+                .CountAsync(audit =>
+                    audit.Action == AuditActions.RevisionReleased &&
+                    audit.EntityType == "EngineeringChangeOrder" &&
+                    audit.EntityId == eco.Id);
+        }
+
         await InstallAuditFailureTriggerAsync(database, AuditActions.RevisionReleased);
 
         await using (var db = database.CreateDbContext())
@@ -433,8 +443,8 @@ public class EcoWorkflowTests(PostgresFixture fixture)
         Assert.Equal(EngineeringChangeStatus.Approved,
             (await verify.EngineeringChangeOrders.AsNoTracking().SingleAsync(order => order.Id == eco.Id)).Status);
 
-        Assert.False(await verify.AuditEvents.AsNoTracking()
-            .AnyAsync(audit =>
+        Assert.Equal(priorReleaseAuditCount, await verify.AuditEvents.AsNoTracking()
+            .CountAsync(audit =>
                 audit.Action == AuditActions.RevisionReleased &&
                 audit.EntityType == "EngineeringChangeOrder" &&
                 audit.EntityId == eco.Id));

@@ -11,6 +11,7 @@ TestResults/
 node_modules/
 dist/
 .vite/
+coverage/
 npm-debug.log*
 
 # Local configuration and database files

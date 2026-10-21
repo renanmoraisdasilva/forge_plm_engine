@@ -46,8 +46,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // A-16: in the demo/run container the API also serves the built SPA, so there is one origin
-// and no CORS. Registered only when a build actually produced an index.html — before Slice 7
-// there is no frontend, and MapFallbackToFile throws at startup if its target is missing.
+// and no CORS. The fallback is registered below only when a build produced an index.html.
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -58,10 +57,6 @@ app.UseStaticFiles();
 // different contracts for the same endpoint, decided by an environment flag nobody would think
 // to check. Declaring it here pins the behaviour in both modes.
 app.UseExceptionHandler();
-if (File.Exists(Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "index.html")))
-{
-    app.MapFallbackToFile("index.html");
-}
 
 // A-11: migrate and seed on startup. `Migrate()` is a no-op once the schema exists, and the
 // seed is idempotent by primary key, so repeated starts change nothing.
@@ -94,6 +89,13 @@ app.Map("/api/{**path}", () => Results.Problem(
     statusCode: StatusCodes.Status404NotFound,
     title: "API endpoint not found.",
     detail: "No API route matches this request."));
+
+// Keep this last: the SPA handles browser routes, while the more specific API catch-all above
+// preserves ProblemDetails for unknown /api paths once wwwroot/index.html is present.
+if (File.Exists(Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "index.html")))
+{
+    app.MapFallbackToFile("index.html");
+}
 
 app.Run();
 
