@@ -114,10 +114,9 @@ The [ECO API contract](docs/ECO-API-CONTRACT.md) documents API routes and lifecy
 
 ```mermaid
 flowchart LR
-    Browser["React frontend"] -->|"same origin: /api"| Api["ASP.NET Core Minimal API"]
+    Browser["React frontend"] -->|"same-origin /api"| Api["ASP.NET Core Minimal API"]
     Api --> App["Application + domain"]
     App --> Db[("PostgreSQL")]
-    Api -->|"serves built SPA"| Browser
 ```
 
 The API serves the built frontend and JSON endpoints from one origin. PostgreSQL and EF Core enforce persistence constraints, including unique part numbers and revision concurrency. The backend is organized around products, components, BOM revisions, ECO workflows, and audit records.
