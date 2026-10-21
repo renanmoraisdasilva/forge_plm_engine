@@ -1,3 +1,5 @@
+using ForgePlm.Api.Endpoints;
+using ForgePlm.Api.Http;
 using ForgePlm.Api.Persistence;
 using ForgePlm.Api.Seed;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +8,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ForgePlmDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("ForgePlm")));
+
+// A-10/A-21: one mapping from failure to RFC 7807, registered as the framework's exception
+// handler so no endpoint can forget it. Endpoints simply let domain exceptions propagate.
+builder.Services.AddExceptionHandler<ForgePlmExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // Development-only OpenAPI (spec §4).
 if (builder.Environment.IsDevelopment())
@@ -20,6 +27,14 @@ var app = builder.Build();
 // there is no frontend, and MapFallbackToFile throws at startup if its target is missing.
 app.UseDefaultFiles();
 app.UseStaticFiles();
+
+// Explicit rather than relying on the implicit registration from `AddExceptionHandler`:
+// `WebApplication.CreateBuilder` adds the developer exception page in Development, which is
+// outer in the pipeline and swallows every exception before `IExceptionHandler` sees it. That
+// would make Development return a stack trace where the demo returns ProblemDetails — two
+// different contracts for the same endpoint, decided by an environment flag nobody would think
+// to check. Declaring it here pins the behaviour in both modes.
+app.UseExceptionHandler();
 if (File.Exists(Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "index.html")))
 {
     app.MapFallbackToFile("index.html");
@@ -39,6 +54,12 @@ if (builder.Configuration.GetValue("Database:ApplyOnStartup", true))
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
+// Slice 3 — product and BOM reads. Grouped so the surface stays greppable as slices 4-6 add
+// the write endpoints beside them.
+app.MapProductEndpoints();
+app.MapComponentEndpoints();
+app.MapBomRevisionEndpoints();
+
 app.Run();
 
 static async Task ApplyDatabaseAsync(WebApplication app)
@@ -49,3 +70,10 @@ static async Task ApplyDatabaseAsync(WebApplication app)
     await db.Database.MigrateAsync();
     await DemoSeed.ApplyAsync(db);
 }
+
+/// <summary>
+/// Exposure point for `WebApplicationFactory`. Top-level statements generate an `internal`
+/// Program, which the test project cannot name; this partial declaration makes it public so
+/// endpoint tests can drive the real pipeline rather than a hand-rolled stand-in.
+/// </summary>
+public partial class Program;
