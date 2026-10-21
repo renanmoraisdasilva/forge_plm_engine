@@ -1,0 +1,13 @@
+# Build artefacts and local state — never useful inside the image, and they dominate the
+# build-context upload. `docker compose build` sends this whole directory to the daemon, so
+# a stale bin/obj is pure latency.
+**/bin/
+**/obj/
+**/node_modules/
+.git/
+
+# Not part of the backend image. tests/ is a separate project the publish does not build;
+# docs/ and mockups/ are reference material. Shipping them would only slow every build.
+tests/
+docs/
+mockups/

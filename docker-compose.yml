@@ -1,0 +1,73 @@
+# Forge PLM — the whole application in one command.
+#
+#   docker compose up -d --wait     build and start the database + API, wait until both are healthy
+#   http://localhost:5199           the running app
+#   docker compose down             stop (data survives in the named volume)
+#   docker compose down -v          stop AND delete the data
+#   docker compose logs -f backend  watch the API
+#
+# Two containers, not three: the API serves the built SPA as well as /api (A-16), so there is
+# no separate web server and no CORS to configure. `--wait` blocks on the healthchecks, so the
+# command returns with the app actually ready rather than mid-migration.
+#
+# This is the demo/run mode. Development does NOT use it — see the header of Dockerfile.
+#
+# Administration (there is no psql on the host — ADR-001):
+#   docker compose exec db psql -U forge -d forge_plm
+
+services:
+  db:
+    image: postgres:18
+    container_name: forge-plm-db
+    environment:
+      POSTGRES_DB: forge_plm
+      POSTGRES_USER: forge
+      POSTGRES_PASSWORD: forge_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      # NOTE: PostgreSQL 18+ images changed their data layout and now refuse to start if
+      # data is found at the old /var/lib/postgresql/data mount point. They expect a single
+      # mount at /var/lib/postgresql, with the version-specific data directory as a
+      # subdirectory (which also allows pg_upgrade --link across majors without hitting a
+      # mount boundary). See docker-library/postgres#1259 and #37.
+      - forge_plm_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U forge -d forge_plm"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build:
+      context: .
+      dockerfile: src/ForgePlm.Api/Dockerfile
+    container_name: forge-plm-backend
+    depends_on:
+      db:
+        # Not just `service_started`: the API runs migrations at startup, and connecting to a
+        # database that is still initialising is the classic first-run failure.
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      # `db`, not `localhost` — inside this container the database is a sibling service.
+      # Overrides ConnectionStrings:ForgePlm in appsettings.json, which points at localhost
+      # for the local dev workflow.
+      ConnectionStrings__ForgePlm: "Host=db;Port=5432;Database=forge_plm;Username=forge;Password=forge_dev_password"
+      # Explicit even though true is the default, so it is visible that this container owns
+      # its schema. Set false and migrate out-of-band for anything resembling a real deploy.
+      Database__ApplyOnStartup: "true"
+    ports:
+      # Host 5199 matches the local dev URL, so the demo link never changes between the two.
+      - "5199:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      # Migrations plus the first seed run take a few seconds on a cold database.
+      start_period: 30s
+
+volumes:
+  forge_plm_data:
