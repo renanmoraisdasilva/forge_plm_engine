@@ -2,7 +2,7 @@
 
 **Controlled product configurations, with every proposed BOM change reviewed before release.**
 
-Forge PLM is a product lifecycle management prototype for tracking products, released bills of materials, and engineering change orders (ECOs). Its central rule is that approval and release are separate decisions: approving an ECO creates a candidate revision, while a later release makes that revision current and preserves the previous baseline for history.
+Forge PLM is a .NET and React prototype for managing product configurations, BOM revisions, and Engineering Change Orders (ECOs). Approval creates a candidate revision; release makes it the current released configuration. Previous revisions remain available for historical traceability.
 
 ![Forge PLM walkthrough cycling through the product catalog, released BOM, and ECO review](docs/images/forge-plm-demo.gif)
 
@@ -38,12 +38,7 @@ flowchart TB
     class R rejected
 ```
 
-“Current” means the current released revision. Approval creates Rev C but keeps B current; release makes C current and supersedes B. Rejection creates no revision. The ECO detail page keeps the request, BOM comparison, workflow state, and audit history together.
-
-Release takes effect immediately in this prototype. If an ECO requests a future effective date,
-the reviewer is told that scheduled effectivity is unsupported and can release the revision now or
-cancel. The database and release audit record the actual release time (`ReleasedAtUtc`) separately
-from when the revision applies (`EffectiveAtUtc`); both are current UTC for a prototype release.
+The ECO detail page keeps the request, BOM comparison, workflow state, and audit history together.
 
 ## Screens
 
@@ -81,6 +76,19 @@ docker compose up -d --build --wait
 Open <http://localhost:5199/>. The first start migrates the database and seeds the baseline product, components, released revision B, and audit events. Startup seeding is idempotent.
 
 Stop the containers and keep the database volume with `docker compose down`. To also remove the data, run `docker compose down -v`.
+
+### Stack
+
+- .NET 10 and ASP.NET Core Minimal APIs
+- C# and Entity Framework Core
+- PostgreSQL
+- React and TypeScript
+- Docker Compose
+- xUnit and Vitest
+
+### Prototype limitations
+
+Release takes effect immediately. Scheduled future effectivity is unsupported; when an ECO requests a future date, the reviewer can release now or cancel. The release time (`ReleasedAtUtc`) and effective time (`EffectiveAtUtc`) are recorded separately; both are current UTC for a prototype release.
 
 ### Develop and check
 
