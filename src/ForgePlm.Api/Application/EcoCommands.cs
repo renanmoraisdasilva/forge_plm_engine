@@ -29,6 +29,7 @@ public sealed record EcoEdit(
     string? ReasonForChange,
     string? ImpactAssessment,
     DateTime? RequestedEffectiveAtUtc,
+    string? Actor,
     IReadOnlyList<NewEcoLine>? Lines);
 
 internal static class EcoLineFactory

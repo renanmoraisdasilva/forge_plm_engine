@@ -9,7 +9,8 @@ namespace ForgePlm.Api.Contracts;
 ///
 /// Requests carry only what a client may decide. `ecoNumber`, `baseReleasedRevisionId` and
 /// the creator are absent on purpose: the first two are resolved by the server, and the
-/// creator was decided when the draft was created.
+/// creator was decided when the draft was created. Draft edit requests carry the current actor
+/// separately so audit events identify the editor.
 /// </summary>
 public sealed record EcoLineRequest(
     EngineeringChangeType ChangeType,
@@ -27,12 +28,13 @@ public sealed record CreateEcoRequest(
     string? Actor,
     IReadOnlyList<EcoLineRequest>? Lines);
 
-/// <summary>Draft edit (spec §7). Same as create minus `productId` and `actor`.</summary>
+/// <summary>Draft edit (spec §7). The product is fixed; actor identifies the person editing.</summary>
 public sealed record UpdateEcoRequest(
     string? Title,
     string? ReasonForChange,
     string? ImpactAssessment,
     DateTime? RequestedEffectiveAtUtc,
+    string? Actor,
     IReadOnlyList<EcoLineRequest>? Lines);
 
 public sealed record ActorRequest(string? Actor);

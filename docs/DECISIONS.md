@@ -29,10 +29,11 @@ should apply migrations as a separate release step.
 
 ## Concurrency
 
-Product `xmin` concurrency tokens and a partial unique index enforce release concurrency. The
-database is PostgreSQL-specific by design. The implementation and measured release ordering are
-documented in [ADR-004](adr/ADR-004-concurrency-xmin-partial-index.md); the integration tests run
-against PostgreSQL rather than an in-memory provider.
+Product and ECO `xmin` concurrency tokens plus a partial unique index enforce configuration
+release and ECO state-transition concurrency. The database is PostgreSQL-specific by design.
+The implementation and measured release ordering are documented in
+[ADR-004](adr/ADR-004-concurrency-xmin-partial-index.md); integration tests run against PostgreSQL
+rather than an in-memory provider.
 
 ## Short references in source comments
 

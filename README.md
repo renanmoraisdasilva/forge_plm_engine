@@ -59,13 +59,14 @@ The ECO review screen above shows a submitted motherboard replacement. The blue 
 ## What the prototype covers
 
 - Product and component catalog reads, with lifecycle status and paged search.
+- API-only initial BOM setup for a new active product, followed by ECO-controlled revisions.
 - Released BOM revisions and their component lines.
 - ECO drafts with component replacement or quantity changes.
 - Draft editing, submission, approval, rejection, and release.
 - Before-and-after BOM comparison and append-only application audit events.
 - PostgreSQL persistence, EF Core migrations, and demo baseline seeding.
 
-Catalog creation is available through the API, not the UI. The acting person selector is a demo identity supplied by the client, not authentication or authorization. See [current implementation status](docs/STATUS.md) for known gaps.
+Catalog creation is available through the API, not the UI. A new active product can receive its first released BOM through `POST /api/products/{productId}/bom-revisions/initial`; later revisions must use ECOs. The acting person selector is a demo identity supplied by the client, not authentication or authorization. See [current implementation status](docs/STATUS.md) for known gaps.
 
 ## Run the demo
 

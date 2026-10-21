@@ -128,6 +128,54 @@ public class EcoWorkflowTests(PostgresFixture fixture)
         Assert.Equal(DomainErrorCodes.NoReleasedRevision, ex.Code);
     }
 
+    [Fact]
+    public async Task InitialBomMakesANewProductAvailableToTheEcoWorkflow()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        var product = Product.Create("NEW-SERVER-1", "New server", "Server", ProductLifecycleStatus.Active, DateTime.UtcNow);
+        await using (var seedDb = database.CreateDbContext())
+        {
+            seedDb.Products.Add(product);
+            await seedDb.SaveChangesAsync();
+        }
+
+        await using (var db = database.CreateDbContext())
+        {
+            var initial = await new CreateInitialBom(db).ExecuteAsync(product.Id, new NewInitialBom(
+                [new NewInitialBomLine(DemoSeed.Mb020Id, 1, "Each")], "Alex Morgan"));
+
+            Assert.NotNull(initial);
+            Assert.Equal("A", initial.RevisionCode);
+            Assert.Equal(BomRevisionStatus.Released, initial.Status);
+            Assert.Equal(DateTimeKind.Utc, initial.EffectiveAtUtc!.Value.Kind);
+            Assert.Equal(DateTimeKind.Utc, initial.ReleasedAtUtc!.Value.Kind);
+            Assert.Single(initial.Lines);
+        }
+
+        var ecoCommand = ReplaceMotherboardEco() with { ProductId = product.Id };
+        await using (var db = database.CreateDbContext())
+        {
+            var eco = await new CreateEngineeringChange(db).ExecuteAsync(ecoCommand);
+            Assert.NotNull(eco);
+            Assert.Equal("A", (await db.BomRevisions.AsNoTracking().SingleAsync(r => r.Id == eco.BaseReleasedRevisionId)).RevisionCode);
+        }
+
+        await using (var db = database.CreateDbContext())
+        {
+            var duplicate = await Assert.ThrowsAsync<DomainConflictException>(() =>
+                new CreateInitialBom(db).ExecuteAsync(product.Id, new NewInitialBom(
+                    [new NewInitialBomLine(DemoSeed.Mb020Id, 1, "Each")], "Alex Morgan")));
+            Assert.Equal(DomainErrorCodes.InvalidTransition, duplicate.Code);
+        }
+
+        await using var verify = database.CreateDbContext();
+        var audit = await verify.AuditEvents.AsNoTracking()
+            .SingleAsync(a => a.Action == AuditActions.InitialRevisionReleased && a.EntityType == "BomRevision");
+        Assert.Equal("Alex Morgan", audit.Actor);
+    }
+
     /// <summary>
     /// IT-02 and IT-03 — approval creates the new revision with the requested change applied,
     /// while the old released revision remains byte-for-byte unchanged and still `Released`.
@@ -305,6 +353,75 @@ public class EcoWorkflowTests(PostgresFixture fixture)
 
         Assert.True(await verify.AuditEvents.AsNoTracking()
             .AnyAsync(audit => audit.Action == AuditActions.EcoRejected && audit.EntityId == eco.Id));
+    }
+
+    [Fact]
+    public async Task ConcurrentApprovalLosesToTheCommittedRejectionWithoutCreatingARevision()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        var eco = await CreateAsync(database, "Competing decision");
+        await SubmitAsync(database, eco.Id);
+
+        // Materialize the losing request's ECO before the winning decision commits. Its
+        // original xmin must be used when it later attempts to approve.
+        await using var staleRequest = database.CreateDbContext();
+        await staleRequest.EngineeringChangeOrders.Include(order => order.Lines).SingleAsync(order => order.Id == eco.Id);
+
+        await using (var winner = database.CreateDbContext())
+        {
+            var rejected = await new RejectEngineeringChange(winner)
+                .ExecuteAsync(eco.Id, "Jordan Lee", "Rejected during concurrency test.");
+            Assert.NotNull(rejected);
+        }
+
+        await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() =>
+            new ApproveEngineeringChange(staleRequest).ExecuteAsync(eco.Id, "Jordan Lee", "Racing approval."));
+
+        await using var verify = database.CreateDbContext();
+        var persistedEco = await verify.EngineeringChangeOrders.AsNoTracking().SingleAsync(order => order.Id == eco.Id);
+        Assert.Equal(EngineeringChangeStatus.Rejected, persistedEco.Status);
+        Assert.Null(persistedEco.ApprovedRevisionId);
+        Assert.False(await verify.BomRevisions.AsNoTracking().AnyAsync(revision => revision.SourceEcoId == eco.Id));
+        Assert.False(await verify.AuditEvents.AsNoTracking()
+            .AnyAsync(audit => audit.Action == AuditActions.EcoApproved && audit.EntityId == eco.Id));
+        Assert.True(await verify.AuditEvents.AsNoTracking()
+            .AnyAsync(audit => audit.Action == AuditActions.EcoRejected && audit.EntityId == eco.Id));
+    }
+
+    [Fact]
+    public async Task StaleDraftEditCannotReplaceLinesAfterSubmissionEvenWhenScalarsAreUnchanged()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        var eco = await CreateAsync(database, "Edit racing submission");
+        await using var staleRequest = database.CreateDbContext();
+        await staleRequest.EngineeringChangeOrders.Include(order => order.Lines).SingleAsync(order => order.Id == eco.Id);
+
+        await SubmitAsync(database, eco.Id);
+
+        var unchangedEdit = new EcoEdit(
+            eco.Title,
+            eco.ReasonForChange,
+            eco.ImpactAssessment,
+            eco.RequestedEffectiveAtUtc,
+            "Alex Morgan",
+            [new NewEcoLine(EngineeringChangeType.ReplaceComponent, DemoSeed.Mb020Id, DemoSeed.Mb021Id, null, "Controller spec update")]);
+
+        await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() =>
+            new UpdateEngineeringChange(staleRequest).ExecuteAsync(eco.Id, unchangedEdit));
+
+        await using var verify = database.CreateDbContext();
+        var persisted = await verify.EngineeringChangeOrders.AsNoTracking()
+            .Include(order => order.Lines)
+            .SingleAsync(order => order.Id == eco.Id);
+        Assert.Equal(EngineeringChangeStatus.Submitted, persisted.Status);
+        Assert.Single(persisted.Lines);
+        Assert.Equal("Controller spec update", persisted.Lines[0].Reason);
+        Assert.False(await verify.AuditEvents.AsNoTracking()
+            .AnyAsync(audit => audit.Action == AuditActions.EcoDraftUpdated && audit.EntityId == eco.Id));
     }
 
     /// <summary>

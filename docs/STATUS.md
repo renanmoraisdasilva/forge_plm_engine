@@ -9,39 +9,36 @@ remains the product and engineering guide.
 - ECO create, edit, submit, approve, reject, release, and audit APIs. Approval and release are
   separate operations; release and its audit record are transactional. Release applies
   immediately in the prototype; future requested effectivity requires confirmation, and actual
-  release/effective timestamps are recorded separately.
-- Commit `0ae3398` adds API-only product/component creation and writes matching audit events.
-  This work has not yet been verified.
+  release/effective timestamps are recorded separately. Draft edits write an `EcoDraftUpdated`
+  event with before/after snapshots and the editing actor in the same save as the ECO and lines.
+- API-only product/component creation writes matching audit events. A new active product with no
+  revision history can initialize its first released BOM as revision A; later revisions require
+  ECOs. ECO writes use PostgreSQL `xmin` concurrency tokens so stale state transitions conflict.
 - React frontend with Products and Engineering Changes screens, actor switch, live API client,
   confirmation flows, BOM comparison, and audit timeline.
 - Compose demo image that builds and serves the frontend from the API host. The image change is
-  committed; a post-change full image/browser verification has not been recorded.
+  built and started successfully for the verification below.
 
 ## Last recorded verification
 
-These results predate commits `57e674d` and `0ae3398`. The catalog-create changes in `0ae3398`
-have not been re-run in this status record.
-
-- Backend: build passed with zero warnings/errors; **155 tests passed** (104 domain, 27 PostgreSQL
-  integration, 24 API).
-- Frontend: build passed; **37 tests passed** in four files. V8 whole-`src/` coverage measured
-  **13.35% statements, 8.07% branches, 14.92% functions, and 13.58% lines**.
-- Backend coverage collection is configured, but no backend percentage has been measured.
-
-For the effectivity alignment, the backend build passed and 16 targeted domain/PostgreSQL tests
-passed. The frontend build passed and all 39 tests passed. The API-host confirmation test could not
-initialize in this Windows environment because the `.NET Runtime` Event Log provider denied
-permission during host startup; the corresponding release guard is covered by the PostgreSQL
-application-service test. The full backend suite has not been rerun.
+- Backend: `dotnet test ForgePlm.slnx --no-restore` and `coverage.ps1` passed: **163 tests**, including API coverage
+  for component creation and draft-edit audit snapshots, and real PostgreSQL coverage for
+  initial-BOM setup and ECO concurrency. API test-host logging avoids the Windows Event Log
+  permission issue. Cobertura reports **89.00% lines** and **49.31% branches** for the backend test
+  run.
+- Frontend: production build passed; **39 tests passed** in five files. V8 whole-`src/` coverage
+  measured **13.59% statements, 8.36% branches, 15.42% functions, and 13.85% lines**.
+- Compose: `docker compose up -d --build --wait` reached healthy status. HTTP smoke checks returned
+  the SPA shell for `/` and `/products`, JavaScript/CSS assets loaded, the seeded product and
+  current BOM APIs returned 200, and an unknown `/api` route returned ProblemDetails 404.
+- A rendered browser check remains unavailable on this Windows host: headless Chrome/Edge failed
+  to initialize the GPU process. Direct route and asset HTTP checks passed.
 
 ## Remaining work
 
-1. Verify the Compose image starts, the SPA loads at `/`, a client-side route loads, and unknown
-   `/api` paths still return ProblemDetails.
-2. Add API tests for product/component creation and verify their audit behavior.
-3. Re-run backend build and tests after the latest code changes, then collect Cobertura coverage
-   with `coverage.ps1` and record the result.
-4. Add frontend tests for screens and shared components if higher whole-project coverage is wanted.
+1. Run a visual browser check on a host where headless Chrome/Edge can initialize; the HTTP fallback
+   and asset checks passed here.
+2. Add frontend tests for screens and shared components if higher whole-project coverage is wanted.
 
 The frontend report currently measures mostly transport and domain helpers; the screens, shared
 components, providers, and router have no automated coverage. Integration tests require the

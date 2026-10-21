@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace ForgePlm.Tests.Api;
 
@@ -30,6 +31,9 @@ public sealed class ApiApplicationFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseSetting("ConnectionStrings:ForgePlm", _database.ConnectionString);
+        // WebApplicationFactory runs as a non-elevated process on Windows; the default Event Log
+        // provider can throw while reporting startup errors and mask the actual test result.
+        builder.ConfigureLogging(logging => logging.ClearProviders());
 
         // The database is fresh, so the application applies its own schema and seed. That is
         // the same path a first run takes, and it means a migration error would fail here
@@ -171,6 +175,67 @@ public class ProductApiTests(PostgresFixture fixture) : IAsyncLifetime
         // `(page - 1) * pageSize` used to overflow to a negative OFFSET for int.MaxValue.
         var huge = await _client.GetAsync("/api/products?page=2147483647");
         Assert.Equal(HttpStatusCode.OK, huge.StatusCode);
+    }
+
+    [Fact]
+    public async Task ANewProductCanReceiveItsInitialReleasedBomThroughTheApi()
+    {
+        var createProduct = await _client.PostAsJsonAsync("/api/products", new
+        {
+            partNumber = "API-SERVER-1",
+            name = "API created server",
+            category = "Server",
+            lifecycleStatus = "Active",
+            actor = "Alex Morgan",
+        });
+        Assert.Equal(HttpStatusCode.Created, createProduct.StatusCode);
+        var product = await createProduct.Content.ReadFromJsonAsync<ProductDto>();
+        Assert.NotNull(product);
+
+        var createBom = await _client.PostAsJsonAsync($"/api/products/{product.Id}/bom-revisions/initial", new
+        {
+            actor = "Alex Morgan",
+            lines = new[] { new { componentId = "00000011-0000-0000-0000-000000000011", quantity = 1, unit = "Each" } },
+        });
+        Assert.Equal(HttpStatusCode.Created, createBom.StatusCode);
+        var revision = await createBom.Content.ReadFromJsonAsync<BomRevisionDto>();
+        Assert.NotNull(revision);
+        Assert.Equal("A", revision.RevisionCode);
+        Assert.Equal("Released", revision.Status);
+        Assert.Equal(1, revision.LineCount);
+
+        var current = await _client.GetFromJsonAsync<CurrentRevisionResponse>(
+            $"/api/products/{product.Id}/bom-revisions/current");
+        Assert.NotNull(current);
+        Assert.Equal(revision.Id, current.Revision.Id);
+        Assert.Single(current.Lines);
+        Assert.Equal("MB-020", current.Lines[0].Component.PartNumber);
+    }
+
+    [Fact]
+    public async Task ComponentCreationPersistsTheComponentCreatedAuditEvent()
+    {
+        var response = await _client.PostAsJsonAsync("/api/components", new
+        {
+            partNumber = "API-COMP-001",
+            name = "API-created component",
+            category = "Accessory",
+            lifecycleStatus = "Active",
+            actor = "Alex Morgan",
+        });
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var component = await response.Content.ReadFromJsonAsync<ComponentDto>();
+        Assert.NotNull(component);
+        Assert.Equal("API-COMP-001", component.PartNumber);
+
+        var audit = await _client.GetFromJsonAsync<PagedResponse<AuditEventDto>>(
+            $"/api/audit?entityType=Component&entityId={component.Id}");
+        Assert.NotNull(audit);
+        var createdEvent = Assert.Single(audit.Items);
+        Assert.Equal("ComponentCreated", createdEvent.Action);
+        Assert.Equal("Alex Morgan", createdEvent.Actor);
+        Assert.Equal(component.Id, createdEvent.EntityId);
     }
 
     [Fact]

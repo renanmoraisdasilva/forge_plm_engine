@@ -145,12 +145,13 @@ export interface CreateEcoRequest {
   lines: EcoLineRequest[];
 }
 
-/** PUT body: same as POST minus productId and actor. */
+/** PUT body: product is fixed; actor identifies the person editing the draft. */
 export interface UpdateEcoRequest {
   title: string;
   reasonForChange: string;
   impactAssessment: string | null;
   requestedEffectiveAtUtc: string | null;
+  actor: string;
   lines: EcoLineRequest[];
 }
 

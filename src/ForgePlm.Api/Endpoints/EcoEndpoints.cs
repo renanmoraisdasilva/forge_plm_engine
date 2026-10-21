@@ -124,6 +124,7 @@ public static class EcoEndpoints
                 request.ReasonForChange,
                 request.ImpactAssessment,
                 request.RequestedEffectiveAtUtc,
+                request.Actor,
                 ToLineCommands(request.Lines)),
             cancellationToken);
 

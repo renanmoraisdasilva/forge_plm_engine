@@ -57,13 +57,14 @@ describe('LiveEcoApi — contract endpoints', () => {
     expect(post).toHaveBeenCalledWith('/ecos', createRequest);
   });
 
-  it('updates a draft with PUT and no productId or actor', async () => {
+  it('updates a draft with PUT and the current actor but no productId', async () => {
     const { client, put } = fakeHttp();
     const update = {
       title: 'Replace the motherboard',
       reasonForChange: 'Obsolete part',
       impactAssessment: null,
       requestedEffectiveAtUtc: null,
+      actor: 'Jordan Lee',
       lines: [line],
     };
     await new LiveEcoApi(client).updateEco(id, update);

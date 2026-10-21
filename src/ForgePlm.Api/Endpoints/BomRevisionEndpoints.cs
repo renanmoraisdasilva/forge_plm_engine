@@ -1,4 +1,5 @@
 using ForgePlm.Api.Contracts;
+using ForgePlm.Api.Application;
 using ForgePlm.Api.Persistence;
 using ForgePlm.Domain.BillOfMaterials;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,10 @@ public static class BomRevisionEndpoints
             .WithName("ListBomRevisions")
             .WithSummary("Paged revision history for one product, newest first.");
 
+        app.MapPost("/api/products/{productId:guid}/bom-revisions/initial", CreateInitialAsync)
+            .WithName("CreateInitialBom")
+            .WithSummary("Create a product's first released BOM. Later revisions require an ECO.");
+
         app.MapGet("/api/products/{productId:guid}/bom-revisions/current", GetCurrentAsync)
             .WithName("GetCurrentBomRevision")
             .WithSummary("The product's single Released revision, with its lines. 404 if none is released.");
@@ -27,6 +32,23 @@ public static class BomRevisionEndpoints
             .WithSummary("Paged lines of one revision, each carrying its component summary.");
 
         return app;
+    }
+
+    private static async Task<IResult> CreateInitialAsync(
+        CreateInitialBom useCase,
+        Guid productId,
+        CreateInitialBomRequest request,
+        CancellationToken cancellationToken)
+    {
+        var revision = await useCase.ExecuteAsync(
+            productId,
+            new NewInitialBom(
+                request.Lines?.Select(line => new NewInitialBomLine(line.ComponentId, line.Quantity, line.Unit)).ToList(),
+                request.Actor),
+            cancellationToken);
+        return revision is null
+            ? NotFoundProduct(productId)
+            : Results.Created($"/api/bom-revisions/{revision.Id}", revision.ToDto(revision.Lines.Count));
     }
 
     private static async Task<IResult> ListForProductAsync(

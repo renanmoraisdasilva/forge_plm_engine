@@ -348,6 +348,13 @@ namespace ForgePlm.Api.Persistence.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("title");
 
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin")
+                        .HasDefaultValueSql("xmin");
+
                     b.HasKey("Id")
                         .HasName("pk_engineering_change_orders");
 

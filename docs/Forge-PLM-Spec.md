@@ -334,6 +334,7 @@ The Components endpoints below are mandatory even though there is no Components 
 - `POST /api/components`
 
 ### BOM revisions
+- `POST /api/products/{productId}/bom-revisions/initial` â€” create the first released revision `A` for an active product with no revision history; every later revision goes through an ECO.
 - `GET /api/products/{productId}/bom-revisions`
 - `GET /api/products/{productId}/bom-revisions/current`
 - `GET /api/bom-revisions/{revisionId}`
@@ -351,6 +352,9 @@ The Components endpoints below are mandatory even though there is no Components 
 
 ### Audit
 - `GET /api/audit?entityType=&entityId=&page=&pageSize=`
+
+Editing a draft ECO writes an `EcoDraftUpdated` event with before/after snapshots, in the same
+database save as the edited ECO and replacement lines.
 
 For state-changing endpoints, use a request DTO with the actor identifier for this demo (e.g. `actor`), reviewer comments, rejection reason, or effective date as appropriate. Clearly document that production identity should come from authenticated claims, not a client-supplied actor field.
 
@@ -449,7 +453,7 @@ Use the Stitch screenshots as visual reference, but remove unnecessary detail. I
 - Search and a simple lifecycle status filter
 - Table: part number, name, category, current released revision, lifecycle status
 - Row click opens product detail
-- No `Create Product` UI in v1. `POST /api/products` exists for API completeness and seeding only.
+- No catalog-creation UI in v1. Products and components can be created through the API; a product's first BOM is initialized through the initial-revision endpoint, and later revisions go through ECOs.
 
 ### B. Product details
 - Header with name, part number, lifecycle status, current released revision

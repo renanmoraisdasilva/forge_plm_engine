@@ -9,10 +9,12 @@ public static class AuditActions
     public const string ProductCreated = "ProductCreated";
     public const string ComponentCreated = "ComponentCreated";
     public const string EcoCreated = "EcoCreated";
+    public const string EcoDraftUpdated = "EcoDraftUpdated";
     public const string EcoSubmitted = "EcoSubmitted";
     public const string EcoApproved = "EcoApproved";
     public const string EcoRejected = "EcoRejected";
     public const string RevisionReleased = "RevisionReleased";
+    public const string InitialRevisionReleased = "InitialRevisionReleased";
 }
 
 /// <summary>

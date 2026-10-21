@@ -72,6 +72,25 @@ public class BomRevisionTests
     }
 
     [Fact]
+    public void AnInitialReleasedBaselineStartsAtRevisionAWithReleaseAndEffectivityTimes()
+    {
+        var revision = BomRevision.CreateReleasedBaseline(
+            ProductId,
+            "A",
+            [Line(TestData.Motherboard020)],
+            "Alex Morgan",
+            TestData.Now,
+            TestData.Now);
+
+        Assert.Equal(BomRevisionStatus.Released, revision.Status);
+        Assert.Equal("A", revision.RevisionCode);
+        Assert.Null(revision.SourceEcoId);
+        Assert.Equal(TestData.Now, revision.ReleasedAtUtc);
+        Assert.Equal(TestData.Now, revision.EffectiveAtUtc);
+        Assert.Single(revision.Lines);
+    }
+
+    [Fact]
     public void DT03_AnApprovedRevisionCannotBeEdited()
     {
         var revision = BomRevision.CreateApproved(

@@ -14,9 +14,9 @@ With PostgreSQL (spec §4), there is a native mechanism for a version token that
 
 Two independent defences, because they fail differently.
 
-**1. Optimistic concurrency — `xmin` on `Product`.**
+**1. Optimistic concurrency — `xmin` on `Product` and `EngineeringChangeOrder`.**
 
-`Product` carries a shadow `xmin` property configured as a concurrency token. Approve and release both load the product row and write through it inside their transaction. If another transaction committed a release in the meantime, `xmin` has changed, EF throws `DbUpdateConcurrencyException`, and the endpoint maps it to `409 Conflict` with `conflictType: concurrency-conflict`. (`stale-base-revision` is the separate, deterministic check that the ECO's base revision is still the product's current released revision; it is not the `xmin` failure.)
+`Product` and `EngineeringChangeOrder` carry shadow `xmin` properties configured as concurrency tokens. Approve and release load and write the product row inside their transaction; every ECO edit or state transition writes the ECO row. If another transaction committed a conflicting write after the row was read, `xmin` has changed, EF throws `DbUpdateConcurrencyException`, and the endpoint maps it to `409 Conflict` with `conflictType: concurrency-conflict`. (`stale-base-revision` remains the separate, deterministic check that the ECO's base revision is still current.) This prevents stale draft edits, duplicate submissions, and competing approve/reject decisions from silently overwriting one another.
 
 *Amended during Slice 2.* This ADR originally named Npgsql's `UseXminAsConcurrencyToken()` helper as the mechanism. That extension was **removed in Npgsql EF Core 10**, so the three calls it made are now written explicitly:
 
@@ -27,7 +27,7 @@ builder.Property<uint>("xmin")
     .HasDefaultValueSql("xmin");   // the system column supplies the value
 ```
 
-The generated migration confirms this is equivalent to the removed helper: `type: "xid", rowVersion: true, defaultValueSql: "xmin"`. The property is a shadow property, so `xmin` never appears in the domain model. The decision itself is unchanged — only the spelling of its implementation.
+The generated migrations confirm this is equivalent to the removed helper: `type: "xid", rowVersion: true, defaultValueSql: "xmin"`. The property is a shadow property, so `xmin` never appears in the domain model. The decision itself is unchanged — only the spelling of its implementation.
 
 **2. Database enforcement — partial unique index.**
 

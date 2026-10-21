@@ -324,6 +324,7 @@ export function EcoForm() {
           reasonForChange: reason.trim(),
           impactAssessment: impact.trim() || null,
           requestedEffectiveAtUtc: fromLocalInputValue(requestedLocal),
+          actor,
           lines: buildLineRequests(),
         });
       } else {

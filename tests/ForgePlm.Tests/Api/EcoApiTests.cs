@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using ForgePlm.Api.Contracts;
 using ForgePlm.Api.Seed;
+using ForgePlm.Domain.Audit;
 using ForgePlm.Domain.EngineeringChanges;
 using ForgePlm.Domain.Products;
 using ForgePlm.Tests.Integration;
@@ -265,6 +266,7 @@ public class EcoApiTests(PostgresFixture fixture) : IAsyncLifetime
             "A revised reason.",
             "A revised impact assessment.",
             new DateTime(2026, 12, 1, 0, 0, 0, DateTimeKind.Utc),
+            "Jordan Lee",
             [new EcoLineRequest(EngineeringChangeType.ChangeQuantity, DemoSeed.Ram032Id, null, 16, "Double the memory")]);
 
         var put = await _client.PutAsJsonAsync($"/api/ecos/{created.Id}", update, ApiJson);
@@ -276,6 +278,16 @@ public class EcoApiTests(PostgresFixture fixture) : IAsyncLifetime
         Assert.Equal("A revised reason.", updated.ReasonForChange);
         Assert.Equal(16, updated.Lines.Single().NewQuantity);
         Assert.Equal("ChangeQuantity", updated.Lines.Single().ChangeType);
+
+        var auditPage = await _client.GetFromJsonAsync<PagedResponse<AuditEventDto>>(
+            $"/api/audit?entityType=EngineeringChangeOrder&entityId={created.Id}&pageSize=200");
+        Assert.NotNull(auditPage);
+        var editEvent = Assert.Single(auditPage.Items, item => item.Action == AuditActions.EcoDraftUpdated);
+        Assert.Equal("Jordan Lee", editEvent.Actor);
+        Assert.Equal("Original title", editEvent.Details.GetProperty("before").GetProperty("title").GetString());
+        Assert.Equal("Edited title", editEvent.Details.GetProperty("after").GetProperty("title").GetString());
+        Assert.Equal("ReplaceComponent", editEvent.Details.GetProperty("before").GetProperty("lines")[0].GetProperty("changeType").GetString());
+        Assert.Equal("ChangeQuantity", editEvent.Details.GetProperty("after").GetProperty("lines")[0].GetProperty("changeType").GetString());
 
         await PostActionAsync($"/api/ecos/{created.Id}/submit", new ActorRequest("Alex Morgan"));
 
@@ -505,7 +517,7 @@ public class EcoApiTests(PostgresFixture fixture) : IAsyncLifetime
 
         var put = await _client.PutAsJsonAsync(
             $"/api/ecos/{missing}",
-            new UpdateEcoRequest("title", "reason", null, null, [ReplaceMotherboardLine()]),
+            new UpdateEcoRequest("title", "reason", null, null, "Alex Morgan", [ReplaceMotherboardLine()]),
             ApiJson);
         Assert.Equal(HttpStatusCode.NotFound, put.StatusCode);
 

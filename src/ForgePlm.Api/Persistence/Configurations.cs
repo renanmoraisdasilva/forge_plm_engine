@@ -187,6 +187,15 @@ internal sealed class EngineeringChangeOrderConfiguration : IEntityTypeConfigura
 {
     public void Configure(EntityTypeBuilder<EngineeringChangeOrder> builder)
     {
+        // ECO transitions are concurrent writes too: an edit racing submission or an
+        // approval racing rejection must not both commit from the same observed status.
+        // PostgreSQL's system xmin column gives each persisted ECO the same optimistic
+        // concurrency protection used by Product, without adding a domain property.
+        builder.Property<uint>("xmin")
+            .IsConcurrencyToken()
+            .ValueGeneratedOnAddOrUpdate()
+            .HasDefaultValueSql("xmin");
+
         builder.Property(e => e.EcoNumber).HasMaxLength(EngineeringChangeOrder.MaxEcoNumberLength).IsRequired();
         builder.Property(e => e.Title).HasMaxLength(EngineeringChangeOrder.MaxTitleLength).IsRequired();
         builder.Property(e => e.ReasonForChange).HasMaxLength(EngineeringChangeOrder.MaxTextLength).IsRequired();

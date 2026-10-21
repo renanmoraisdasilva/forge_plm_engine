@@ -17,6 +17,23 @@ frontend. Keep it aligned with `src/ForgePlm.Api/Endpoints/` and the DTOs in
   `conflictType`; see [implementation decision notes](DECISIONS.md#errors).
 - There are **no DELETE endpoints anywhere** (spec §16). A draft ECO cannot be cancelled.
 
+### `POST /api/products/{productId}/bom-revisions/initial` → 201 `BomRevisionDto`
+
+Creates revision `A` as the product's first released BOM. The product must be active and have no
+existing revision history; every component must exist and be active, and the lines must be
+non-empty with unique components and positive quantities. The request body is:
+
+```jsonc
+{
+  "actor": "string (required)",
+  "lines": [{ "componentId": "guid", "quantity": 1, "unit": "Each" }]
+}
+```
+
+The initial release is effective immediately, and an `InitialRevisionReleased` audit event is
+written atomically with the revision. This is the only path for setting up a new product's first
+configuration; every later revision must be proposed through an ECO.
+
 ---
 
 ## Endpoints
@@ -71,8 +88,11 @@ second change to the same target would be silently discarded.
 
 ### `PUT /api/ecos/{ecoId}` → 200 `EcoDetailDto`
 
-Draft only. Same body as `POST` minus `productId` and `actor` (the creator is immutable).
-Editing a non-draft ECO is **409** `invalid-transition`.
+Draft only. Same fields as `POST` minus `productId`; `actor` is required and identifies the
+editor (the creator remains immutable). Each successful edit writes an `EcoDraftUpdated` audit
+event in the same save as the replacement fields and lines. Its `details` contains complete
+`before` and `after` snapshots of the draft, including change lines. Editing a non-draft ECO is
+**409** `invalid-transition`.
 
 ### `POST /api/ecos/{ecoId}/submit` → 200 `EcoDetailDto`
 
@@ -177,7 +197,7 @@ AuditEventDto {
   "id": "guid",
   "occurredAtUtc": "datetime",
   "actor": "Jordan Lee",
-  "action": "EcoCreated | EcoSubmitted | EcoApproved | EcoRejected | RevisionReleased | ProductCreated | ComponentCreated",
+  "action": "ProductCreated | ComponentCreated | InitialRevisionReleased | EcoCreated | EcoDraftUpdated | EcoSubmitted | EcoApproved | EcoRejected | RevisionReleased",
   "entityType": "string",
   "entityId": "guid",
   "details": "object"
