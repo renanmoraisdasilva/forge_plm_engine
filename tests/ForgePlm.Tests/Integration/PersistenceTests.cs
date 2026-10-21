@@ -1,0 +1,236 @@
+using ForgePlm.Api.Persistence;
+using ForgePlm.Domain.BillOfMaterials;
+using ForgePlm.Domain.Components;
+using ForgePlm.Domain.Products;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
+
+namespace ForgePlm.Tests.Integration;
+
+/// <summary>
+/// Persistence behaviour that the schema is responsible for (spec §11, ADR-004).
+///
+/// These run against the real PostgreSQL container. Anything a test here "proves" about
+/// transactions, uniqueness or concurrency would be meaningless on the in-memory provider,
+/// which §11 explicitly forbids for such claims.
+///
+/// Each test gets its own database, so no test's state can leak into another regardless of
+/// execution order.
+/// </summary>
+[Collection(PostgresCollection.Name)]
+public class PersistenceTests(PostgresFixture fixture)
+{
+    /// <summary>
+    /// IT-08 — seed data is idempotent: a second application changes nothing.
+    ///
+    /// This caught a real bug during Slice 2. The seed helper took an id for the existence
+    /// check and a separate factory that minted its own Guid, so the audit row was re-inserted
+    /// on every startup: 7 components (correct, they passed the id through) but 2, then 3,
+    /// audit events. The fix made the factory receive the id, so the mistake is unrepresentable.
+    /// </summary>
+    [Fact]
+    public async Task IT08_SeedingTwiceChangesNothing()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+
+        await database.SeedAsync();
+        var afterFirst = await SnapshotAsync(database);
+
+        await database.SeedAsync();
+        var afterSecond = await SnapshotAsync(database);
+
+        Assert.Equal(afterFirst, afterSecond);
+    }
+
+    /// <summary>IT-08's companion: the seed produces the demo scenario exactly as spec §10 asks.</summary>
+    [Fact]
+    public async Task IT08_SeedProducesTheDemoBaseline()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        await using var db = database.CreateDbContext();
+
+        var product = await db.Products.SingleAsync();
+        Assert.Equal("SERVER-100", product.PartNumber);
+        Assert.Equal(ProductLifecycleStatus.Active, product.LifecycleStatus);
+
+        Assert.Equal(7, await db.Components.CountAsync());
+
+        var revision = await db.BomRevisions.SingleAsync();
+        Assert.Equal("B", revision.RevisionCode);
+        Assert.Equal(BomRevisionStatus.Released, revision.Status);
+        Assert.Equal(6, await db.BomLines.CountAsync(l => l.BomRevisionId == revision.Id));
+    }
+
+    /// <summary>
+    /// IT-09 — a duplicate part number is refused by the database, and the domain's case
+    /// normalisation is what makes that refusal case-insensitive in practice.
+    ///
+    /// These are two separate facts, and the distinction matters:
+    ///
+    ///   * the index is a plain unique index on the stored column, so it is case-*sensitive*;
+    ///   * the domain normalises to upper case at every entry point, so `server-100` and
+    ///     `SERVER-100` reach the column as the same value and collide.
+    ///
+    /// An earlier version of this test asserted that the *index* caught a case variant written
+    /// directly through EF. It did not — no exception was thrown — which is exactly why the
+    /// normalisation has to live in the domain rather than being assumed of the schema.
+    /// </summary>
+    [Fact]
+    public async Task IT09_CaseVariantPartNumbersCollideBecauseTheDomainNormalises()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+
+        await using var db = database.CreateDbContext();
+        db.Products.Add(Product.Create("SERVER-100", "Compute Server", "Server", ProductLifecycleStatus.Active, DateTime.UtcNow));
+        await db.SaveChangesAsync();
+
+        // A different case and padding, entering through the domain exactly as the API would.
+        var duplicate = Product.Create("  server-100  ", "Duplicate", "Server", ProductLifecycleStatus.Active, DateTime.UtcNow);
+
+        Assert.Equal("SERVER-100", duplicate.PartNumber);
+
+        db.Products.Add(duplicate);
+
+        var ex = await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync());
+
+        Assert.Equal(PostgresErrorCodes.UniqueViolation, Assert.IsType<PostgresException>(ex.InnerException).SqlState);
+    }
+
+    /// <summary>
+    /// IT-09's second half — the constraint genuinely lives in the schema, not only in the
+    /// domain. Writing the same value twice while bypassing the factories entirely is still
+    /// refused, so a future endpoint that skipped the domain could not silently fork a part.
+    /// </summary>
+    [Fact]
+    public async Task IT09_PartNumberUniquenessIsEnforcedByTheDatabaseItself()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+
+        await using var db = database.CreateDbContext();
+        db.Products.Add(Product.Create("SERVER-100", "Compute Server", "Server", ProductLifecycleStatus.Active, DateTime.UtcNow));
+        await db.SaveChangesAsync();
+
+        var duplicate = Product.Create("SERVER-100-DUPLICATE", "Duplicate", "Server", ProductLifecycleStatus.Active, DateTime.UtcNow);
+
+        // Overwrite the stored value after construction, so the insert is a raw write rather
+        // than something the domain would have normalised or rejected.
+        typeof(Product).GetProperty(nameof(Product.PartNumber))!.SetValue(duplicate, "SERVER-100");
+        db.Products.Add(duplicate);
+
+        var ex = await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync());
+
+        var postgres = Assert.IsType<PostgresException>(ex.InnerException);
+        Assert.Equal(PostgresErrorCodes.UniqueViolation, postgres.SqlState);
+        Assert.Contains("ux_products_part_number", postgres.Message);
+    }
+
+    /// <summary>
+    /// IT-10 — the partial unique index refuses a second `Released` revision for one product.
+    ///
+    /// ADR-004's second line of defence. The application logic in slice 5/6 prevents this too,
+    /// but the schema must refuse it regardless, because that is the invariant that actually
+    /// protects the demo's historical-integrity claim.
+    /// </summary>
+    [Fact]
+    public async Task IT10_OnlyOneReleasedRevisionPerProductIsAllowedByTheSchema()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        await using var db = database.CreateDbContext();
+        var product = await db.Products.SingleAsync();
+        var component = await db.Components.FirstAsync();
+
+        // A second revision in `Released` status for the same product, inserted directly so the
+        // test exercises the index rather than the aggregate's release() method.
+        var second = BomRevision.CreateReleasedBaseline(
+            product.Id,
+            "C",
+            [BomLine.Create(component.Id, 1, "Each")],
+            createdBy: "Test",
+            utcNow: DateTime.UtcNow,
+            effectiveAtUtc: DateTime.UtcNow);
+
+        db.BomRevisions.Add(second);
+
+        var ex = await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync());
+
+        var postgres = Assert.IsType<PostgresException>(ex.InnerException);
+        Assert.Equal(PostgresErrorCodes.UniqueViolation, postgres.SqlState);
+        Assert.Contains("ux_bom_revisions_one_released_per_product", postgres.Message);
+    }
+
+    /// <summary>IT-10's positive case: an `Approved` revision may coexist with a `Released` one.</summary>
+    [Fact]
+    public async Task AnApprovedRevisionMayCoexistWithAReleasedOne()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        await using var db = database.CreateDbContext();
+        var product = await db.Products.SingleAsync();
+        var component = await db.Components.FirstAsync();
+
+        var approved = BomRevision.CreateApproved(
+            product.Id,
+            "C",
+            [BomLine.Create(component.Id, 1, "Each")],
+            createdBy: "Test",
+            utcNow: DateTime.UtcNow,
+            sourceEcoId: Guid.NewGuid());
+
+        db.BomRevisions.Add(approved);
+        await db.SaveChangesAsync();
+
+        Assert.Equal(2, await db.BomRevisions.CountAsync(r => r.ProductId == product.Id));
+    }
+
+    /// <summary>
+    /// A duplicate revision code for the same product is refused, so `A → B → C` cannot fork.
+    /// </summary>
+    [Fact]
+    public async Task DuplicateRevisionCodeForTheSameProductIsRefused()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        await using var db = database.CreateDbContext();
+        var product = await db.Products.SingleAsync();
+        var component = await db.Components.FirstAsync();
+
+        db.BomRevisions.Add(BomRevision.CreateApproved(
+            product.Id,
+            "B",
+            [BomLine.Create(component.Id, 1, "Each")],
+            createdBy: "Test",
+            utcNow: DateTime.UtcNow,
+            sourceEcoId: Guid.NewGuid()));
+
+        var ex = await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync());
+
+        var postgres = Assert.IsType<PostgresException>(ex.InnerException);
+        Assert.Equal(PostgresErrorCodes.UniqueViolation, postgres.SqlState);
+        Assert.Contains("ux_bom_revisions_product_revision_code", postgres.Message);
+    }
+
+    private static async Task<string> SnapshotAsync(IsolatedDatabase database)
+    {
+        await using var db = database.CreateDbContext();
+
+        var components = await db.Components.OrderBy(c => c.Id).Select(c => c.Id).ToListAsync();
+        var products = await db.Products.OrderBy(p => p.Id).Select(p => p.Id).ToListAsync();
+        var revisions = await db.BomRevisions.OrderBy(r => r.Id).Select(r => r.Id).ToListAsync();
+        var lines = await db.BomLines.OrderBy(l => l.Id).Select(l => l.Id).ToListAsync();
+        var audit = await db.AuditEvents.OrderBy(a => a.Id).Select(a => a.Id).ToListAsync();
+
+        // Ids only: if the seed inserted a duplicate row with a fresh Guid, the count and the
+        // id list both change, which is precisely the failure mode this test exists to catch.
+        return string.Join("|", components.Select(i => i.ToString()))
+             + "#" + string.Join("|", products.Select(i => i.ToString()))
+             + "#" + string.Join("|", revisions.Select(i => i.ToString()))
+             + "#" + string.Join("|", lines.Select(i => i.ToString()))
+             + "#" + string.Join("|", audit.Select(i => i.ToString()));
+    }
+}
