@@ -1,7 +1,7 @@
 # Forge PLM — Frontend Slice Record (Slice 7)
 
 - **Written:** 2026-10-21
-- **Owner:** Agent A (frontend). Agent B owns `IMPLEMENTATION.md`; the merge is still open (§6).
+- **Owner:** Agent A (frontend). This record has been merged into `IMPLEMENTATION.md` (§2, §4, §10).
 - **Status:** converged — every screen calls the live API. The contract mock, the mode probe and
   the `VITE_ECO_API_MODE` switch were removed once Slices 4–6 landed.
 - **Read alongside:** [`HANDOFF.md`](HANDOFF.md) §8, [`ECO-API-CONTRACT.md`](ECO-API-CONTRACT.md),
@@ -116,10 +116,10 @@ Observed live, with no mock note anywhere:
    `wwwroot/index.html` exists. `http://localhost:5199/` is a 404; the SPA runs only through the
    Vite dev server. Wiring a node stage that builds `frontend/` into `wwwroot` closes demo mode
    (A-16). That file is in Agent B's ownership, so it was left untouched.
-2. **`docs/IMPLEMENTATION.md` is stale.** It still says “Slice 7 (frontend) next”; this record
-   needs merging into it by whoever owns that file.
-3. **`Product.UpdatedAtUtc` is still creation-only**, the known rough edge from HANDOFF §10.
-4. Optional hardening: an E2E test for the protected path, and UI coverage of the 409/stale-base
+2. **The backend working tree is uncommitted and newer than the image.** It includes the
+   `AddEcoIntegrityConstraints` migration, so the running container must be rebuilt after those
+   edits are committed.
+3. Optional hardening: an E2E test for the protected path, and UI coverage of the 409/stale-base
    branches.
 
 ---

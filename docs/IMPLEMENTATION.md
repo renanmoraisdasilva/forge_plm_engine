@@ -2,11 +2,11 @@
 
 **Living document.** Updated at the end of every slice. Never claims a test passed unless it was actually run.
 
-- **Last updated:** 2026-10-21 (end of Slices 4–6)
-- **Current phase:** Slices 1–6 complete — ECO write path and audit read; Slice 7 (frontend) next
-- **Build state:** `dotnet build ForgePlm.slnx` — succeeded, 0 warnings, 0 errors (`TreatWarningsAsErrors` is on)
-- **Test state:** `dotnet test ForgePlm.slnx` — **137 passed, 0 failed** (1 m 34 s; 94 domain + 22 integration against real PostgreSQL + 21 API)
-- **Run state:** `docker compose up -d --wait` — both containers healthy on port 5199. The ECO write path was exercised through HTTP against the local pipeline (see `EcoApiTests.TheProtectedDemoPathWorksEndToEnd`); the container was not rebuilt after the last code change.
+- **Last updated:** 2026-10-21 (end of Slice 7)
+- **Current phase:** Slices 1–7 complete — ECO write path, audit read, and the live frontend; Slice 8 (tests, errors, README) remains
+- **Build state:** `dotnet build ForgePlm.slnx` — succeeded, 0 warnings, 0 errors (`TreatWarningsAsErrors` is on). `npm run build` in `frontend/` — passes.
+- **Test state:** `dotnet test ForgePlm.slnx` — **137 passed, 0 failed** (1 m 34 s; 94 domain + 22 integration against real PostgreSQL + 21 API). Frontend: `npm test` — **4 files, 37 tests passed** (Vitest).
+- **Run state:** `docker compose up -d --wait` — both containers healthy on port 5199. The backend image was rebuilt from the committed tree for Slice 7, and `/api/products`, `/api/ecos` and `/api/audit` all answer 200. It predates the uncommitted backend edits now in the working tree (see §10). The protected path was driven end to end in a browser against this container.
 
 > Note: .NET 10 writes the solution as `ForgePlm.slnx` (XML solution format), not `.sln`. Use `dotnet build ForgePlm.slnx`.
 
@@ -45,8 +45,8 @@ Definition of done: `Forge-PLM-Spec.md` §12.
 | **4. ECO creation & submission** | Create ECO (captures base released revision), edit draft, submit; actor switch plumbing | ✅ **complete** |
 | **5. Approval transaction** | Approve ECO → copy base lines → apply changes → new `Approved` revision, all in one transaction; stale-base 409 | ✅ **complete** |
 | **6. Rejection & release** | Reject with reason; release → supersede + effective date + `Applied`; concurrency conflict test | ✅ **complete** |
-| **7. Frontend** | Vite + React + TS + Tailwind; shell, Products list, Product detail, ECO list, ECO detail, Create/Edit ECO | ⬜ not started |
-| **8. Tests, errors, README** | Postgres-backed integration tests; error states; README with commands, decisions, limitations | 🟡 backend half complete; README pending |
+| **7. Frontend** | Vite + React + TS + Tailwind; shell, Products list, Product detail, ECO list, ECO detail, Create/Edit ECO | ✅ **complete — live API; `npm run build` and 37 unit tests pass; protected path verified in a browser** |
+| **8. Tests, errors, README** | Postgres-backed integration tests; error states; README with commands, decisions, limitations | 🟡 backend tests complete; `frontend/README.md` added; root README and error-state polish pending |
 
 Slices are delivered in order. Nothing in the protected journey is cut to save a slice.
 
@@ -169,9 +169,14 @@ Status: ⬜ not written · 🟡 written, not run · ✅ run and passing · ❌ r
 
 | # | Check | Status |
 |---|---|---|
-| FE-01 | `npm run build` (tsc + vite) passes | ⬜ |
-| FE-02 | Invalid actions disabled per ECO status (no fake status changes in the client) | ⬜ |
-| FE-03 | Approve / reject / release require confirmation | ⬜ |
+| FE-01 | `npm run build` (tsc + vite) passes | ✅ `npm run build` passes; `npm test` 4 files / 37 tests |
+| FE-02 | Invalid actions disabled per ECO status (no fake status changes in the client) | ✅ matrix in `frontend/src/lib/ecoStatus.ts`; checked on Draft, Submitted, Approved, Rejected and Applied |
+| FE-03 | Approve / reject / release require confirmation | ✅ `ConfirmDialog` shows the current actor; checked for approve and reject |
+
+> Verified in a browser against the rebuilt container: create ECO (MB-020 → MB-021) → submit →
+> approve → release → **Applied**; the product advanced to revision C, its BOM shows MB-021, and
+> its Revisions tab shows C `Released` / B `Superseded`. A second ECO covered draft edit (PUT),
+> submit and reject. Screens C/D/E no longer use a mock adapter.
 
 ### Gates run before every slice is called done
 
@@ -651,9 +656,13 @@ Products -> SERVER-100 (released B)
   stays in the list. The contract says so; the UI should not imply otherwise.
 - **No scheduler exists.** A future effective date is a label; "current" is decided by revision
   status, never by the date.
-- **The container was not rebuilt after the last domain change.** The HTTP path was verified
-  through `WebApplicationFactory`, and `docker compose` is healthy, but the image predates the
-  final `UpdateDraft` ordering fix.
+- **The running container predates the uncommitted backend edits.** The image was rebuilt from
+  the committed tree at the end of Slice 7 and serves `/api` correctly; the working tree has since
+  gained backend changes, including the `AddEcoIntegrityConstraints` migration.
+- **The container does not serve the SPA.** The Dockerfile's Slice 7 node stage is still a
+  placeholder and `Program.cs` registers the SPA fallback only when `wwwroot/index.html` exists,
+  so `http://localhost:5199/` is a 404. The frontend runs on the Vite dev server; adding the build
+  stage closes demo mode (A-16).
 
 ---
 
@@ -668,3 +677,4 @@ Products -> SERVER-100 (released B)
 | 2026-10-21 | **Code review response.** Four items from an independent review. Two were verified and fixed in the domain: the error taxonomy returned `blank-part-number` for six unrelated failures (8 codes added, 6 throw sites corrected, `duplicate-part-number` added to close the contract before endpoints exist, `revision-limit-reached` moved to `409` per spec �7); and `Lines` exposed the backing list, so a released revision could be mutated through a cast (now `_lines.AsReadOnly()`, EF unaffected because it uses field access). Two were tested rather than taken on trust: the predicted release-ordering failure **did not reproduce** � a single `SaveChanges` superseding and releasing did not throw across five runs, though the constraint is real and cannot be deferred, so Slice 6 still ships the ordered design and both halves are pinned by IT-11; and duplicate ECO targets were confirmed to be silently merged by `FirstOrDefault`, now rejected at `ReplaceLines`. **101 tests pass, 0 fail; build clean.** |
 | 2026-10-21 | **Slice 3 - product & BOM read endpoints.** Products and components list/detail, BOM revision history, current revision, revision lines - 8 endpoints, all returning DTOs rather than EF entities, with the `{ items, total, page, pageSize }` shape �7 requires. Built the RFC 7807 mapping **before** the endpoints: `ErrorResponseMapper` plus an `IExceptionHandler`, so a new endpoint cannot forget it. Two findings: (1) registering `AddExceptionHandler` alone was **not enough** - `WebApplication.CreateBuilder` adds the developer exception page in Development, which sits outer in the pipeline and swallowed every exception, so a bad filter returned a 500 with a stack trace where the contract promised a 400; fixed with an explicit `UseExceptionHandler()`. (2) The new API tests failed intermittently (`3D000: database does not exist`, ~2 in 3 runs) because each test constructed its own `PostgresFixture`, whose `DisposeAsync` sweeps **every** test database on the server - so each test dropped the database a parallel test was using. Fixed by joining `PostgresCollection`; verified over five consecutive full-suite runs. **111 tests pass, 0 fail; build clean.** |
 | 2026-10-21 | **Slices 4–6 — ECO write path and audit read.** Create/edit/submit/approve/reject/release plus `GET /api/audit`, implemented to the frozen `ECO-API-CONTRACT.md`. ECO numbers and base revisions are server-resolved; creation retries a number collision up to five times. Approval runs the ten-step §8 transaction; release sequences supersede → save → release → save because the partial unique index cannot be deferred. Every action writes its audit row in the same transaction. **137 tests pass, 0 fail** (94 domain + 22 integration against real PostgreSQL + 21 API); IT-06 and IT-10 were re-run explicitly against PostgreSQL (3/3). Findings: EF tracks a new child with an application-assigned key as `Modified`, so line replacement needs explicit `RemoveRange`/`AddRange`; `UpdateDraft` had to validate lines before assigning fields; PostgreSQL stores microseconds, so the IT-04 date assertion uses a 1 ms tolerance. The frozen contract's 400s for `component-not-active` and `target-component-not-in-base-revision` required changing two domain throw sites; `effective-date-required` was added as an additive code. `Product.UpdatedAtUtc` is now maintained. **Build clean, 0 warnings.** |
+| 2026-10-21 | **Slice 7 — frontend.** Vite 8 + React 19 + TS 7 + Tailwind 4 in `frontend/`: app shell, sidebar with exactly Products and Engineering Changes, actor switch, Products list/detail (live read API), and ECO list/detail/create-edit. Screens C/D/E were first built against the frozen contract behind an in-memory mock and a start-up probe; once Slices 4–6 landed, the probe, the mock, `EcoModeNote` and `VITE_ECO_API_MODE` were deleted and every screen bound directly to `LiveEcoApi`/`LiveProductsApi`. FE-02 is a status matrix in `lib/ecoStatus.ts`; FE-03 is one `ConfirmDialog` showing the current actor. Timestamps are stored/sent in UTC and shown locally with UTC on hover; part numbers are monospaced. **`npm run build` passes; `npm test` 37/37** (ecoStatus, format, http, ecoApi). The protected path was driven in a browser against the rebuilt container (create → submit → approve → release → revision C), plus draft edit (PUT) and reject. Known gap: the Dockerfile still has no SPA build stage, so the container serves `/api` only. |
