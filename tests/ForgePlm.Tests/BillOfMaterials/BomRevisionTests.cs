@@ -17,6 +17,17 @@ public class BomRevisionTests
     }
 
     [Fact]
+    public void AnOverlongUnitIsRejectedByTheDomain()
+    {
+        var ex = Assert.Throws<DomainRuleViolationException>(() => BomLine.Create(
+            TestData.Motherboard020,
+            1,
+            new string('x', BomLine.MaxUnitLength + 1)));
+
+        Assert.Equal(DomainErrorCodes.TextTooLong, ex.Code);
+    }
+
+    [Fact]
     public void DT10_AComponentCanAppearOnlyOncePerRevision()
     {
         var ex = Assert.Throws<DomainRuleViolationException>(

@@ -449,6 +449,13 @@ public class EcoApiTests(PostgresFixture fixture) : IAsyncLifetime
         var blankTitle = await PostJsonAsync("/api/ecos", CreateRequest(title: "  "));
         Assert.Equal(HttpStatusCode.BadRequest, blankTitle.StatusCode);
         Assert.Equal("blank-title", Extension(await ProblemAsync(blankTitle), "code"));
+        Assert.Equal("application/problem+json", blankTitle.Content.Headers.ContentType?.MediaType);
+
+        var blankReason = await PostJsonAsync(
+            "/api/ecos",
+            CreateRequest() with { ReasonForChange = "  " });
+        Assert.Equal(HttpStatusCode.BadRequest, blankReason.StatusCode);
+        Assert.Equal("reason-for-change-required", Extension(await ProblemAsync(blankReason), "code"));
     }
 
     /// <summary>An unknown ECO is 404 from every ECO endpoint, not a 500 or a validation error.</summary>

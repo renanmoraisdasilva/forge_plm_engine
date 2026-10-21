@@ -1,6 +1,9 @@
 using ForgePlm.Api.Persistence;
+using ForgePlm.Api.Seed;
+using ForgePlm.Domain.Audit;
 using ForgePlm.Domain.BillOfMaterials;
 using ForgePlm.Domain.Components;
+using ForgePlm.Domain.EngineeringChanges;
 using ForgePlm.Domain.Products;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -61,6 +64,158 @@ public class PersistenceTests(PostgresFixture fixture)
         Assert.Equal("B", revision.RevisionCode);
         Assert.Equal(BomRevisionStatus.Released, revision.Status);
         Assert.Equal(6, await db.BomLines.CountAsync(l => l.BomRevisionId == revision.Id));
+    }
+
+    /// <summary>
+    /// The baseline records the two facts that actually happened: the product was created and
+    /// revision B was released. Recording only `ProductCreated` with a release note made the
+    /// timeline show the wrong event and no release at all.
+    /// </summary>
+    [Fact]
+    public async Task IT08_BaselineAuditSeparatesProductCreationFromRevisionRelease()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        await using var db = database.CreateDbContext();
+
+        Assert.True(await db.AuditEvents.AnyAsync(audit =>
+            audit.Action == AuditActions.ProductCreated &&
+            audit.EntityType == "Product" &&
+            audit.EntityId == DemoSeed.Server100Id));
+
+        Assert.True(await db.AuditEvents.AnyAsync(audit =>
+            audit.Action == AuditActions.RevisionReleased &&
+            audit.EntityType == "BomRevision" &&
+            audit.EntityId == DemoSeed.RevBId));
+    }
+
+    /// <summary>
+    /// A BOM line is a reference to a component, so the schema refuses an orphan. Before the
+    /// foreign key, an orphan was invisible to the inner-join read while still counted in
+    /// `total` and `lineCount` — a silent inconsistency.
+    /// </summary>
+    [Fact]
+    public async Task ABomLineMustReferenceAnExistingComponent()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        await using var db = database.CreateDbContext();
+        var product = await db.Products.SingleAsync();
+
+        db.BomRevisions.Add(BomRevision.CreateApproved(
+            product.Id,
+            "C",
+            [BomLine.Create(Guid.NewGuid(), 1, "Each")],
+            createdBy: "Test",
+            utcNow: DateTime.UtcNow,
+            sourceEcoId: null));
+
+        var ex = await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync());
+        var postgres = Assert.IsType<PostgresException>(ex.InnerException);
+
+        Assert.Equal(PostgresErrorCodes.ForeignKeyViolation, postgres.SqlState);
+    }
+
+    /// <summary>An ECO line's target is a real component reference, not an unchecked Guid.</summary>
+    [Fact]
+    public async Task AnEcoLineMustReferenceAnExistingComponent()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        await using var db = database.CreateDbContext();
+        var product = await db.Products.SingleAsync();
+        var baseRevision = await db.BomRevisions.SingleAsync(r => r.Status == BomRevisionStatus.Released);
+
+        var eco = EngineeringChangeOrder.Create(
+            "ECO-2026-0091",
+            product.Id,
+            baseRevision.Id,
+            "Orphan reference",
+            "Prove the component FK.",
+            null,
+            null,
+            "Test",
+            DateTime.UtcNow);
+        eco.ReplaceLines([EngineeringChangeLine.ChangeQuantity(Guid.NewGuid(), 2, null)]);
+
+        db.EngineeringChangeOrders.Add(eco);
+
+        var ex = await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync());
+        var postgres = Assert.IsType<PostgresException>(ex.InnerException);
+
+        Assert.Equal(PostgresErrorCodes.ForeignKeyViolation, postgres.SqlState);
+    }
+
+    /// <summary>
+    /// The duplicate-target domain rule is also a unique index, so a write that bypasses the
+    /// aggregate cannot create two changes for the same component.
+    /// </summary>
+    [Fact]
+    public async Task AnEcoCannotHaveTwoLinesForTheSameTargetInTheSchema()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        await using var db = database.CreateDbContext();
+        var product = await db.Products.SingleAsync();
+        var baseRevision = await db.BomRevisions.SingleAsync(r => r.Status == BomRevisionStatus.Released);
+
+        var eco = EngineeringChangeOrder.Create(
+            "ECO-2026-0092",
+            product.Id,
+            baseRevision.Id,
+            "Duplicate target",
+            "Prove the composite index.",
+            null,
+            null,
+            "Test",
+            DateTime.UtcNow);
+        eco.ReplaceLines([EngineeringChangeLine.ChangeQuantity(DemoSeed.Ram032Id, 16, null)]);
+        db.EngineeringChangeOrders.Add(eco);
+        await db.SaveChangesAsync();
+
+        var ex = await Assert.ThrowsAsync<PostgresException>(() => db.Database.ExecuteSqlRawAsync(
+            """
+            INSERT INTO engineering_change_lines
+                (id, change_type, target_component_id, new_quantity, reason, engineering_change_order_id)
+            VALUES ({0}, {1}, {2}, {3}, {4}, {5})
+            """,
+            Guid.NewGuid(),
+            nameof(EngineeringChangeType.ChangeQuantity),
+            DemoSeed.Ram032Id,
+            8,
+            string.Empty,
+            eco.Id));
+
+        Assert.Equal(PostgresErrorCodes.UniqueViolation, ex.SqlState);
+        Assert.Contains("ux_engineering_change_lines_eco_target", ex.Message);
+    }
+
+    /// <summary>The parent link is now required, so an ECO line cannot outlive its ECO.</summary>
+    [Fact]
+    public async Task AnEcoLineCannotExistWithoutAnEco()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        await using var db = database.CreateDbContext();
+
+        var ex = await Assert.ThrowsAsync<PostgresException>(() => db.Database.ExecuteSqlRawAsync(
+            """
+            INSERT INTO engineering_change_lines
+                (id, change_type, target_component_id, new_quantity, reason, engineering_change_order_id)
+            VALUES ({0}, {1}, {2}, {3}, {4}, NULL)
+            """,
+            Guid.NewGuid(),
+            nameof(EngineeringChangeType.ChangeQuantity),
+            DemoSeed.Ram032Id,
+            2,
+            string.Empty));
+
+        Assert.Equal(PostgresErrorCodes.NotNullViolation, ex.SqlState);
     }
 
     /// <summary>
@@ -353,3 +508,4 @@ public class PersistenceTests(PostgresFixture fixture)
              + "#" + string.Join("|", audit.Select(i => i.ToString()));
     }
 }
+

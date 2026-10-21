@@ -9,6 +9,8 @@ namespace ForgePlm.Domain.EngineeringChanges;
 /// </summary>
 public class EngineeringChangeLine
 {
+    public const int MaxReasonLength = 4000;
+
     public Guid Id { get; private set; }
 
     public EngineeringChangeType ChangeType { get; private set; }
@@ -55,7 +57,7 @@ public class EngineeringChangeLine
             ChangeType = EngineeringChangeType.ReplaceComponent,
             TargetComponentId = targetComponentId,
             ReplacementComponentId = replacementComponentId,
-            Reason = (reason ?? string.Empty).Trim(),
+            Reason = DomainText.Optional(reason, MaxReasonLength, "Change line reason"),
         };
     }
 
@@ -73,7 +75,7 @@ public class EngineeringChangeLine
             ChangeType = EngineeringChangeType.ChangeQuantity,
             TargetComponentId = targetComponentId,
             NewQuantity = Quantity.From(newQuantity).Value,
-            Reason = (reason ?? string.Empty).Trim(),
+            Reason = DomainText.Optional(reason, MaxReasonLength, "Change line reason"),
         };
     }
 

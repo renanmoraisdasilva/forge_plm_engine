@@ -97,6 +97,9 @@ namespace ForgePlm.Api.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_bom_lines");
 
+                    b.HasIndex("ComponentId")
+                        .HasDatabaseName("ix_bom_lines_component_id");
+
                     b.HasIndex("BomRevisionId", "ComponentId")
                         .IsUnique()
                         .HasDatabaseName("ux_bom_lines_revision_component");
@@ -222,7 +225,7 @@ namespace ForgePlm.Api.Persistence.Migrations
                         .HasColumnType("character varying(30)")
                         .HasColumnName("change_type");
 
-                    b.Property<Guid?>("EngineeringChangeOrderId")
+                    b.Property<Guid>("EngineeringChangeOrderId")
                         .HasColumnType("uuid")
                         .HasColumnName("engineering_change_order_id");
 
@@ -247,8 +250,15 @@ namespace ForgePlm.Api.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_engineering_change_lines");
 
-                    b.HasIndex("EngineeringChangeOrderId")
-                        .HasDatabaseName("ix_engineering_change_lines_engineering_change_order_id");
+                    b.HasIndex("ReplacementComponentId")
+                        .HasDatabaseName("ix_engineering_change_lines_replacement_component_id");
+
+                    b.HasIndex("TargetComponentId")
+                        .HasDatabaseName("ix_engineering_change_lines_target_component_id");
+
+                    b.HasIndex("EngineeringChangeOrderId", "TargetComponentId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_engineering_change_lines_eco_target");
 
                     b.ToTable("engineering_change_lines");
                 });
@@ -416,6 +426,12 @@ namespace ForgePlm.Api.Persistence.Migrations
                         .HasForeignKey("BomRevisionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("ForgePlm.Domain.Components.Component", null)
+                        .WithMany()
+                        .HasForeignKey("ComponentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ForgePlm.Domain.BillOfMaterials.BomRevision", b =>
@@ -432,7 +448,19 @@ namespace ForgePlm.Api.Persistence.Migrations
                     b.HasOne("ForgePlm.Domain.EngineeringChanges.EngineeringChangeOrder", null)
                         .WithMany("Lines")
                         .HasForeignKey("EngineeringChangeOrderId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ForgePlm.Domain.Components.Component", null)
+                        .WithMany()
+                        .HasForeignKey("ReplacementComponentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ForgePlm.Domain.Components.Component", null)
+                        .WithMany()
+                        .HasForeignKey("TargetComponentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ForgePlm.Domain.EngineeringChanges.EngineeringChangeOrder", b =>

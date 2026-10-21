@@ -38,6 +38,13 @@ if (builder.Environment.IsDevelopment())
 
 var app = builder.Build();
 
+// Development-only OpenAPI document (spec §4). `AddOpenApi` alone registers the generator;
+// `MapOpenApi` is what actually exposes `/openapi/v1.json`.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+
 // A-16: in the demo/run container the API also serves the built SPA, so there is one origin
 // and no CORS. Registered only when a build actually produced an index.html — before Slice 7
 // there is no frontend, and MapFallbackToFile throws at startup if its target is missing.
@@ -79,6 +86,14 @@ app.MapBomRevisionEndpoints();
 // Slices 4–6 — engineering changes, and the audit read their use cases write.
 app.MapEcoEndpoints();
 app.MapAuditEndpoints();
+
+// Once the SPA exists, `MapFallbackToFile` would answer an unknown `/api/...` route with
+// `index.html`. This catch-all is more specific than the file fallback, so an unknown API route
+// stays a 404 ProblemDetails instead of becoming a 200 HTML page.
+app.Map("/api/{**path}", () => Results.Problem(
+    statusCode: StatusCodes.Status404NotFound,
+    title: "API endpoint not found.",
+    detail: "No API route matches this request."));
 
 app.Run();
 

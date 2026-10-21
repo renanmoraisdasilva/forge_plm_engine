@@ -48,21 +48,17 @@ Agent A should also add to `.gitignore` before its first commit: `node_modules/`
 
 ---
 
-## 4. The test-hazard warning — read this twice
+## 4. Parallel test runs — fixed during Slices 4–6
 
-**Agent A must never run `dotnet test`.**
+**Agent A's gate is still `npm run build` plus its own frontend tests.** It does not need
+`dotnet test`, and should not run it.
 
-`PostgresFixture.DisposeAsync` sweeps **every** `forge_plm_test_%` database on the shared
-PostgreSQL server. That is correct for a collection fixture disposed once at the end of a run —
-but two separate `dotnet test` *processes* each run their own fixture, so one agent's suite would
-drop the databases the other was still using.
+The old hazard is gone. `PostgresFixture` previously swept every `forge_plm_test_%` database,
+so two `dotnet test` processes could drop each other's databases. It now names databases with
+a per-fixture run prefix (`forge_plm_test_{runId}_{sequence}`) and sweeps only that prefix.
+Concurrent backend runs are safe; each run still cleans up its own leftovers.
 
-This is not hypothetical. It produced an intermittent failure here an hour ago (`3D000: database
-does not exist`, roughly two runs in three) at single-process level, and the fix was to make tests
-share one collection fixture. Two processes reintroduce it at a level no code change can fix.
-
-Agent A's gate is `npm run build` plus its own frontend unit tests, which touches none of this. If
-Agent A needs to see real data, the seeded container is enough:
+If Agent A needs real data, the seeded container is enough:
 
 ```bash
 docker compose up -d --wait
@@ -91,15 +87,16 @@ Neither agent edits the other's file.
 Verified on the committed tree:
 
 - `dotnet build ForgePlm.slnx` → **0 warnings, 0 errors**
-- `dotnet test ForgePlm.slnx` → **111 passed, 0 failed** (90 domain + 11 integration + 10 API,
+- `dotnet test ForgePlm.slnx` → **155 passed, 0 failed** (104 domain + 27 integration + 24 API,
   against real PostgreSQL 18 in Docker)
-- Verified over five consecutive full-suite runs after the last fix.
-- 15 commits, all local, nothing pushed. `docs/` is deliberately untracked.
+- `docs/` is tracked; `IMPLEMENTATION.md` is the authoritative slice record.
 
-**Done:** Phase 0 · Slice 1 (domain) · Slice 2 (persistence + seed) · Slice 2b (containerised, D-07)
-· Slice 3 (read endpoints + ProblemDetails mapping) · a 4-item code review.
+**Done:** Phase 0 · Slice 1 (domain) · Slice 2 (persistence + seed) · Slice 2b (containerised,
+D-07) · Slice 3 (read endpoints + ProblemDetails mapping) · Slice 4 (ECO create/edit/submit and
+reads) · Slice 5 (approval transaction) · Slice 6 (reject, release, audit read) · the code-review
+fixes recorded in `IMPLEMENTATION.md`.
 
-**Not done:** Slices 4, 5, 6, 7, 8.
+**Not done:** Slice 7 (frontend) and Slice 8 (remaining write endpoints, final polish).
 
 ### Demo entry point
 
@@ -112,29 +109,11 @@ Development keeps `dotnet run` + `npm run dev` for hot reload (D-07: Docker is d
 
 ---
 
-## 7. Agent B — backend scope, in order
+## 7. Agent B — backend scope, completed
 
-| Slice | What | Watch out for |
-|---|---|---|
-| **4** | `POST/PUT /api/ecos`, `POST .../submit`, `GET /api/ecos`, `GET /api/ecos/{id}`, `GET /api/audit` | ECO number is server-generated (A-04) with retry on conflict. `baseReleasedRevisionId` is resolved server-side — see the contract. |
-| **5** | `POST .../approve` — the ten-step transaction | **All ten steps or none.** IT-02, IT-03, IT-07. A partial revision is the worst possible failure here. |
-| **6** | `POST .../reject`, `POST .../release` | **Supersede → save → release → save, one explicit transaction.** Do not batch. IT-04, IT-06, IT-10. |
-
-### The highest-risk item in the project
-
-**IT-06 and IT-10 are the first tests that claim concurrency safety.** `xmin` is configured and
-migrated but has never been exercised. ADR-004 is explicit that no concurrency claim may be made
-until they run against real PostgreSQL.
-
-Do not leave this to the end of a session, and do not report it as passing without a run.
-
-Two supporting facts already measured:
-
-- Releasing the new revision *before* superseding the old one **does** violate
-  `ux_bom_revisions_one_released_per_product` — pinned by
-  `IT11_ReleasingTheNewRevisionBeforeSupersedingTheOldOneViolatesTheIndex`.
-- A single unordered `SaveChanges` happened *not* to throw, stably across five runs. That is an
-  accident of EF's batching, not a guarantee — which is why the ordered design is still required.
+Slices 4–6 are implemented and tested. The implementation record, including the ten-step approval
+transaction and the ordered release transaction, is in `IMPLEMENTATION.md`. The remaining backend
+work is Slice 8: `POST /api/products` and `POST /api/components`, final error states, and README.
 
 ### Error mapping already exists — do not rebuild it
 

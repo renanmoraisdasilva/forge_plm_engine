@@ -21,7 +21,9 @@ public sealed class PageRequest
 
     public int EffectivePageSize => PageSize < 1 ? DefaultPageSize : Math.Min(PageSize, MaxPageSize);
 
-    public int Skip => (EffectivePage - 1) * EffectivePageSize;
+    // Multiply in `long`: `page=2147483647` must not overflow into a negative OFFSET. Clamping
+    // to `int.MaxValue` keeps the query valid; a page that far out is legitimately empty anyway.
+    public int Skip => (int)Math.Min((long)(EffectivePage - 1) * EffectivePageSize, int.MaxValue);
 
     /// <summary>Builds a request from nullable query parameters, applying the spec's defaults.</summary>
     public static PageRequest From(int? page, int? pageSize) =>

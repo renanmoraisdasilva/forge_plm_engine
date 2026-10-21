@@ -1,10 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
 using ForgePlm.Api.Contracts;
+using ForgePlm.Domain.BillOfMaterials;
 using ForgePlm.Tests.Integration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 
 namespace ForgePlm.Tests.Api;
 
@@ -40,12 +42,9 @@ public sealed class ApiApplicationFactory : WebApplicationFactory<Program>
 /// Slice 3 — product and BOM read endpoints (spec §7).
 ///
 /// In `PostgresCollection`, not standalone. xUnit creates a new instance of this class per test
-/// method and runs them in parallel with other collections; an earlier version constructed its
-/// own `PostgresFixture`, and that fixture's `DisposeAsync` sweeps *every* `forge_plm_test_%`
-/// database on the server. Each test was therefore dropping the database a concurrently running
-/// test was still using, surfacing as an intermittent `3D000: database does not exist` from the
-/// startup seed. Sharing the collection fixture makes the sweep run once, when the whole
-/// collection is finished.
+/// method and runs them in parallel with other collections. The collection fixture owns one
+/// run-scoped database prefix, so concurrently running test processes cannot drop each other's
+/// databases (see <see cref="PostgresFixture"/>).
 /// </summary>
 [Collection(PostgresCollection.Name)]
 public class ProductApiTests(PostgresFixture fixture) : IAsyncLifetime
@@ -168,6 +167,10 @@ public class ProductApiTests(PostgresFixture fixture) : IAsyncLifetime
         Assert.NotNull(negative);
         Assert.Equal(1, negative.Page);
         Assert.Single(negative.Items);
+
+        // `(page - 1) * pageSize` used to overflow to a negative OFFSET for int.MaxValue.
+        var huge = await _client.GetAsync("/api/products?page=2147483647");
+        Assert.Equal(HttpStatusCode.OK, huge.StatusCode);
     }
 
     [Fact]
@@ -194,6 +197,55 @@ public class ProductApiTests(PostgresFixture fixture) : IAsyncLifetime
         Assert.Equal(7, page.Total);
         Assert.Contains(page.Items, c => c.PartNumber == "MB-020");
         Assert.Contains(page.Items, c => c.PartNumber == "MB-021");
+    }
+
+    [Fact]
+    public async Task AComponentCanBeFetchedByItsId()
+    {
+        var page = await _client.GetFromJsonAsync<PagedResponse<ComponentDto>>("/api/components?search=MB-021");
+
+        Assert.NotNull(page);
+        var listed = Assert.Single(page.Items);
+
+        var component = await _client.GetFromJsonAsync<ComponentDto>($"/api/components/{listed.Id}");
+
+        Assert.NotNull(component);
+        Assert.Equal(listed.Id, component.Id);
+        Assert.Equal("MB-021", component.PartNumber);
+        Assert.Equal("Active", component.LifecycleStatus);
+    }
+
+    [Fact]
+    public async Task ARevisionCanBeFetchedByItsId()
+    {
+        var product = await SeededProductAsync();
+        var history = await _client.GetFromJsonAsync<PagedResponse<BomRevisionDto>>(
+            $"/api/products/{product.Id}/bom-revisions");
+
+        Assert.NotNull(history);
+        var listed = Assert.Single(history.Items);
+
+        var revision = await _client.GetFromJsonAsync<BomRevisionDto>(
+            $"/api/bom-revisions/{listed.Id}");
+
+        Assert.NotNull(revision);
+        Assert.Equal(listed.Id, revision.Id);
+        Assert.Equal("B", revision.RevisionCode);
+        Assert.Equal("Released", revision.Status);
+        Assert.Equal(6, revision.LineCount);
+    }
+
+    [Fact]
+    public async Task AnUnknownApiRouteIsA404ProblemDetails()
+    {
+        var response = await _client.GetAsync("/api/not-a-real-endpoint");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.NotNull(problem);
+        Assert.Equal(404, problem.Status);
     }
 
     [Fact]
@@ -250,13 +302,32 @@ public class ProductApiTests(PostgresFixture fixture) : IAsyncLifetime
     {
         var product = await SeededProductAsync();
 
+        // Seed a second, older-than-now revision. One row cannot prove an ORDER BY.
+        await using (var db = _database.CreateDbContext())
+        {
+            var released = await db.BomRevisions
+                .Include(revision => revision.Lines)
+                .SingleAsync(revision => revision.Status == BomRevisionStatus.Released);
+
+            var newer = BomRevision.CreateApproved(
+                released.ProductId,
+                "C",
+                released.Lines.Select(line => BomLine.Create(line.ComponentId, line.Quantity, line.Unit)),
+                "Alex Morgan",
+                DateTime.UtcNow,
+                sourceEcoId: null);
+
+            db.BomRevisions.Add(newer);
+            await db.SaveChangesAsync();
+        }
+
         var page = await _client.GetFromJsonAsync<PagedResponse<BomRevisionDto>>(
             $"/api/products/{product.Id}/bom-revisions");
 
         Assert.NotNull(page);
-        var revision = page.Items.Single();
-        Assert.Equal("B", revision.RevisionCode);
-        Assert.Equal(6, revision.LineCount);
+        Assert.Equal(2, page.Total);
+        Assert.Equal("C", page.Items[0].RevisionCode);
+        Assert.Equal("B", page.Items[1].RevisionCode);
     }
 
     [Fact]

@@ -48,6 +48,19 @@ public class ProductTests
     }
 
     [Fact]
+    public void AnOverlongCategoryIsRejectedByTheDomain()
+    {
+        var ex = Assert.Throws<DomainRuleViolationException>(() => Product.Create(
+            "SERVER-100",
+            "Compute Server",
+            new string('x', Product.MaxCategoryLength + 1),
+            ProductLifecycleStatus.Active,
+            TestData.Now));
+
+        Assert.Equal(DomainErrorCodes.TextTooLong, ex.Code);
+    }
+
+    [Fact]
     public void RetiredProductCannotReceiveANewlyReleasedRevision()
     {
         var product = Product.Create("SERVER-100", "Compute Server", "Server", ProductLifecycleStatus.Retired, TestData.Now);

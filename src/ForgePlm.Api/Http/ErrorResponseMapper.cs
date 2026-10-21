@@ -21,7 +21,7 @@ namespace ForgePlm.Api.Http;
 public static class ErrorResponseMapper
 {
     /// <summary>Generic fallback so a constraint added later still produces a sane 409.</summary>
-    private const string UnknownUniqueViolation = "duplicate-value";
+    private const string UnknownUniqueViolation = DomainErrorCodes.DuplicateValue;
 
     /// <summary>
     /// PostgreSQL reports a unique violation by index name, not by meaning. Translating here —
@@ -66,7 +66,9 @@ public static class ErrorResponseMapper
 
         DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } unique } =>
             Problem(
-                StatusCodes.Status409Conflict, "A unique constraint was violated.", unique.Message,
+                StatusCodes.Status409Conflict,
+                "A unique constraint was violated.",
+                "A record with the same unique value already exists.",
                 ConflictTypeFor(unique), ConflictTypeFor(unique)),
 
         _ => null,
@@ -132,7 +134,11 @@ public sealed class ForgePlmExceptionHandler(ILogger<ForgePlmExceptionHandler> l
         }
 
         httpContext.Response.StatusCode = problem.Status ?? StatusCodes.Status500InternalServerError;
-        await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
+        await httpContext.Response.WriteAsJsonAsync(
+            problem,
+            options: null,
+            contentType: "application/problem+json",
+            cancellationToken);
 
         return true;
     }

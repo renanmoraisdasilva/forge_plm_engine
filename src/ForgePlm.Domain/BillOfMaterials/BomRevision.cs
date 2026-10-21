@@ -22,6 +22,8 @@ public enum BomRevisionStatus
 /// </summary>
 public class BomRevision
 {
+    public const int MaxActorLength = 200;
+
     public Guid Id { get; private set; }
 
     public Guid ProductId { get; private set; }
@@ -82,7 +84,8 @@ public class BomRevision
             RevisionCode = Common.RevisionCode.EnsureValid(revisionCode),
             Status = BomRevisionStatus.Approved,
             CreatedAtUtc = utcNow,
-            CreatedBy = string.IsNullOrWhiteSpace(createdBy) ? throw new DomainRuleViolationException(DomainErrorCodes.BlankActor, "Created-by must not be blank.") : createdBy.Trim(),
+            CreatedBy = Common.DomainText.Required(
+                createdBy, MaxActorLength, "Created-by", DomainErrorCodes.BlankActor),
             SourceEcoId = sourceEcoId,
         };
 

@@ -30,6 +30,8 @@ public class EngineeringChangeOrder
 {
     public const int MaxTitleLength = 200;
     public const int MaxTextLength = 4000;
+    public const int MaxEcoNumberLength = 30;
+    public const int MaxActorLength = 200;
 
     public Guid Id { get; private set; }
 
@@ -99,6 +101,13 @@ public class EngineeringChangeOrder
             throw new DomainRuleViolationException(DomainErrorCodes.BlankEcoNumber, "ECO number is required.");
         }
 
+        if (productId == Guid.Empty)
+        {
+            throw new DomainRuleViolationException(
+                DomainErrorCodes.ProductRequired,
+                "An ECO must belong to a product.");
+        }
+
         if (baseReleasedRevisionId == Guid.Empty)
         {
             throw new DomainRuleViolationException(
@@ -107,16 +116,20 @@ public class EngineeringChangeOrder
         }
 
         var normalisedTitle = EnsureTitle(title);
+        var normalisedEcoNumber = DomainText.Required(
+            ecoNumber, MaxEcoNumberLength, "ECO number", DomainErrorCodes.BlankEcoNumber);
+        var normalisedReason = DomainText.Required(
+            reasonForChange, MaxTextLength, "Reason for change", DomainErrorCodes.ReasonForChangeRequired);
 
         return new EngineeringChangeOrder
         {
             Id = id ?? Guid.NewGuid(),
-            EcoNumber = ecoNumber.Trim(),
+            EcoNumber = normalisedEcoNumber,
             Title = normalisedTitle,
             ProductId = productId,
             BaseReleasedRevisionId = baseReleasedRevisionId,
-            ReasonForChange = (reasonForChange ?? string.Empty).Trim(),
-            ImpactAssessment = (impactAssessment ?? string.Empty).Trim(),
+            ReasonForChange = normalisedReason,
+            ImpactAssessment = DomainText.Optional(impactAssessment, MaxTextLength, "Impact assessment"),
             RequestedEffectiveAtUtc = requestedEffectiveAtUtc,
             Status = EngineeringChangeStatus.Draft,
             CreatedBy = EnsureNotBlankActor(createdBy),
@@ -142,11 +155,15 @@ public class EngineeringChangeOrder
         // leave the draft exactly as it was, not half-edited. ReplaceLines only mutates after
         // every rule has passed.
         var normalisedTitle = EnsureTitle(title);
+        var normalisedReason = DomainText.Required(
+            reasonForChange, MaxTextLength, "Reason for change", DomainErrorCodes.ReasonForChangeRequired);
+        var normalisedImpact = DomainText.Optional(impactAssessment, MaxTextLength, "Impact assessment");
+
         ReplaceLines(lines);
 
         Title = normalisedTitle;
-        ReasonForChange = (reasonForChange ?? string.Empty).Trim();
-        ImpactAssessment = (impactAssessment ?? string.Empty).Trim();
+        ReasonForChange = normalisedReason;
+        ImpactAssessment = normalisedImpact;
         RequestedEffectiveAtUtc = requestedEffectiveAtUtc;
     }
 
@@ -197,12 +214,7 @@ public class EngineeringChangeOrder
             throw new DomainRuleViolationException(DomainErrorCodes.EcoLinesRequired, "An ECO must contain at least one change line before submission.");
         }
 
-        if (baseRevision.Id != BaseReleasedRevisionId)
-        {
-            throw new DomainConflictException(
-                DomainErrorCodes.StaleBaseRevision,
-                $"ECO {EcoNumber} was created against revision {baseRevision.RevisionCode}, which is no longer the base revision.");
-        }
+        EnsureBaseRevisionMatches(baseRevision);
 
         foreach (var line in _lines)
         {
@@ -232,7 +244,9 @@ public class EngineeringChangeOrder
         ApprovedRevisionId = approvedRevisionId;
         DecidedBy = EnsureNotBlankActor(reviewer);
         DecidedAtUtc = utcNow;
-        ReviewerComment = string.IsNullOrWhiteSpace(comment) ? null : comment.Trim();
+        ReviewerComment = string.IsNullOrWhiteSpace(comment)
+            ? null
+            : DomainText.Optional(comment, MaxTextLength, "Reviewer comment");
     }
 
     /// <summary>Submitted -> Rejected, with a non-blank reason (spec §5.4).</summary>
@@ -250,7 +264,7 @@ public class EngineeringChangeOrder
         Status = EngineeringChangeStatus.Rejected;
         DecidedBy = EnsureNotBlankActor(reviewer);
         DecidedAtUtc = utcNow;
-        ReviewerComment = reason.Trim();
+        ReviewerComment = DomainText.Optional(reason, MaxTextLength, "Rejection reason");
     }
 
     /// <summary>Approved -> Applied, called by the release use case in the same transaction.</summary>
@@ -298,13 +312,7 @@ public class EngineeringChangeOrder
         DateTime utcNow)
     {
         EnsureSubmitted();
-
-        if (baseRevision.Id != BaseReleasedRevisionId)
-        {
-            throw new DomainConflictException(
-                DomainErrorCodes.StaleBaseRevision,
-                $"ECO {EcoNumber} was created against a different base revision than the one supplied.");
-        }
+        EnsureBaseRevisionMatches(baseRevision);
 
         var newLines = new List<BomLine>();
 
@@ -349,6 +357,36 @@ public class EngineeringChangeOrder
         return normalised;
     }
 
+    /// <summary>
+    /// The base revision is a snapshot, so an ECO must be checked against the exact revision it
+    /// captured: same id, same product, still `Released`. The id alone is not enough — the two
+    /// foreign keys on the ECO are independent, so a row can name any revision id and any
+    /// product id.
+    /// </summary>
+    private void EnsureBaseRevisionMatches(BomRevision baseRevision)
+    {
+        if (baseRevision.Id != BaseReleasedRevisionId)
+        {
+            throw new DomainConflictException(
+                DomainErrorCodes.StaleBaseRevision,
+                $"ECO {EcoNumber} was created against a different base revision than the one supplied.");
+        }
+
+        if (baseRevision.ProductId != ProductId)
+        {
+            throw new DomainConflictException(
+                DomainErrorCodes.StaleBaseRevision,
+                $"ECO {EcoNumber} belongs to product {ProductId}, but revision {baseRevision.RevisionCode} belongs to another product.");
+        }
+
+        if (baseRevision.Status != BomRevisionStatus.Released)
+        {
+            throw new DomainConflictException(
+                DomainErrorCodes.StaleBaseRevision,
+                $"ECO {EcoNumber} must be based on a released revision, but {baseRevision.RevisionCode} is {baseRevision.Status}.");
+        }
+    }
+
     private void EnsureDraft()
     {
         if (Status != EngineeringChangeStatus.Draft)
@@ -369,13 +407,6 @@ public class EngineeringChangeOrder
         }
     }
 
-    private static string EnsureNotBlankActor(string? actor)
-    {
-        if (string.IsNullOrWhiteSpace(actor))
-        {
-            throw new DomainRuleViolationException(DomainErrorCodes.BlankActor, "An actor is required for this action.");
-        }
-
-        return actor.Trim();
-    }
+    private static string EnsureNotBlankActor(string? actor) =>
+        DomainText.Required(actor, MaxActorLength, "Actor", DomainErrorCodes.BlankActor);
 }

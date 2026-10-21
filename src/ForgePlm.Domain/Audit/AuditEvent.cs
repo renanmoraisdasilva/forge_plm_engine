@@ -25,6 +25,8 @@ public static class AuditActions
 /// </summary>
 public class AuditEvent
 {
+    public const int MaxActorLength = 200;
+
     public Guid Id { get; private set; }
 
     public DateTime OccurredAtUtc { get; private set; }
@@ -56,18 +58,11 @@ public class AuditEvent
         DateTime utcNow,
         Guid? id = null)
     {
-        if (string.IsNullOrWhiteSpace(actor))
-        {
-            throw new Common.DomainRuleViolationException(
-                Common.DomainErrorCodes.BlankActor,
-                "An audit event must record which actor performed the action.");
-        }
-
         return new AuditEvent
         {
             Id = id ?? Guid.NewGuid(),
             OccurredAtUtc = utcNow,
-            Actor = actor.Trim(),
+            Actor = Common.DomainText.Required(actor, MaxActorLength, "Audit actor", Common.DomainErrorCodes.BlankActor),
             Action = action,
             EntityType = entityType,
             EntityId = entityId,

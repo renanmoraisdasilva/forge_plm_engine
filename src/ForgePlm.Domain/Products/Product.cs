@@ -20,6 +20,7 @@ public enum ProductLifecycleStatus
 public class Product
 {
     public const int MaxNameLength = 200;
+    public const int MaxCategoryLength = 200;
 
     public Guid Id { get; private set; }
 
@@ -58,7 +59,7 @@ public class Product
             Id = id ?? Guid.NewGuid(),
             PartNumber = Common.PartNumber.From(partNumber).Value,
             Name = EnsureNameNotBlank(name),
-            Category = (category ?? string.Empty).Trim(),
+            Category = DomainText.Optional(category, MaxCategoryLength, "Product category"),
             LifecycleStatus = lifecycleStatus,
             CreatedAtUtc = utcNow,
             UpdatedAtUtc = utcNow,

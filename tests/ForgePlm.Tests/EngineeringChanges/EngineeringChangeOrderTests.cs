@@ -59,6 +59,43 @@ public class EngineeringChangeOrderTests
         Assert.Equal(DomainErrorCodes.BlankActor, ex.Code);
     }
 
+    [Fact]
+    public void AnEcoWithoutAProductIsRejected()
+    {
+        var baseRevision = TestData.Server100RevB(ProductId);
+
+        var ex = Assert.Throws<DomainRuleViolationException>(
+            () => EngineeringChangeOrder.Create("ECO-2026-0042", Guid.Empty, baseRevision.Id, "title", "reason", "impact", null, "Alex Morgan", TestData.Now));
+
+        Assert.Equal(DomainErrorCodes.ProductRequired, ex.Code);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void ABlankReasonForChangeIsRejected(string? reason)
+    {
+        var baseRevision = TestData.Server100RevB(ProductId);
+
+        var ex = Assert.Throws<DomainRuleViolationException>(
+            () => EngineeringChangeOrder.Create("ECO-2026-0042", ProductId, baseRevision.Id, "title", reason, "impact", null, "Alex Morgan", TestData.Now));
+
+        Assert.Equal(DomainErrorCodes.ReasonForChangeRequired, ex.Code);
+    }
+
+    [Fact]
+    public void AnOverlongEcoTextIsRejected()
+    {
+        var baseRevision = TestData.Server100RevB(ProductId);
+        var tooLong = new string('x', EngineeringChangeOrder.MaxTextLength + 1);
+
+        var ex = Assert.Throws<DomainRuleViolationException>(
+            () => EngineeringChangeOrder.Create("ECO-2026-0042", ProductId, baseRevision.Id, "title", "reason", tooLong, null, "Alex Morgan", TestData.Now));
+
+        Assert.Equal(DomainErrorCodes.TextTooLong, ex.Code);
+    }
+
     // --- Change lines -------------------------------------------------------------
 
     [Fact]
@@ -174,6 +211,37 @@ public class EngineeringChangeOrderTests
         var ex = Assert.Throws<DomainRuleViolationException>(() => eco.Submit(baseRevision, TestData.Now));
 
         Assert.Equal(DomainErrorCodes.EcoLinesRequired, ex.Code);
+    }
+
+    [Fact]
+    public void SubmitRejectsABaseRevisionFromAnotherProduct()
+    {
+        var baseRevision = TestData.Server100RevB(ProductId);
+        var otherProduct = Guid.NewGuid();
+        var eco = EngineeringChangeOrder.Create("ECO-2026-0045", otherProduct, baseRevision.Id, "title", "reason", "impact", null, "Alex Morgan", TestData.Now);
+        eco.ReplaceLines([EngineeringChangeLine.ChangeQuantity(TestData.Memory032, 16, null)]);
+
+        var ex = Assert.Throws<DomainConflictException>(() => eco.Submit(baseRevision, TestData.Now));
+
+        Assert.Equal(DomainErrorCodes.StaleBaseRevision, ex.Code);
+    }
+
+    [Fact]
+    public void SubmitRejectsABaseRevisionThatIsNotReleased()
+    {
+        var approvedRevision = BomRevision.CreateApproved(
+            ProductId,
+            "C",
+            [BomLine.Create(TestData.Memory032, 8, "Each")],
+            "Alex Morgan",
+            TestData.Now,
+            sourceEcoId: null);
+        var eco = EngineeringChangeOrder.Create("ECO-2026-0046", ProductId, approvedRevision.Id, "title", "reason", "impact", null, "Alex Morgan", TestData.Now);
+        eco.ReplaceLines([EngineeringChangeLine.ChangeQuantity(TestData.Memory032, 16, null)]);
+
+        var ex = Assert.Throws<DomainConflictException>(() => eco.Submit(approvedRevision, TestData.Now));
+
+        Assert.Equal(DomainErrorCodes.StaleBaseRevision, ex.Code);
     }
 
     // --- Submission ---------------------------------------------------------------

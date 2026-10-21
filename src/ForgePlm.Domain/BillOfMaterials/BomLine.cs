@@ -12,6 +12,7 @@ namespace ForgePlm.Domain.BillOfMaterials;
 public class BomLine
 {
     public const string DefaultUnit = "Each";
+    public const int MaxUnitLength = 20;
 
     public Guid Id { get; private set; }
 
@@ -45,7 +46,9 @@ public class BomLine
             Id = id ?? Guid.NewGuid(),
             ComponentId = componentId,
             Quantity = Common.Quantity.From(quantity).Value,
-            Unit = string.IsNullOrWhiteSpace(unit) ? DefaultUnit : unit.Trim(),
+            Unit = string.IsNullOrWhiteSpace(unit)
+                ? DefaultUnit
+                : DomainText.Optional(unit, MaxUnitLength, "BOM line unit"),
         };
     }
 }

@@ -22,11 +22,20 @@ public sealed class PostgresFixture : IAsyncLifetime
     private const string AdminConnectionString =
         "Host=localhost;Port=5432;Database=postgres;Username=forge;Password=forge_dev_password;Include Error Detail=true";
 
+    /// <summary>
+    /// Unique to this fixture instance, so two `dotnet test` processes sharing the container
+    /// cannot drop each other's databases. The old sweep matched every `forge_plm_test_%`
+    /// database, which was correct only while one process existed.
+    /// </summary>
+    private readonly string _runPrefix = $"forge_plm_test_{Guid.NewGuid():N}_";
+
+    private int _sequence;
+
     public Task InitializeAsync() => Task.CompletedTask;
 
     /// <summary>
-    /// Sweeps any test database left behind — a crashed run, or a test process killed before
-    /// disposal — so repeated local runs do not slowly accumulate databases on the container.
+    /// Sweeps any database left by *this run* — a crashed test, or a process killed before
+    /// disposal — without touching another run's databases.
     /// </summary>
     public async Task DisposeAsync()
     {
@@ -35,8 +44,10 @@ public sealed class PostgresFixture : IAsyncLifetime
 
         var leftovers = new List<string>();
         await using (var query = new NpgsqlCommand(
-            "SELECT datname FROM pg_database WHERE datname LIKE 'forge_plm\\_test\\_%'", admin))
+            "SELECT datname FROM pg_database WHERE starts_with(datname, @prefix)", admin))
         {
+            query.Parameters.AddWithValue("prefix", _runPrefix);
+
             await using var reader = await query.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -53,7 +64,7 @@ public sealed class PostgresFixture : IAsyncLifetime
     /// <summary>Creates, migrates, and hands back a database that belongs to exactly one test.</summary>
     public async Task<IsolatedDatabase> CreateDatabaseAsync()
     {
-        var name = $"forge_plm_test_{Guid.NewGuid():N}";
+        var name = $"{_runPrefix}{Interlocked.Increment(ref _sequence):D4}";
 
         await using (var admin = new NpgsqlConnection(AdminConnectionString))
         {

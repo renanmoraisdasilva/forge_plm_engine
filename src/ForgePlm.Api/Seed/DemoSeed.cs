@@ -34,8 +34,9 @@ public static class DemoSeed
     public static readonly Guid Nic010Id = Guid.Parse("00000015-0000-0000-0000-000000000015");
     public static readonly Guid Fan005Id = Guid.Parse("00000016-0000-0000-0000-000000000016");
 
-    /// <summary>The audit row describing the seeded baseline.</summary>
-    public static readonly Guid BaselineAuditId = Guid.Parse("00000003-0000-0000-0000-000000000003");
+    /// <summary>The audit rows describing the seeded baseline: the product, then its released revision.</summary>
+    public static readonly Guid BaselineProductAuditId = Guid.Parse("00000003-0000-0000-0000-000000000003");
+    public static readonly Guid BaselineRevisionAuditId = Guid.Parse("00000004-0000-0000-0000-000000000004");
 
     private static readonly DateTime BaselineEffectiveAtUtc = new(2026, 1, 15, 0, 0, 0, DateTimeKind.Utc);
 
@@ -54,16 +55,31 @@ public static class DemoSeed
 
         await InsertIfMissing(db, RevBId, CreateReleasedBaselineRevB, cancellationToken);
 
-        // A baseline needs an audit event too, or the demo's timeline starts mid-story.
+        // The baseline has two facts worth recording, and they belong to different entities:
+        // the product was created, and revision B was released. Recording only "ProductCreated"
+        // with a note about the release made the timeline claim the wrong event.
         await InsertIfMissing(
             db,
-            BaselineAuditId,
+            BaselineProductAuditId,
             id => AuditEvent.Record(
                 "System",
                 AuditActions.ProductCreated,
                 "Product",
                 Server100Id,
-                JsonSerializer.Serialize(new { note = "Seeded baseline: SERVER-100 released revision B.", revision = "B" }),
+                JsonSerializer.Serialize(new { note = "Seeded baseline product.", partNumber = "SERVER-100" }),
+                BaselineEffectiveAtUtc,
+                id),
+            cancellationToken);
+
+        await InsertIfMissing(
+            db,
+            BaselineRevisionAuditId,
+            id => AuditEvent.Record(
+                "System",
+                AuditActions.RevisionReleased,
+                "BomRevision",
+                RevBId,
+                JsonSerializer.Serialize(new { note = "Seeded baseline release.", revision = "B" }),
                 BaselineEffectiveAtUtc,
                 id),
             cancellationToken);

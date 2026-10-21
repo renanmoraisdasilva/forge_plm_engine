@@ -51,11 +51,14 @@ public static class DomainErrorCodes
     public const string BlankActor = "blank-actor";
     public const string BlankEcoNumber = "blank-eco-number";
     public const string NonPositiveQuantity = "non-positive-quantity";
+    public const string TextTooLong = "text-too-long";
+    public const string ReasonForChangeRequired = "reason-for-change-required";
 
     // --- Missing required references (400) --------------------------------------
     // These used to share `blank-part-number`, which made the code a lie: a missing base
     // revision is not a blank part number, and the UI keys off these strings.
     public const string BaseRevisionRequired = "base-revision-required";
+    public const string ProductRequired = "product-required";
     public const string TargetComponentRequired = "target-component-required";
     public const string ReplacementComponentRequired = "replacement-component-required";
     public const string ComponentRequired = "component-required";
@@ -89,4 +92,5 @@ public static class DomainErrorCodes
     public const string DuplicateComponentInRevisionLine = "duplicate-component-in-revision-line";
     public const string ConflictingReleasedRevision = "conflicting-released-revision";
     public const string ConcurrencyConflict = "concurrency-conflict";
+    public const string DuplicateValue = "duplicate-value";
 }

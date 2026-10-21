@@ -26,6 +26,19 @@ public class ComponentTests
         Assert.True(component.IsActive);
     }
 
+    [Fact]
+    public void AnOverlongCategoryIsRejectedByTheDomain()
+    {
+        var ex = Assert.Throws<DomainRuleViolationException>(() => Component.Create(
+            "MB-020",
+            "Server Motherboard",
+            new string('x', Component.MaxCategoryLength + 1),
+            ComponentLifecycleStatus.Active,
+            TestData.Now));
+
+        Assert.Equal(DomainErrorCodes.TextTooLong, ex.Code);
+    }
+
     [Theory]
     [InlineData(ComponentLifecycleStatus.Retired)]
     [InlineData(ComponentLifecycleStatus.Draft)]

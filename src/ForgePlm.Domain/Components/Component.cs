@@ -19,6 +19,7 @@ public enum ComponentLifecycleStatus
 public class Component
 {
     public const int MaxNameLength = 200;
+    public const int MaxCategoryLength = 200;
 
     public Guid Id { get; private set; }
 
@@ -54,7 +55,7 @@ public class Component
             Id = id ?? Guid.NewGuid(),
             PartNumber = Common.PartNumber.From(partNumber).Value,
             Name = EnsureNameNotBlank(name),
-            Category = (category ?? string.Empty).Trim(),
+            Category = DomainText.Optional(category, MaxCategoryLength, "Component category"),
             LifecycleStatus = lifecycleStatus,
             CreatedAtUtc = utcNow,
             UpdatedAtUtc = utcNow,

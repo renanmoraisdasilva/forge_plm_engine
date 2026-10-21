@@ -85,7 +85,7 @@ internal sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
     {
         builder.Property(p => p.PartNumber).HasMaxLength(50).IsRequired();
         builder.Property(p => p.Name).HasMaxLength(Product.MaxNameLength).IsRequired();
-        builder.Property(p => p.Category).HasMaxLength(Product.MaxNameLength).IsRequired();
+        builder.Property(p => p.Category).HasMaxLength(Product.MaxCategoryLength).IsRequired();
         builder.Property(p => p.LifecycleStatus).HasConversion<string>().HasMaxLength(20).IsRequired();
 
         // §5.1: unique, case-insensitively. Enforced by the database, not by an application check.
@@ -113,7 +113,7 @@ internal sealed class ComponentConfiguration : IEntityTypeConfiguration<Componen
     {
         builder.Property(c => c.PartNumber).HasMaxLength(50).IsRequired();
         builder.Property(c => c.Name).HasMaxLength(Component.MaxNameLength).IsRequired();
-        builder.Property(c => c.Category).HasMaxLength(Component.MaxNameLength).IsRequired();
+        builder.Property(c => c.Category).HasMaxLength(Component.MaxCategoryLength).IsRequired();
         builder.Property(c => c.LifecycleStatus).HasConversion<string>().HasMaxLength(20).IsRequired();
 
         builder.HasIndex(c => c.PartNumber).IsUnique().HasDatabaseName("ux_components_part_number");
@@ -126,7 +126,7 @@ internal sealed class BomRevisionConfiguration : IEntityTypeConfiguration<BomRev
     {
         builder.Property(r => r.RevisionCode).HasMaxLength(2).IsRequired();
         builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
-        builder.Property(r => r.CreatedBy).HasMaxLength(200).IsRequired();
+        builder.Property(r => r.CreatedBy).HasMaxLength(BomRevision.MaxActorLength).IsRequired();
 
         builder.HasOne<Product>()
             .WithMany()
@@ -164,8 +164,15 @@ internal sealed class BomLineConfiguration : IEntityTypeConfiguration<BomLine>
 {
     public void Configure(EntityTypeBuilder<BomLine> builder)
     {
-        builder.Property(l => l.Unit).HasMaxLength(20).IsRequired();
+        builder.Property(l => l.Unit).HasMaxLength(BomLine.MaxUnitLength).IsRequired();
         builder.Property(l => l.Quantity).IsRequired();
+
+        // A BOM line without its component is not a line, and an inner join would silently
+        // drop it while `total` still counted it. The FK makes that state unrepresentable.
+        builder.HasOne<Component>()
+            .WithMany()
+            .HasForeignKey(l => l.ComponentId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Belt and braces with the domain rule: the database refuses a duplicate component
         // in the same revision even if application code were to bypass the aggregate.
@@ -179,13 +186,13 @@ internal sealed class EngineeringChangeOrderConfiguration : IEntityTypeConfigura
 {
     public void Configure(EntityTypeBuilder<EngineeringChangeOrder> builder)
     {
-        builder.Property(e => e.EcoNumber).HasMaxLength(30).IsRequired();
+        builder.Property(e => e.EcoNumber).HasMaxLength(EngineeringChangeOrder.MaxEcoNumberLength).IsRequired();
         builder.Property(e => e.Title).HasMaxLength(EngineeringChangeOrder.MaxTitleLength).IsRequired();
         builder.Property(e => e.ReasonForChange).HasMaxLength(EngineeringChangeOrder.MaxTextLength).IsRequired();
         builder.Property(e => e.ImpactAssessment).HasMaxLength(EngineeringChangeOrder.MaxTextLength).IsRequired();
         builder.Property(e => e.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
-        builder.Property(e => e.CreatedBy).HasMaxLength(200).IsRequired();
-        builder.Property(e => e.DecidedBy).HasMaxLength(200);
+        builder.Property(e => e.CreatedBy).HasMaxLength(EngineeringChangeOrder.MaxActorLength).IsRequired();
+        builder.Property(e => e.DecidedBy).HasMaxLength(EngineeringChangeOrder.MaxActorLength);
         builder.Property(e => e.ReviewerComment).HasMaxLength(EngineeringChangeOrder.MaxTextLength);
 
         // §5.4: `ECO-2026-0042` is generated at creation and never reused (A-04).
@@ -214,6 +221,7 @@ internal sealed class EngineeringChangeOrderConfiguration : IEntityTypeConfigura
         builder.HasMany(e => e.Lines)
             .WithOne()
             .HasForeignKey("EngineeringChangeOrderId")
+            .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Navigation(e => e.Lines)
@@ -227,7 +235,29 @@ internal sealed class EngineeringChangeLineConfiguration : IEntityTypeConfigurat
     public void Configure(EntityTypeBuilder<EngineeringChangeLine> builder)
     {
         builder.Property(l => l.ChangeType).HasConversion<string>().HasMaxLength(30).IsRequired();
-        builder.Property(l => l.Reason).HasMaxLength(EngineeringChangeOrder.MaxTextLength).IsRequired();
+        builder.Property(l => l.Reason).HasMaxLength(EngineeringChangeLine.MaxReasonLength).IsRequired();
+
+        // The parent link is a shadow property because the line has no back-reference in the
+        // domain. Declaring its type explicitly lets the unique index below name it.
+        builder.Property<Guid>("EngineeringChangeOrderId");
+
+        // The duplicate-target rule is a domain rule and now also a schema rule. Without this,
+        // approval's `FirstOrDefault` would silently discard one of two changes to the same part.
+        builder.HasIndex("EngineeringChangeOrderId", nameof(EngineeringChangeLine.TargetComponentId))
+            .IsUnique()
+            .HasDatabaseName("ux_engineering_change_lines_eco_target");
+
+        // Both component references are real references; without FKs an ECO could point at a
+        // part that does not exist and only fail much later, in a read join or an approval.
+        builder.HasOne<Component>()
+            .WithMany()
+            .HasForeignKey(l => l.TargetComponentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<Component>()
+            .WithMany()
+            .HasForeignKey(l => l.ReplacementComponentId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
 

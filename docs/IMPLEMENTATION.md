@@ -5,8 +5,8 @@
 - **Last updated:** 2026-10-21 (end of Slice 7)
 - **Current phase:** Slices 1–7 complete — ECO write path, audit read, and the live frontend; Slice 8 (tests, errors, README) remains
 - **Build state:** `dotnet build ForgePlm.slnx` — succeeded, 0 warnings, 0 errors (`TreatWarningsAsErrors` is on). `npm run build` in `frontend/` — passes.
-- **Test state:** `dotnet test ForgePlm.slnx` — **137 passed, 0 failed** (1 m 34 s; 94 domain + 22 integration against real PostgreSQL + 21 API). Frontend: `npm test` — **4 files, 37 tests passed** (Vitest).
-- **Run state:** `docker compose up -d --wait` — both containers healthy on port 5199. The backend image was rebuilt from the committed tree for Slice 7, and `/api/products`, `/api/ecos` and `/api/audit` all answer 200. It predates the uncommitted backend edits now in the working tree (see §10). The protected path was driven end to end in a browser against this container.
+- **Test state:** `dotnet test ForgePlm.slnx` - **155 passed, 0 failed** (1 m 53 s; 104 domain + 27 integration against real PostgreSQL + 24 API). Frontend: `npm test` - **4 files, 37 tests passed** (Vitest).
+- **Run state:** `docker compose up -d --build --wait` - both containers healthy on port 5199. The image was rebuilt from the review-fix tree; `AddEcoIntegrityConstraints` applied cleanly to the existing demo database. Verified live: unknown `/api` route returns 404 `application/problem+json`, blank `reasonForChange` returns 400 `reason-for-change-required`, and a 4001-character reason returns 400 `text-too-long` rather than a database 500. The seeded audit timeline now shows `ProductCreated` on the product and `RevisionReleased` on revision B.
 
 > Note: .NET 10 writes the solution as `ForgePlm.slnx` (XML solution format), not `.sln`. Use `dotnet build ForgePlm.slnx`.
 
@@ -38,10 +38,10 @@ Definition of done: `Forge-PLM-Spec.md` §12.
 | Phase | Steps | Status |
 |---|---|---|
 | **0. Requirements & architecture interview** | Interview (D-01…D-06 + A-01…A-20); revise spec; write ADRs; write decision register | ✅ complete |
-| **1. Domain model** | Solution + projects; `Product`, `Component`, `BomRevision`, `EngineeringChangeOrder`, `AuditEvent`; enums; transition methods; domain unit tests | ✅ **complete — 84 tests passing** |
-| **2. Persistence** | Npgsql + `ForgePlmDbContext`; entity configurations and constraints; migrations; idempotent seed; `docker-compose.yml` | ✅ **complete — 7 integration tests passing** |
+| **1. Domain model** | Solution + projects; `Product`, `Component`, `BomRevision`, `EngineeringChangeOrder`, `AuditEvent`; enums; transition methods; domain unit tests | ✅ **complete — 84 domain tests at the time (104 now)** |
+| **2. Persistence** | Npgsql + `ForgePlmDbContext`; entity configurations and constraints; migrations; idempotent seed; `docker-compose.yml` | ✅ **complete — 7 integration tests at the time (27 now)** |
 | **2b. Containerised delivery** | Multi-stage Dockerfile for the API; `backend` service in compose; config-gated migrate-on-startup; `.dockerignore`; SPA-serving guard | ✅ **complete — cold start verified** |
-| **3. Product & BOM read endpoints** | Products list/detail, BOM revisions, current revision, revision lines; pagination; ProblemDetails | ✅ **complete — 10 API tests passing** |
+| **3. Product & BOM read endpoints** | Products list/detail, BOM revisions, current revision, revision lines; pagination; ProblemDetails | ✅ **complete — 10 API tests at the time (24 now)** |
 | **4. ECO creation & submission** | Create ECO (captures base released revision), edit draft, submit; actor switch plumbing | ✅ **complete** |
 | **5. Approval transaction** | Approve ECO → copy base lines → apply changes → new `Approved` revision, all in one transaction; stale-base 409 | ✅ **complete** |
 | **6. Rejection & release** | Reject with reason; release → supersede + effective date + `Applied`; concurrency conflict test | ✅ **complete** |
@@ -262,6 +262,10 @@ The constraints that carry a domain rule are in the database, not only in code:
 | At most one `Released` revision per product | partial unique index on `product_id` `WHERE status = 'Released'` | ADR-004 — the invariant protecting the demo's historical-integrity claim. A code path could be bypassed; the index cannot. |
 | Revision codes unique per product | unique `(product_id, revision_code)` | §5.3 — `A → B → C` cannot fork. |
 | One component per revision | unique `(bom_revision_id, component_id)` | Belt and braces with the domain rule in §5.3. |
+| Every BOM line points at a real component | FK `bom_lines.component_id → components` (restrict) | An orphan line was invisible to the inner-join read while still counted in `total`/`lineCount`. |
+| Every ECO line points at real components | FKs `engineering_change_lines.target_component_id` and `replacement_component_id → components` (restrict) | A change record must not name a part that does not exist. |
+| An ECO line always belongs to an ECO | `engineering_change_order_id` is `NOT NULL` (cascade) | A line without a parent cannot be reached by the aggregate. |
+| One change per target per ECO | unique `(engineering_change_order_id, target_component_id)` | The domain rejects duplicates; the index makes a bypass impossible. |
 | `ECO-2026-0042` never reused | unique `eco_number` | A-04. |
 | Part numbers unique | unique `part_number` | §5.1, via domain normalisation (see **A-02** below). |
 | Optimistic concurrency on `Product` | `xmin` as a concurrency token | ADR-004 — the guard behind Slice 6's competing-ECO test. |
@@ -643,22 +647,36 @@ Products -> SERVER-100 (released B)
   -> GET /api/audit      (EcoCreated -> EcoSubmitted -> EcoApproved -> RevisionReleased)
 ```
 
+### Code review response (post-Slices 4–6)
+
+The pre-Slice-4 review was re-checked against the current tree. Items already delivered were left
+alone; the remaining gaps were fixed here.
+
+| Review item | Outcome |
+|---|---|
+| `xmin` configured but never written | Already fixed by `Product.MarkConfigurationChanged` and IT-06. |
+| Contract/domain status mismatch; missing `UpdateDraft` | Already fixed in Slices 4–6. |
+| `reasonForChange` required but blank accepted | **Fixed.** `DomainText.Required` now raises `400 reason-for-change-required`. |
+| Database-only length limits become 500s | **Fixed.** Category, unit, ECO number, reason, impact, reviewer comment, line reason and actor lengths are domain-checked (`400 text-too-long`). |
+| Base revision checked by id only | **Fixed.** `Submit`/`BuildApprovedRevision` also require the same product and a `Released` base; creation rejects an empty product id. |
+| Missing component FKs, nullable ECO-line parent, no duplicate-target index | **Fixed** in `AddEcoIntegrityConstraints`, with persistence tests. |
+| Baseline audit claimed `ProductCreated` for a release | **Fixed.** The seed now records `ProductCreated` and a separate `RevisionReleased` for revision B. |
+| Global test-database sweep could drop another run | **Fixed.** Each fixture run uses a unique database prefix and sweeps only that prefix. |
+| Revision-order test seeded only one revision | **Fixed.** It now creates a second revision and asserts the order. |
+| No positive tests for component/revision detail | **Fixed.** Both endpoints now have 200-path tests. |
+| SPA fallback would swallow unknown `/api` routes | **Fixed.** An `/api/{**path}` 404 ProblemDetails is mapped ahead of the file fallback. |
+| `application/json` instead of `application/problem+json`; raw PostgreSQL message leaked | **Fixed.** The handler sets the ProblemDetails content type and returns a generic unique-conflict detail. |
+| `duplicate-value` not declared in `DomainErrorCodes` | **Fixed.** It is now a named constant. |
+| `page` multiplication overflow | **Fixed** by multiplying in `long` and clamping the offset. |
+| `type` is a bare code rather than an absolute URI | Left as-is. RFC 7807 allows a relative URI reference, and clients key off `code`/`conflictType`; inventing a dead absolute URL would be worse. |
+| Docs drifted on counts, phases and OpenAPI | **Fixed** here, `HANDOFF.md` and ADR-004. `MapOpenApi()` is now actually registered in Development. |
+
 ### Known rough edges carried forward
 
-- **`reasonForChange` is contract-required but not enforced as non-blank.** The domain stores an
-  omitted value as an empty string. There is no code for it in the frozen contract, and inventing
-  a second validation vocabulary at the API layer was judged worse than accepting the gap until
-  Slice 8. The UI marks the field required.
-- **Text longer than 4000 characters reaches PostgreSQL** and surfaces as a 500
-  (`22001 string_data_right_truncation`) rather than a 400. The length limit is a database column,
-  not a domain check, for `reasonForChange` and `impactAssessment`.
 - **A draft ECO cannot be cancelled.** There is no DELETE endpoint (A-06), so an unwanted draft
   stays in the list. The contract says so; the UI should not imply otherwise.
 - **No scheduler exists.** A future effective date is a label; "current" is decided by revision
   status, never by the date.
-- **The running container predates the uncommitted backend edits.** The image was rebuilt from
-  the committed tree at the end of Slice 7 and serves `/api` correctly; the working tree has since
-  gained backend changes, including the `AddEcoIntegrityConstraints` migration.
 - **The container does not serve the SPA.** The Dockerfile's Slice 7 node stage is still a
   placeholder and `Program.cs` registers the SPA fallback only when `wwwroot/index.html` exists,
   so `http://localhost:5199/` is a 404. The frontend runs on the Vite dev server; adding the build
@@ -678,3 +696,4 @@ Products -> SERVER-100 (released B)
 | 2026-10-21 | **Slice 3 - product & BOM read endpoints.** Products and components list/detail, BOM revision history, current revision, revision lines - 8 endpoints, all returning DTOs rather than EF entities, with the `{ items, total, page, pageSize }` shape �7 requires. Built the RFC 7807 mapping **before** the endpoints: `ErrorResponseMapper` plus an `IExceptionHandler`, so a new endpoint cannot forget it. Two findings: (1) registering `AddExceptionHandler` alone was **not enough** - `WebApplication.CreateBuilder` adds the developer exception page in Development, which sits outer in the pipeline and swallowed every exception, so a bad filter returned a 500 with a stack trace where the contract promised a 400; fixed with an explicit `UseExceptionHandler()`. (2) The new API tests failed intermittently (`3D000: database does not exist`, ~2 in 3 runs) because each test constructed its own `PostgresFixture`, whose `DisposeAsync` sweeps **every** test database on the server - so each test dropped the database a parallel test was using. Fixed by joining `PostgresCollection`; verified over five consecutive full-suite runs. **111 tests pass, 0 fail; build clean.** |
 | 2026-10-21 | **Slices 4–6 — ECO write path and audit read.** Create/edit/submit/approve/reject/release plus `GET /api/audit`, implemented to the frozen `ECO-API-CONTRACT.md`. ECO numbers and base revisions are server-resolved; creation retries a number collision up to five times. Approval runs the ten-step §8 transaction; release sequences supersede → save → release → save because the partial unique index cannot be deferred. Every action writes its audit row in the same transaction. **137 tests pass, 0 fail** (94 domain + 22 integration against real PostgreSQL + 21 API); IT-06 and IT-10 were re-run explicitly against PostgreSQL (3/3). Findings: EF tracks a new child with an application-assigned key as `Modified`, so line replacement needs explicit `RemoveRange`/`AddRange`; `UpdateDraft` had to validate lines before assigning fields; PostgreSQL stores microseconds, so the IT-04 date assertion uses a 1 ms tolerance. The frozen contract's 400s for `component-not-active` and `target-component-not-in-base-revision` required changing two domain throw sites; `effective-date-required` was added as an additive code. `Product.UpdatedAtUtc` is now maintained. **Build clean, 0 warnings.** |
 | 2026-10-21 | **Slice 7 — frontend.** Vite 8 + React 19 + TS 7 + Tailwind 4 in `frontend/`: app shell, sidebar with exactly Products and Engineering Changes, actor switch, Products list/detail (live read API), and ECO list/detail/create-edit. Screens C/D/E were first built against the frozen contract behind an in-memory mock and a start-up probe; once Slices 4–6 landed, the probe, the mock, `EcoModeNote` and `VITE_ECO_API_MODE` were deleted and every screen bound directly to `LiveEcoApi`/`LiveProductsApi`. FE-02 is a status matrix in `lib/ecoStatus.ts`; FE-03 is one `ConfirmDialog` showing the current actor. Timestamps are stored/sent in UTC and shown locally with UTC on hover; part numbers are monospaced. **`npm run build` passes; `npm test` 37/37** (ecoStatus, format, http, ecoApi). The protected path was driven in a browser against the rebuilt container (create → submit → approve → release → revision C), plus draft edit (PUT) and reject. Known gap: the Dockerfile still has no SPA build stage, so the container serves `/api` only. |
+| 2026-10-21 | **Post-Slice-6 review response.** Re-checked the pre-Slice-4 review against the tree and fixed what was still real: domain length checks (`text-too-long`) and required `reasonForChange`; base-revision product/status checks; FKs for BOM and ECO component references, a required ECO-line parent and the `(eco, target)` unique index via `AddEcoIntegrityConstraints`; seed audit now separates `ProductCreated` from `RevisionReleased`; per-run test-database prefixes instead of a global sweep; page-offset overflow guard; an `/api/{**path}` 404 ahead of the SPA fallback; `application/problem+json` and a generic unique-conflict detail; `duplicate-value` declared; positive component/revision detail tests and a two-revision ordering test; `MapOpenApi()` actually mapped. Left `type` as a relative code (valid RFC 7807, and the contract keys off `code`). **155 tests pass, 0 fail** (104 domain + 27 integration + 24 API); build clean. |

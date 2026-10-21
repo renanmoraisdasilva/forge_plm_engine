@@ -16,7 +16,7 @@ Two independent defences, because they fail differently.
 
 **1. Optimistic concurrency — `xmin` on `Product`.**
 
-`Product` carries a shadow `xmin` property configured as a concurrency token. Approve and release both load the product row and write through it inside their transaction. If another transaction committed a release in the meantime, `xmin` has changed, EF throws `DbUpdateConcurrencyException`, and the endpoint maps it to `409 Conflict` with `conflictType: stale-base-revision`.
+`Product` carries a shadow `xmin` property configured as a concurrency token. Approve and release both load the product row and write through it inside their transaction. If another transaction committed a release in the meantime, `xmin` has changed, EF throws `DbUpdateConcurrencyException`, and the endpoint maps it to `409 Conflict` with `conflictType: concurrency-conflict`. (`stale-base-revision` is the separate, deterministic check that the ECO's base revision is still the product's current released revision; it is not the `xmin` failure.)
 
 *Amended during Slice 2.* This ADR originally named Npgsql's `UseXminAsConcurrencyToken()` helper as the mechanism. That extension was **removed in Npgsql EF Core 10**, so the three calls it made are now written explicitly:
 

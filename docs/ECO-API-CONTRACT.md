@@ -53,16 +53,16 @@ Returns `PagedResponse<EcoSummaryDto>`.
   "productId": "guid",
   "title": "string (required, max 200)",
   "reasonForChange": "string (required, max 4000)",
-  "impactAssessment": "string (optional)",
+  "impactAssessment": "string (optional, max 4000)",
   "requestedEffectiveAtUtc": "datetime | null",
-  "actor": "string (required)",
+  "actor": "string (required, max 200)",
   "lines": [
     {
       "changeType": "ReplaceComponent | ChangeQuantity",
       "targetComponentId": "guid",
       "replacementComponentId": "guid | null",   // required when ReplaceComponent
       "newQuantity": "int | null",               // required when ChangeQuantity, must be > 0
-      "reason": "string | null"
+      "reason": "string | null (max 4000)"
     }
   ]
 }
@@ -233,12 +233,14 @@ Already implemented:
 | `concurrency-conflict` | 409 | reload and retry |
 | `conflicting-released-revision` | 409 | two releases raced |
 
-**Codes added while implementing Slices 4–6** (both additive; no shape changed):
+**Codes added while implementing Slices 4–6** (all additive; no shape changed):
 
 | Code | Status | Raised by |
 |---|---|---|
 | `no-released-revision` | 409 | creating an ECO for a product with no released BOM |
 | `effective-date-required` | 400 | release submitted without an effective date |
+| `reason-for-change-required` | 400 | create/edit sent a blank reason (`required` above was previously only documented) |
+| `text-too-long` | 400 | a text field exceeded its documented maximum before it reached the database |
 
 ### The UI should prevent, not report, `invalid-transition`
 

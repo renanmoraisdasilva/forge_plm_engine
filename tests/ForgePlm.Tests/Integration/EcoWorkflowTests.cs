@@ -434,7 +434,10 @@ public class EcoWorkflowTests(PostgresFixture fixture)
             (await verify.EngineeringChangeOrders.AsNoTracking().SingleAsync(order => order.Id == eco.Id)).Status);
 
         Assert.False(await verify.AuditEvents.AsNoTracking()
-            .AnyAsync(audit => audit.Action == AuditActions.RevisionReleased));
+            .AnyAsync(audit =>
+                audit.Action == AuditActions.RevisionReleased &&
+                audit.EntityType == "EngineeringChangeOrder" &&
+                audit.EntityId == eco.Id));
     }
 
     /// <summary>
