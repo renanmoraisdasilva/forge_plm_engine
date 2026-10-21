@@ -60,6 +60,7 @@ export interface BomRevision {
   revisionCode: string;
   status: BomRevisionStatus;
   effectiveAtUtc: string | null;
+  releasedAtUtc: string | null;
   createdAtUtc: string;
   createdBy: string;
   sourceEcoId: string | null;
@@ -166,7 +167,7 @@ export interface RejectEcoRequest extends ActorRequest {
 }
 
 export interface ReleaseEcoRequest extends ActorRequest {
-  effectiveAtUtc: string;
+  confirmImmediateEffectivity?: boolean;
 }
 
 export interface ListEcosParams {

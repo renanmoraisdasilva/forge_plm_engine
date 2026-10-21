@@ -132,6 +132,10 @@ namespace ForgePlm.Api.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("product_id");
 
+                    b.Property<DateTime?>("ReleasedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("released_at_utc");
+
                     b.Property<string>("RevisionCode")
                         .IsRequired()
                         .HasMaxLength(2)

@@ -81,8 +81,10 @@ public static class BomRevisionEndpoints
             return NotFoundProduct(productId);
         }
 
+        var now = DateTime.UtcNow;
         var revision = await db.BomRevisions.AsNoTracking()
-            .Where(r => r.ProductId == productId && r.Status == BomRevisionStatus.Released)
+            .Where(r => r.ProductId == productId && r.Status == BomRevisionStatus.Released &&
+                        r.EffectiveAtUtc.HasValue && r.EffectiveAtUtc.Value <= now)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (revision is null)

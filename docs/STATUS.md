@@ -7,7 +7,9 @@ remains the product and engineering guide.
 
 - Domain model, PostgreSQL persistence, migrations, seed data, and product/BOM read APIs.
 - ECO create, edit, submit, approve, reject, release, and audit APIs. Approval and release are
-  separate operations; release and its audit record are transactional.
+  separate operations; release and its audit record are transactional. Release applies
+  immediately in the prototype; future requested effectivity requires confirmation, and actual
+  release/effective timestamps are recorded separately.
 - Commit `0ae3398` adds API-only product/component creation and writes matching audit events.
   This work has not yet been verified.
 - React frontend with Products and Engineering Changes screens, actor switch, live API client,
@@ -25,6 +27,12 @@ have not been re-run in this status record.
 - Frontend: build passed; **37 tests passed** in four files. V8 whole-`src/` coverage measured
   **13.35% statements, 8.07% branches, 14.92% functions, and 13.58% lines**.
 - Backend coverage collection is configured, but no backend percentage has been measured.
+
+For the effectivity alignment, the backend build passed and 16 targeted domain/PostgreSQL tests
+passed. The frontend build passed and all 39 tests passed. The API-host confirmation test could not
+initialize in this Windows environment because the `.NET Runtime` Event Log provider denied
+permission during host startup; the corresponding release guard is covered by the PostgreSQL
+application-service test. The full backend suite has not been rerun.
 
 ## Remaining work
 

@@ -106,7 +106,7 @@ A blank reason is **400** `rejection-reason-required`. Rejecting creates **no** 
 ### `POST /api/ecos/{ecoId}/release` → 200 `EcoDetailDto`
 
 ```jsonc
-{ "actor": "string (required)", "effectiveAtUtc": "datetime (required)" }
+{ "actor": "string (required)", "confirmImmediateEffectivity": "boolean (optional, defaults false)" }
 ```
 
 Supersedes the prior revision, releases the new one, sets the ECO to `Applied`.
@@ -117,8 +117,13 @@ Supersedes the prior revision, releases the new one, sets the ECO to `Applied`.
 > Measured on 2026-10-21: a single `SaveChanges` happened *not* to throw across five runs, but
 > that is an accident of EF's batching, not a guarantee. `IT11_*` tests pin both halves.
 
-The effective date is a **recorded label**, not a trigger (spec §15.5). Release takes effect
-immediately; a future timestamp is stored and shown as "Scheduled". No scheduler exists.
+The service records `ReleasedAtUtc` as the actual release event time and `EffectiveAtUtc` as the
+time the revision applies. In this prototype both are set to current UTC. If the ECO has a future
+`RequestedEffectiveAtUtc`, the client must send `confirmImmediateEffectivity: true`; otherwise the
+API returns `409 future-effectivity-requires-confirmation`. No scheduled effectivity is supported.
+The `BomRevisionDto` includes both timestamps. `GET /api/products/{productId}/bom-revisions/current`
+only returns a released revision whose `EffectiveAtUtc` has arrived, so a future-dated revision is
+never presented as the production configuration.
 
 ### `GET /api/audit?entityType=&entityId=&page=&pageSize=`
 
@@ -227,7 +232,7 @@ Already implemented:
 | Code | Status | Raised by |
 |---|---|---|
 | `no-released-revision` | 409 | creating an ECO for a product with no released BOM |
-| `effective-date-required` | 400 | release submitted without an effective date |
+| `future-effectivity-requires-confirmation` | 409 | requested future effectivity needs explicit immediate-release confirmation |
 | `reason-for-change-required` | 400 | create/edit sent a blank reason (`required` above was previously only documented) |
 | `text-too-long` | 400 | a text field exceeded its documented maximum before it reached the database |
 

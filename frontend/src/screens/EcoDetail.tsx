@@ -13,7 +13,8 @@ import { StatusChip } from '../components/ui/StatusChip';
 import { Timestamp } from '../components/ui/Timestamp';
 import { actionDisabledReason, canPerform, isEcoEditable, isReleaseVisible } from '../lib/ecoStatus';
 import { mapEcoError } from '../lib/ecoErrors';
-import { fromLocalInputValue, isFuture, toLocalInputValue } from '../lib/format';
+import { isFuture } from '../lib/format';
+import { immediateReleaseConfirmation } from '../lib/releaseConfirmation';
 import { useAsync } from '../lib/useAsync';
 import { useActor } from '../state/ActorProvider';
 import { useApi } from '../state/ApiProvider';
@@ -36,7 +37,6 @@ export function EcoDetail() {
   const [dialog, setDialog] = useState<DialogKind | null>(null);
   const [comment, setComment] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
-  const [effectiveLocal, setEffectiveLocal] = useState('');
   const [pending, setPending] = useState(false);
   const [submitPending, setSubmitPending] = useState(false);
   const [dialogError, setDialogError] = useState<string | null>(null);
@@ -90,17 +90,13 @@ export function EcoDetail() {
 
   const { detail, audits, baseLines, baseLinesError, approvedRevision } = data;
   const status = detail.status;
+  const releaseConfirmation = immediateReleaseConfirmation(detail.requestedEffectiveAtUtc);
 
   const openDialog = (kind: DialogKind) => {
     setNotice(null);
     setDialogError(null);
     setComment('');
     setRejectionReason('');
-    setEffectiveLocal(
-      kind === 'release'
-        ? toLocalInputValue(detail.requestedEffectiveAtUtc ?? new Date().toISOString())
-        : '',
-    );
     setDialog(kind);
   };
 
@@ -137,16 +133,13 @@ export function EcoDetail() {
         await eco.rejectEco(detail.id, { actor, rejectionReason });
         setNotice({ tone: 'success', text: 'ECO rejected. No BOM revision was created.' });
       } else if (dialog === 'release') {
-        const effectiveAtUtc = fromLocalInputValue(effectiveLocal);
-        if (!effectiveAtUtc) {
-          setDialogError('Choose an effective date.');
-          setPending(false);
-          return;
-        }
-        await eco.releaseEco(detail.id, { actor, effectiveAtUtc });
+        await eco.releaseEco(detail.id, {
+          actor,
+          confirmImmediateEffectivity: Boolean(releaseConfirmation),
+        });
         setNotice({
           tone: 'success',
-          text: 'ECO applied. The approved revision is now released and the previous revision is superseded.',
+          text: 'ECO applied. The approved revision is effective now, and the previous revision is superseded.',
         });
       }
       setDialog(null);
@@ -177,16 +170,17 @@ export function EcoDetail() {
       <>Rejecting closes this ECO. No BOM revision is created, and the reason is recorded in the audit trail.</>
     ) : (
       <>
-        Release makes the approved revision the product&apos;s current released configuration, marks the previous
-        revision Superseded, and sets this ECO to Applied. Release takes effect immediately; a future date is stored as
-        a recorded label and shown as Scheduled.
+        Release makes the approved revision the product&apos;s current configuration, marks the previous revision
+        Superseded, and sets this ECO to Applied. This prototype applies the revision immediately.
+        {releaseConfirmation ? (
+          <strong className="mt-2 block text-warning">{releaseConfirmation}</strong>
+        ) : null}
       </>
     );
 
   const confirmDisabled =
     pending ||
-    (dialog === 'reject' && !rejectionReason.trim()) ||
-    (dialog === 'release' && !effectiveLocal);
+    dialog === 'reject' && !rejectionReason.trim();
 
   return (
     <div>
@@ -304,7 +298,9 @@ export function EcoDetail() {
                 <dd className="mt-0.5 text-ink">
                   <Timestamp iso={detail.requestedEffectiveAtUtc} />
                   {isFuture(detail.requestedEffectiveAtUtc) ? (
-                    <span className="ml-2 text-[11px] font-semibold text-warning">Scheduled</span>
+                    <span className="ml-2 text-[11px] font-semibold text-warning">
+                      {status === 'Applied' ? 'Released effective immediately' : 'Future date requires confirmation'}
+                    </span>
                   ) : null}
                 </dd>
               </div>
@@ -385,6 +381,18 @@ export function EcoDetail() {
                   )}
                 </dd>
               </div>
+              {approvedRevision?.releasedAtUtc ? (
+                <>
+                  <div className="py-2">
+                    <dt className="text-[10px] font-semibold uppercase tracking-[0.06em] text-ink-muted">Released at</dt>
+                    <dd className="mt-0.5 text-ink"><Timestamp iso={approvedRevision.releasedAtUtc} /></dd>
+                  </div>
+                  <div className="py-2">
+                    <dt className="text-[10px] font-semibold uppercase tracking-[0.06em] text-ink-muted">Effective from</dt>
+                    <dd className="mt-0.5 text-ink"><Timestamp iso={approvedRevision.effectiveAtUtc} /></dd>
+                  </div>
+                </>
+              ) : null}
               <div className="py-2">
                 <dt className="text-[10px] font-semibold uppercase tracking-[0.06em] text-ink-muted">Reviewer comment</dt>
                 <dd className="mt-0.5 whitespace-pre-wrap text-ink">
@@ -409,11 +417,19 @@ export function EcoDetail() {
         title={dialogTitle}
         description={dialogDescription}
         actor={actor}
-        confirmLabel={dialog === 'approve' ? 'Approve ECO' : dialog === 'reject' ? 'Reject ECO' : 'Release revision'}
+        confirmLabel={
+          dialog === 'approve'
+            ? 'Approve ECO'
+            : dialog === 'reject'
+              ? 'Reject ECO'
+              : releaseConfirmation
+                ? 'Release effective now'
+                : 'Release revision'
+        }
         tone={dialog === 'reject' ? 'danger' : 'primary'}
         pending={pending}
         confirmDisabled={
-          (dialog === 'reject' && !rejectionReason.trim()) || (dialog === 'release' && !effectiveLocal)
+          dialog === 'reject' && !rejectionReason.trim()
         }
         error={dialogError}
         onCancel={() => setDialog(null)}
@@ -446,21 +462,6 @@ export function EcoDetail() {
           </label>
         ) : null}
 
-        {dialog === 'release' ? (
-          <label className="block text-[12px] text-ink-subtle">
-            Effective date (required)
-            <input
-              type="datetime-local"
-              value={effectiveLocal}
-              onChange={(event) => setEffectiveLocal(event.target.value)}
-              required
-              className="mt-1 h-[30px] w-full rounded border border-line-strong bg-surface px-2 text-[12px] text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-            <span className="mt-1 block text-[11px] text-ink-muted">
-              Stored as UTC and displayed in local time. Release takes effect immediately, even with a future date.
-            </span>
-          </label>
-        ) : null}
       </ConfirmDialog>
     </div>
   );

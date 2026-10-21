@@ -32,7 +32,7 @@ describe('UTC-stored, local-displayed dates (A-15)', () => {
     expect(fromLocalInputValue('')).toBeNull();
   });
 
-  it('recognises scheduled (future) dates', () => {
+  it('recognises future requested dates that need an immediate-release confirmation', () => {
     expect(isFuture('2999-01-01T00:00:00Z')).toBe(true);
     expect(isFuture('2000-01-01T00:00:00Z')).toBe(false);
     expect(isFuture(null)).toBe(false);

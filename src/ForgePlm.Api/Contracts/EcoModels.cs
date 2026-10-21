@@ -42,10 +42,9 @@ public sealed record ApproveEcoRequest(string? Actor, string? Comment);
 public sealed record RejectEcoRequest(string? Actor, string? RejectionReason);
 
 /// <summary>
-/// Release takes effect immediately (spec §15.5). A future timestamp is stored and
-/// displayed as "Scheduled"; nothing schedules anything.
+/// Future requested effectivity must be explicitly acknowledged before immediate release.
 /// </summary>
-public sealed record ReleaseEcoRequest(string? Actor, DateTime? EffectiveAtUtc);
+public sealed record ReleaseEcoRequest(string? Actor, bool ConfirmImmediateEffectivity = false);
 
 /// <summary>A component reference, denormalised into ECO lines so a line renders without a lookup.</summary>
 public sealed record ComponentRefDto(Guid Id, string PartNumber, string Name);

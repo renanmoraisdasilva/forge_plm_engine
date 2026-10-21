@@ -20,7 +20,8 @@ internal static class EcoRules
         Guid productId,
         CancellationToken cancellationToken) =>
         await db.BomRevisions.AsNoTracking()
-            .Where(r => r.ProductId == productId && r.Status == BomRevisionStatus.Released)
+            .Where(r => r.ProductId == productId && r.Status == BomRevisionStatus.Released &&
+                        r.EffectiveAtUtc.HasValue && r.EffectiveAtUtc.Value <= DateTime.UtcNow)
             .Select(r => (Guid?)r.Id)
             .FirstOrDefaultAsync(cancellationToken);
 

@@ -127,6 +127,7 @@ internal sealed class BomRevisionConfiguration : IEntityTypeConfiguration<BomRev
         builder.Property(r => r.RevisionCode).HasMaxLength(2).IsRequired();
         builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
         builder.Property(r => r.CreatedBy).HasMaxLength(BomRevision.MaxActorLength).IsRequired();
+        builder.Property(r => r.ReleasedAtUtc);
 
         builder.HasOne<Product>()
             .WithMany()

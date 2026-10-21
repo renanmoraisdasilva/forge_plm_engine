@@ -50,5 +50,5 @@ comments. Their durable requirements are stated in the spec or above.
 | `A-18` | `BomRevisionStatus.Draft` is unused in v1; spec §16 |
 | `D-02c` | Protected demo path; spec §1 |
 | `D-04a` | Approval and release are separate; spec §15, decision 7 |
-| `D-04b` | Future effective dates are recorded labels, not scheduled actions; spec §15, decision 5 |
+| `D-04b` | Prototype releases take effect immediately; future requested effectivity requires explicit confirmation; actual release and effective timestamps remain separate for future scheduling support |
 | `D-05` | PostgreSQL is the chosen database; spec §4 |

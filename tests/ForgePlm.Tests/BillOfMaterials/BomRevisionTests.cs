@@ -88,11 +88,11 @@ public class BomRevisionTests
         var approved = BomRevision.CreateApproved(
             ProductId, "C", [Line(TestData.Motherboard020)], "Alex Morgan", TestData.Now, sourceEcoId: Guid.NewGuid());
 
-        approved.Release(TestData.Now);
+        approved.Release(TestData.Now, TestData.Now);
 
         Assert.Throws<DomainConflictException>(approved.EnsureLinesAreEditable);
 
-        var ex = Assert.Throws<DomainConflictException>(() => approved.Release(TestData.Now.AddDays(1)));
+        var ex = Assert.Throws<DomainConflictException>(() => approved.Release(TestData.Now, TestData.Now.AddDays(1)));
         Assert.Equal(DomainErrorCodes.InvalidTransition, ex.Code);
     }
 
@@ -102,10 +102,11 @@ public class BomRevisionTests
         var approved = BomRevision.CreateApproved(
             ProductId, "C", [Line(TestData.Motherboard020)], "Alex Morgan", TestData.Now, sourceEcoId: Guid.NewGuid());
 
-        approved.Release(TestData.Now.AddDays(11));
+        approved.Release(TestData.Now, TestData.Now.AddDays(11));
 
         Assert.Equal(BomRevisionStatus.Released, approved.Status);
         Assert.Equal(TestData.Now.AddDays(11), approved.EffectiveAtUtc);
+        Assert.Equal(TestData.Now, approved.ReleasedAtUtc);
     }
 
     [Fact]
@@ -114,7 +115,7 @@ public class BomRevisionTests
         var approved = BomRevision.CreateApproved(
             ProductId, "C", [Line(TestData.Motherboard020)], "Alex Morgan", TestData.Now, sourceEcoId: Guid.NewGuid());
 
-        approved.Release(TestData.Now.AddYears(1));
+        approved.Release(TestData.Now, TestData.Now.AddYears(1));
 
         Assert.True(approved.EffectiveAtUtc > TestData.Now);
     }

@@ -160,7 +160,7 @@ public class EcoApiTests(PostgresFixture fixture) : IAsyncLifetime
 
         var released = await PostActionAsync(
             $"/api/ecos/{created.Id}/release",
-            new ReleaseEcoRequest("Jordan Lee", new DateTime(2026, 11, 1, 0, 0, 0, DateTimeKind.Utc)));
+            new ReleaseEcoRequest("Jordan Lee"));
 
         Assert.Equal("Applied", released.Status);
 
@@ -168,6 +168,8 @@ public class EcoApiTests(PostgresFixture fixture) : IAsyncLifetime
         Assert.Equal("C", afterRelease.Revision.RevisionCode);
         Assert.Equal("Released", afterRelease.Revision.Status);
         Assert.NotNull(afterRelease.Revision.EffectiveAtUtc);
+        Assert.NotNull(afterRelease.Revision.ReleasedAtUtc);
+        Assert.Equal(afterRelease.Revision.ReleasedAtUtc, afterRelease.Revision.EffectiveAtUtc);
         Assert.Contains(afterRelease.Lines, line => line.Component.PartNumber == "MB-021" && line.Quantity == 1);
         Assert.DoesNotContain(afterRelease.Lines, line => line.Component.PartNumber == "MB-020");
 
@@ -188,6 +190,8 @@ public class EcoApiTests(PostgresFixture fixture) : IAsyncLifetime
             audit.Items.Select(item => item.Action));
         Assert.All(audit.Items, item => Assert.Equal(JsonValueKind.Object, item.Details.ValueKind));
         Assert.Equal("Jordan Lee", audit.Items[0].Actor);
+        Assert.Equal(afterRelease.Revision.ReleasedAtUtc, audit.Items[0].Details.GetProperty("releasedAtUtc").GetDateTime());
+        Assert.Equal(afterRelease.Revision.EffectiveAtUtc, audit.Items[0].Details.GetProperty("effectiveAtUtc").GetDateTime());
     }
 
     /// <summary>
@@ -318,25 +322,57 @@ public class EcoApiTests(PostgresFixture fixture) : IAsyncLifetime
     }
 
     /// <summary>
-    /// Release requires a date, and a future date is recorded while taking effect
-    /// immediately. The missing-date case is a 400 and leaves the ECO approved and unreleased.
+    /// Release timestamps are assigned by the server as actual UTC values.
     /// </summary>
     [Fact]
-    public async Task ReleaseRequiresAnEffectiveDate()
+    public async Task ReleaseSetsCurrentUtcEffectivityAndRecordsBothTimestamps()
     {
         var created = await CreateEcoAsync();
         await PostActionAsync($"/api/ecos/{created.Id}/submit", new ActorRequest("Alex Morgan"));
         await PostActionAsync($"/api/ecos/{created.Id}/approve", new ApproveEcoRequest("Jordan Lee", null));
 
-        var response = await PostJsonAsync(
-            $"/api/ecos/{created.Id}/release",
-            new ReleaseEcoRequest("Jordan Lee", null));
-
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equal("effective-date-required", Extension(await ProblemAsync(response), "code"));
-
+        var startedAt = DateTime.UtcNow.AddSeconds(-1);
+        await PostActionAsync($"/api/ecos/{created.Id}/release", new ReleaseEcoRequest("Jordan Lee"));
+        var endedAt = DateTime.UtcNow.AddSeconds(1);
         var current = await CurrentRevisionAsync();
-        Assert.Equal("B", current.Revision.RevisionCode);
+        Assert.Equal("C", current.Revision.RevisionCode);
+        Assert.InRange(current.Revision.ReleasedAtUtc!.Value, startedAt, endedAt);
+        Assert.Equal(current.Revision.ReleasedAtUtc, current.Revision.EffectiveAtUtc);
+
+        var audit = await _client.GetFromJsonAsync<PagedResponse<AuditEventDto>>(
+            $"/api/audit?entityType=EngineeringChangeOrder&entityId={created.Id}");
+        Assert.NotNull(audit);
+        Assert.Equal(current.Revision.ReleasedAtUtc, audit.Items[0].Details.GetProperty("releasedAtUtc").GetDateTime());
+        Assert.Equal(current.Revision.EffectiveAtUtc, audit.Items[0].Details.GetProperty("effectiveAtUtc").GetDateTime());
+    }
+
+    [Fact]
+    public async Task FutureRequestedEffectivityRequiresConfirmationThenReleasesImmediately()
+    {
+        var response = await PostJsonAsync("/api/ecos", CreateRequest() with
+        {
+            RequestedEffectiveAtUtc = DateTime.UtcNow.AddDays(3),
+        });
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var created = (await response.Content.ReadFromJsonAsync<EcoDetailDto>())!;
+        await PostActionAsync($"/api/ecos/{created.Id}/submit", new ActorRequest("Alex Morgan"));
+        await PostActionAsync($"/api/ecos/{created.Id}/approve", new ApproveEcoRequest("Jordan Lee", null));
+
+        var blocked = await PostJsonAsync($"/api/ecos/{created.Id}/release", new ReleaseEcoRequest("Jordan Lee"));
+        Assert.Equal(HttpStatusCode.Conflict, blocked.StatusCode);
+        Assert.Equal("future-effectivity-requires-confirmation", Extension(await ProblemAsync(blocked), "code"));
+        Assert.Equal("B", (await CurrentRevisionAsync()).Revision.RevisionCode);
+
+        var startedAt = DateTime.UtcNow.AddSeconds(-1);
+        await PostActionAsync(
+            $"/api/ecos/{created.Id}/release",
+            new ReleaseEcoRequest("Jordan Lee", ConfirmImmediateEffectivity: true));
+        var endedAt = DateTime.UtcNow.AddSeconds(1);
+        var current = await CurrentRevisionAsync();
+        Assert.Equal("C", current.Revision.RevisionCode);
+        Assert.InRange(current.Revision.EffectiveAtUtc!.Value, startedAt, endedAt);
+        Assert.Equal(current.Revision.ReleasedAtUtc, current.Revision.EffectiveAtUtc);
+        Assert.True(created.RequestedEffectiveAtUtc > current.Revision.EffectiveAtUtc);
     }
 
     /// <summary>Spec §7 filters, and a misspelled status is a 400 rather than an empty list.</summary>
@@ -394,11 +430,11 @@ public class EcoApiTests(PostgresFixture fixture) : IAsyncLifetime
 
         await PostActionAsync(
             $"/api/ecos/{first.Id}/release",
-            new ReleaseEcoRequest("Jordan Lee", DateTime.UtcNow));
+            new ReleaseEcoRequest("Jordan Lee"));
 
         var losing = await PostJsonAsync(
             $"/api/ecos/{second.Id}/release",
-            new ReleaseEcoRequest("Jordan Lee", DateTime.UtcNow));
+            new ReleaseEcoRequest("Jordan Lee"));
 
         Assert.Equal(HttpStatusCode.Conflict, losing.StatusCode);
         Assert.Equal("stale-base-revision", Extension(await ProblemAsync(losing), "conflictType"));
@@ -478,7 +514,7 @@ public class EcoApiTests(PostgresFixture fixture) : IAsyncLifetime
                      ("submit", new ActorRequest("Alex Morgan")),
                      ("approve", new ApproveEcoRequest("Jordan Lee", null)),
                      ("reject", new RejectEcoRequest("Jordan Lee", "no")),
-                     ("release", new ReleaseEcoRequest("Jordan Lee", DateTime.UtcNow)),
+                     ("release", new ReleaseEcoRequest("Jordan Lee")),
                  })
         {
             var response = await PostJsonAsync($"/api/ecos/{missing}/{path}", body);

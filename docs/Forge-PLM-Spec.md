@@ -26,7 +26,7 @@ Product `SERVER-100` (“Compute Server”) currently has released BOM revision 
 
 An engineer creates an ECO to replace `MB-020` with `MB-021` (“Updated Server Motherboard”). The ECO is submitted, reviewed, and approved. The system creates a new BOM revision `C` while preserving revision `B` unchanged.
 
-**Important:** Approval and effectivity are separate concepts. For this prototype, approval creates a new revision in `Approved` status. A separate explicit release action releases that revision and assigns an effective date. Do not automatically treat an approved ECO as released unless the user explicitly chooses to simplify this later.
+**Important:** Approval and effectivity are separate concepts. Approval creates a new revision in `Approved` status. A separate explicit release action releases it. In this prototype release takes effect immediately; `ReleasedAtUtc` records when release occurred and `EffectiveAtUtc` records when the revision applies. If the ECO requested a future effective date, the reviewer must confirm immediate effectivity or cancel. The prototype does not schedule future releases.
 
 ---
 
@@ -81,7 +81,7 @@ Use these terms consistently.
 - **ECO line:** A proposed change to one component line, initially limited to replacing a component or changing quantity.
 - **Approval:** A decision authorizing the ECO to proceed to revision creation.
 - **Release:** An explicit action that makes an approved revision the current released configuration.
-- **Effective date:** The date/time from which a released revision is considered applicable. For this prototype, store UTC timestamps and display in the user's local timezone.
+- **Effective date:** The date/time from which a released revision is considered applicable. The ECO's requested effective date expresses intent; this prototype applies releases immediately and stores the actual UTC effectivity separately from the release event time.
 - **Audit event:** An immutable record of a meaningful domain action, including actor, timestamp, action, and relevant reference/details.
 
 Avoid using `ECN`, `CCB`, `baseline`, `production gate`, and other organization-specific terms as first-class concepts in the prototype. They can be mentioned in documentation as possible future extensions, but are not needed in the initial domain model.
@@ -197,7 +197,8 @@ Fields:
 - `ProductId`
 - `RevisionCode` — sequential human-readable code, e.g. `A`, `B`, `C`
 - `Status` — `Draft`, `Approved`, `Released`, `Superseded`
-- `EffectiveAtUtc` — nullable until release
+- `ReleasedAtUtc` — nullable until release; actual release event time
+- `EffectiveAtUtc` — nullable until release; when the revision applies, separate from release time
 - `CreatedAtUtc`
 - `CreatedBy`
 - `SourceECOId` — nullable for initial seeded revision
@@ -221,7 +222,7 @@ Rules:
 - At most one revision per product may be the current `Released` revision. `Superseded` revisions are historical and remain queryable.
 - Revision codes are assigned sequentially per product. Use a simple documented scheme: initial revision `A`, then `B`, `C`, etc. Do not implement arbitrary alphabet rollover: if the next code would exceed `Z`, fail with a domain error rather than inventing a new scheme.
 - `Draft` exists in the status enum for completeness only. Nothing in v1 creates a draft revision: revisions are created directly in `Approved` status by ECO approval.
-- `EffectiveAtUtc` is metadata recorded at release. It never gates when a revision becomes current (see §8).
+- `ReleasedAtUtc` records when release occurred; `EffectiveAtUtc` records when the revision applies. In this prototype, releases are effective immediately, so both are set to the current UTC time. Keep the fields distinct for future scheduled effectivity.
 - If a revision is approved but not yet released, it is not the current released configuration.
 - The product's current released revision is derived from revisions; avoid storing duplicate mutable `CurrentRevisionId` unless there is a justified consistency strategy.
 
@@ -412,9 +413,9 @@ Within one database transaction:
 2. Load the linked approved revision.
 3. Ensure its status is `Approved`.
 4. Ensure the base revision is still the current released revision.
-5. Ensure an effective date was provided. Release always takes effect immediately; a future timestamp is stored as intent and displayed to the user as "Scheduled", never honoured by a background trigger (no scheduler exists in this prototype).
+5. Capture current UTC as the release and effective timestamps. If `RequestedEffectiveAtUtc` is in the future, require explicit user confirmation to release effective immediately; otherwise leave the ECO approved and the old revision current. No scheduler exists in this prototype.
 6. Mark the prior current revision `Superseded`.
-7. Mark the new revision `Released` and set `EffectiveAtUtc`.
+7. Mark the new revision `Released`; set `ReleasedAtUtc` and `EffectiveAtUtc` separately (both current UTC in this prototype).
 8. Mark the ECO `Applied`.
 9. Add `RevisionReleased` audit event.
 10. Commit.
@@ -578,7 +579,7 @@ The first version is complete when:
 5. A submitted ECO can be approved or rejected.
 6. Approval creates a new approved BOM revision and preserves the old revision unchanged.
 7. An approved revision can be released separately.
-8. Releasing the new revision supersedes the old revision and records an effective date.
+8. Releasing the new revision supersedes the old revision and records both the actual release time and the effective time. They are the same current UTC instant in this prototype.
 9. Invalid state transitions return clear errors.
 10. Audit events are persisted for the key lifecycle actions.
 11. Automated tests cover the critical domain rules and workflow.
@@ -642,7 +643,7 @@ These were open in the first draft and were settled during the requirements inte
 2. **Revision identifiers:** `A`, `B`, `C`, … assigned per product. The code fails with a domain error rather than rolling over after `Z`.
 3. **Quantity:** positive integers. No fractional quantities are needed for this prototype.
 4. **Identity:** no authentication. A two-person actor switch (`Alex Morgan`, `Jordan Lee`) in the UI sends the actor in the request body and is read through an `IActorProvider` boundary, so authenticated claims can replace it later without touching the domain.
-5. **Effectivity:** one UTC timestamp recorded at release. Release always takes effect immediately; a future timestamp is stored as intent and displayed as "Scheduled". No scheduler, no serial/lot effectivity.
+5. **Effectivity:** separate UTC `ReleasedAtUtc` and `EffectiveAtUtc` values. This prototype sets both to current UTC; a future requested date requires explicit confirmation to release immediately. No scheduler, no serial/lot effectivity.
 6. **BOM depth:** single-level BOM, with the model left open to hierarchical expansion.
 7. **Release policy:** a revision is approved first, then explicitly released. This is intentional and must remain consistent across the API and UI.
 8. **Code structure:** three backend projects (`ForgePlm.Api`, `ForgePlm.Domain`, `ForgePlm.Tests`) with Minimal APIs, plus a separate Vite/React/TypeScript frontend.

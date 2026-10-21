@@ -95,16 +95,16 @@ describe('LiveEcoApi — contract endpoints', () => {
     });
   });
 
-  it('releases with an effective date', async () => {
+  it('releases with immediate-effectivity confirmation', async () => {
     const { client, post } = fakeHttp();
     await new LiveEcoApi(client).releaseEco(id, {
       actor: 'Alex Morgan',
-      effectiveAtUtc: '2026-10-21T20:00:00.000Z',
+      confirmImmediateEffectivity: true,
     });
 
     expect(post).toHaveBeenCalledWith(`/ecos/${id}/release`, {
       actor: 'Alex Morgan',
-      effectiveAtUtc: '2026-10-21T20:00:00.000Z',
+      confirmImmediateEffectivity: true,
     });
   });
 

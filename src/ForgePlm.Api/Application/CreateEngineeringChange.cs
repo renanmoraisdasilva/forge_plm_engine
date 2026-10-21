@@ -42,15 +42,16 @@ public sealed class CreateEngineeringChange(ForgePlmDbContext db)
 
         product.EnsureIsActiveForChangeProposal();
 
+        var now = DateTime.UtcNow;
         var baseRevision = await db.BomRevisions.AsNoTracking()
             .FirstOrDefaultAsync(
-                revision => revision.ProductId == product.Id && revision.Status == BomRevisionStatus.Released,
+                revision => revision.ProductId == product.Id && revision.Status == BomRevisionStatus.Released &&
+                            revision.EffectiveAtUtc.HasValue && revision.EffectiveAtUtc.Value <= now,
                 cancellationToken)
             ?? throw new DomainConflictException(
                 DomainErrorCodes.NoReleasedRevision,
                 $"Product {product.PartNumber} has no released BOM revision, so there is nothing to change.");
 
-        var now = DateTime.UtcNow;
         var requestedEffectiveAtUtc = UtcTimestamp.Normalise(command.RequestedEffectiveAtUtc);
 
         for (var attempt = 1; ; attempt++)

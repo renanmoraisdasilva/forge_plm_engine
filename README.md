@@ -40,6 +40,11 @@ flowchart TB
 
 “Current” means the current released revision. Approval creates Rev C but keeps B current; release makes C current and supersedes B. Rejection creates no revision. The ECO detail page keeps the request, BOM comparison, workflow state, and audit history together.
 
+Release takes effect immediately in this prototype. If an ECO requests a future effective date,
+the reviewer is told that scheduled effectivity is unsupported and can release the revision now or
+cancel. The database and release audit record the actual release time (`ReleasedAtUtc`) separately
+from when the revision applies (`EffectiveAtUtc`); both are current UTC for a prototype release.
+
 ## Screens
 
 The screenshots below show the implemented frontend with a fixed demo fixture aligned to the `SERVER-100` workflow. They illustrate the UI and sample data; they are not a recording of a live database session.

@@ -531,7 +531,7 @@ export function EcoForm() {
                 className="mt-1 h-[30px] w-full rounded border border-line-strong bg-surface px-2 text-[12px] text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
               <span className="mt-1 block text-[11px] text-ink-muted">
-                Stored as UTC, displayed in local time. A future date is recorded as Scheduled; release is still explicit.
+                Stored as UTC and displayed in local time. If this date is still in the future at release, the prototype asks you to confirm immediate effectivity.
               </span>
             </label>
           </div>

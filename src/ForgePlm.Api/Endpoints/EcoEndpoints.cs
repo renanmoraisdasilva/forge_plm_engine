@@ -46,7 +46,7 @@ public static class EcoEndpoints
 
         app.MapPost("/api/ecos/{ecoId:guid}/release", ReleaseAsync)
             .WithName("ReleaseEco")
-            .WithSummary("Approved -> Applied. Supersedes the old revision and releases the new one atomically.");
+            .WithSummary("Approved -> Applied immediately. Future requested effectivity requires confirmation.");
 
         return app;
     }
@@ -173,7 +173,7 @@ public static class EcoEndpoints
         ReleaseEcoRequest request,
         CancellationToken cancellationToken)
     {
-        var eco = await useCase.ExecuteAsync(ecoId, request.Actor, request.EffectiveAtUtc, cancellationToken);
+        var eco = await useCase.ExecuteAsync(ecoId, request.Actor, request.ConfirmImmediateEffectivity, cancellationToken);
 
         return await ResultAsync(db, eco, ecoId, cancellationToken);
     }

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ForgePlm.Api.Application;
 using ForgePlm.Api.Seed;
 using ForgePlm.Domain.Audit;
@@ -177,7 +178,7 @@ public class EcoWorkflowTests(PostgresFixture fixture)
 
     /// <summary>
     /// IT-04 — release supersedes the previous revision and releases the new one atomically.
-    /// A future effective date is stored and takes effect immediately (spec §15.5).
+    /// The release and effective timestamps are both actual current UTC, separately recorded.
     /// </summary>
     [Fact]
     public async Task IT04_ReleaseSupersedesTheOldRevisionAndReleasesTheNewOne()
@@ -189,12 +190,10 @@ public class EcoWorkflowTests(PostgresFixture fixture)
         await SubmitAsync(database, eco.Id);
         var approved = await ApproveAsync(database, eco.Id);
 
-        var effectiveAtUtc = DateTime.UtcNow.AddDays(11);
-
         await using (var db = database.CreateDbContext())
         {
             var released = await new ReleaseEngineeringChange(db)
-                .ExecuteAsync(eco.Id, "Jordan Lee", effectiveAtUtc);
+                .ExecuteAsync(eco.Id, "Jordan Lee", confirmImmediateEffectivity: true);
 
             Assert.NotNull(released);
             Assert.Equal(EngineeringChangeStatus.Applied, released.Status);
@@ -209,10 +208,9 @@ public class EcoWorkflowTests(PostgresFixture fixture)
 
         Assert.Equal(BomRevisionStatus.Released, newRevision.Status);
 
-        // PostgreSQL timestamps are microsecond-precision; .NET ticks are 100 ns. A round trip
-        // can therefore drop the final two ticks, so compare within a microsecond.
         Assert.NotNull(newRevision.EffectiveAtUtc);
-        Assert.Equal(effectiveAtUtc, newRevision.EffectiveAtUtc.Value, TimeSpan.FromMilliseconds(1));
+        Assert.NotNull(newRevision.ReleasedAtUtc);
+        Assert.Equal(newRevision.ReleasedAtUtc, newRevision.EffectiveAtUtc);
 
         Assert.Equal(BomRevisionStatus.Superseded, oldRevision.Status);
         Assert.Equal(new DateTime(2026, 1, 15, 0, 0, 0, DateTimeKind.Utc), oldRevision.EffectiveAtUtc);
@@ -222,6 +220,58 @@ public class EcoWorkflowTests(PostgresFixture fixture)
 
         Assert.True(await verify.AuditEvents.AsNoTracking()
             .AnyAsync(audit => audit.Action == AuditActions.RevisionReleased && audit.EntityId == eco.Id));
+    }
+
+    [Fact]
+    public async Task FutureRequestedEffectivityMustBeConfirmedAndConfirmedReleaseIsEffectiveNow()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        var eco = await CreateAsync(database, "Future effectivity confirmation");
+        await SubmitAsync(database, eco.Id);
+        var approved = await ApproveAsync(database, eco.Id);
+
+        await using (var db = database.CreateDbContext())
+        {
+            var error = await Assert.ThrowsAsync<DomainConflictException>(
+                () => new ReleaseEngineeringChange(db).ExecuteAsync(
+                    eco.Id, "Jordan Lee", confirmImmediateEffectivity: false));
+            Assert.Equal(DomainErrorCodes.FutureEffectivityRequiresConfirmation, error.Code);
+        }
+
+        await using (var verify = database.CreateDbContext())
+        {
+            Assert.Equal(BomRevisionStatus.Released,
+                (await verify.BomRevisions.AsNoTracking().SingleAsync(r => r.Id == DemoSeed.RevBId)).Status);
+            Assert.Equal(BomRevisionStatus.Approved,
+                (await verify.BomRevisions.AsNoTracking().SingleAsync(r => r.Id == approved.ApprovedRevisionId)).Status);
+            Assert.Equal(EngineeringChangeStatus.Approved,
+                (await verify.EngineeringChangeOrders.AsNoTracking().SingleAsync(e => e.Id == eco.Id)).Status);
+        }
+
+        var before = DateTime.UtcNow.AddSeconds(-1);
+        await using (var db = database.CreateDbContext())
+        {
+            await new ReleaseEngineeringChange(db).ExecuteAsync(
+                eco.Id, "Jordan Lee", confirmImmediateEffectivity: true);
+        }
+        var after = DateTime.UtcNow.AddSeconds(1);
+
+        await using var final = database.CreateDbContext();
+        var released = await final.BomRevisions.AsNoTracking()
+            .SingleAsync(r => r.Id == approved.ApprovedRevisionId);
+        Assert.InRange(released.ReleasedAtUtc!.Value, before, after);
+        Assert.Equal(released.ReleasedAtUtc, released.EffectiveAtUtc);
+        Assert.True(eco.RequestedEffectiveAtUtc > released.EffectiveAtUtc);
+
+        var auditDetailsJson = await final.AuditEvents.AsNoTracking()
+            .Where(a => a.Action == AuditActions.RevisionReleased && a.EntityId == eco.Id)
+            .Select(a => a.Details)
+            .SingleAsync();
+        using var auditDetails = JsonDocument.Parse(auditDetailsJson);
+        Assert.Equal(released.ReleasedAtUtc, auditDetails.RootElement.GetProperty("releasedAtUtc").GetDateTime());
+        Assert.Equal(released.EffectiveAtUtc, auditDetails.RootElement.GetProperty("effectiveAtUtc").GetDateTime());
     }
 
     /// <summary>IT-05 — rejecting is terminal for the proposal and creates no BOM revision.</summary>
@@ -280,14 +330,14 @@ public class EcoWorkflowTests(PostgresFixture fixture)
         await using (var db = database.CreateDbContext())
         {
             var winner = await new ReleaseEngineeringChange(db)
-                .ExecuteAsync(first.Id, "Jordan Lee", DateTime.UtcNow);
+                .ExecuteAsync(first.Id, "Jordan Lee", confirmImmediateEffectivity: true);
             Assert.NotNull(winner);
         }
 
         await using (var db = database.CreateDbContext())
         {
             var ex = await Assert.ThrowsAsync<DomainConflictException>(
-                () => new ReleaseEngineeringChange(db).ExecuteAsync(second.Id, "Jordan Lee", DateTime.UtcNow));
+                () => new ReleaseEngineeringChange(db).ExecuteAsync(second.Id, "Jordan Lee", confirmImmediateEffectivity: true));
 
             Assert.Equal(DomainErrorCodes.StaleBaseRevision, ex.Code);
         }
@@ -346,7 +396,7 @@ public class EcoWorkflowTests(PostgresFixture fixture)
         currentReleased.MarkSuperseded();
         await winner.SaveChangesAsync();
 
-        newRevision.Release(now);
+        newRevision.Release(now, now);
         await winner.SaveChangesAsync();
 
         await winnerTransaction.CommitAsync();
@@ -429,7 +479,7 @@ public class EcoWorkflowTests(PostgresFixture fixture)
         await using (var db = database.CreateDbContext())
         {
             await Assert.ThrowsAsync<DbUpdateException>(
-                () => new ReleaseEngineeringChange(db).ExecuteAsync(eco.Id, "Jordan Lee", DateTime.UtcNow.AddDays(1)));
+                () => new ReleaseEngineeringChange(db).ExecuteAsync(eco.Id, "Jordan Lee", confirmImmediateEffectivity: true));
         }
 
         await using var verify = database.CreateDbContext();

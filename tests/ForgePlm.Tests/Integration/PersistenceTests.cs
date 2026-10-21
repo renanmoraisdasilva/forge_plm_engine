@@ -409,7 +409,7 @@ public class PersistenceTests(PostgresFixture fixture)
         var old = await db.BomRevisions.SingleAsync(r => r.Status == BomRevisionStatus.Released);
         var next = await db.BomRevisions.SingleAsync(r => r.Status == BomRevisionStatus.Approved);
 
-        next.Release(DateTime.UtcNow);
+        next.Release(DateTime.UtcNow, DateTime.UtcNow);
 
         var ex = await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync());
 
@@ -472,7 +472,7 @@ public class PersistenceTests(PostgresFixture fixture)
             old.MarkSuperseded();
             await db.SaveChangesAsync();
 
-            next.Release(DateTime.UtcNow);
+            next.Release(DateTime.UtcNow, DateTime.UtcNow);
             await db.SaveChangesAsync();
 
             await db.Database.CommitTransactionAsync();

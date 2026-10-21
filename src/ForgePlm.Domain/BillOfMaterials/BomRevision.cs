@@ -33,12 +33,11 @@ public class BomRevision
 
     public BomRevisionStatus Status { get; private set; }
 
-    /// <summary>
-    /// Set at release. This is a recorded label, not a trigger: the revision is
-    /// current from the moment it is released, and a future timestamp means "scheduled",
-    /// never "not yet effective". Nothing may filter on this to decide what is current.
-    /// </summary>
+    /// <summary>When this revision became the production configuration. Kept separate from release authorization.</summary>
     public DateTime? EffectiveAtUtc { get; private set; }
+
+    /// <summary>When a reviewer actually released this revision. Null until release.</summary>
+    public DateTime? ReleasedAtUtc { get; private set; }
 
     public DateTime CreatedAtUtc { get; private set; }
 
@@ -111,6 +110,7 @@ public class BomRevision
         var revision = CreateApproved(productId, revisionCode, lines, createdBy, utcNow, sourceEcoId: null, id: id);
         revision.Status = BomRevisionStatus.Released;
         revision.EffectiveAtUtc = effectiveAtUtc;
+        revision.ReleasedAtUtc = utcNow;
 
         return revision;
     }
@@ -171,7 +171,7 @@ public class BomRevision
     /// Rule from spec §5.4/§8: only an `Approved` revision can be released, and only the
     /// revision linked to an ECO may be released through that ECO.
     /// </summary>
-    public void Release(DateTime effectiveAtUtc)
+    public void Release(DateTime releasedAtUtc, DateTime effectiveAtUtc)
     {
         if (Status != BomRevisionStatus.Approved)
         {
@@ -181,6 +181,7 @@ public class BomRevision
         }
 
         Status = BomRevisionStatus.Released;
+        ReleasedAtUtc = releasedAtUtc;
         EffectiveAtUtc = effectiveAtUtc;
     }
 

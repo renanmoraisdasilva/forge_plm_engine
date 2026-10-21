@@ -67,7 +67,7 @@ public static class DomainErrorCodes
     public const string BomLinesRequired = "bom-lines-required";
     public const string DuplicateTargetComponent = "duplicate-target-component";
     public const string InvalidFilterValue = "invalid-filter-value";
-    public const string EffectiveDateRequired = "effective-date-required";
+    public const string FutureEffectivityRequiresConfirmation = "future-effectivity-requires-confirmation";
 
     // --- State conflicts (409) --------------------------------------------------
     public const string InvalidRevisionCode = "invalid-revision-code";

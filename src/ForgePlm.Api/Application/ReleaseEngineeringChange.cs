@@ -25,9 +25,9 @@ namespace ForgePlm.Api.Application;
 /// </code>
 ///
 /// <para>
-/// Release takes effect immediately. `EffectiveAtUtc` is a recorded label: a future value is
-/// stored and displayed as "Scheduled", and nothing may filter on it to decide what is current
-/// (spec §15.5). There is no scheduler.
+/// This prototype has no scheduler: every release becomes effective at release time. A future
+/// requested effective date requires explicit confirmation to release effective immediately.
+/// The model keeps actual release and effectivity timestamps separate for a future scheduler.
 /// </para>
 /// </summary>
 public sealed class ReleaseEngineeringChange(ForgePlmDbContext db)
@@ -36,7 +36,7 @@ public sealed class ReleaseEngineeringChange(ForgePlmDbContext db)
     public async Task<EngineeringChangeOrder?> ExecuteAsync(
         Guid ecoId,
         string? actor,
-        DateTime? effectiveAtUtc,
+        bool confirmImmediateEffectivity,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(actor))
@@ -64,15 +64,13 @@ public sealed class ReleaseEngineeringChange(ForgePlmDbContext db)
                 $"ECO {eco.EcoNumber} is {eco.Status}; only an approved ECO can be released.");
         }
 
-        // 5. An effective date is required, but it is a label, not a trigger.
-        if (effectiveAtUtc is null)
+        var requestValidationTime = DateTime.UtcNow;
+        if (eco.RequestedEffectiveAtUtc is { } requestedAt && requestedAt > requestValidationTime && !confirmImmediateEffectivity)
         {
-            throw new DomainRuleViolationException(
-                DomainErrorCodes.EffectiveDateRequired,
-                "Release requires an effective date. It is recorded immediately; a future date is shown as scheduled.");
+            throw new DomainConflictException(
+                DomainErrorCodes.FutureEffectivityRequiresConfirmation,
+                "Scheduled effectivity is not supported in this prototype. Confirm release effective immediately, or cancel.");
         }
-
-        var effectiveAt = UtcTimestamp.Normalise(effectiveAtUtc.Value);
 
         var product = await db.Products
             .FirstOrDefaultAsync(p => p.Id == eco.ProductId, cancellationToken)
@@ -100,7 +98,8 @@ public sealed class ReleaseEngineeringChange(ForgePlmDbContext db)
         //    overwrite of the newer configuration.
         var currentReleased = await db.BomRevisions
             .FirstOrDefaultAsync(
-                revision => revision.ProductId == eco.ProductId && revision.Status == BomRevisionStatus.Released,
+                revision => revision.ProductId == eco.ProductId && revision.Status == BomRevisionStatus.Released &&
+                            revision.EffectiveAtUtc.HasValue && revision.EffectiveAtUtc.Value <= requestValidationTime,
                 cancellationToken)
             ?? throw new DomainConflictException(
                 DomainErrorCodes.StaleBaseRevision,
@@ -108,7 +107,10 @@ public sealed class ReleaseEngineeringChange(ForgePlmDbContext db)
 
         eco.EnsureBaseRevisionIsStillCurrent(currentReleased.Id);
 
-        var now = DateTime.UtcNow;
+        // Record as close to the mutation as possible. PostgreSQL timestamps have microsecond
+        // precision, so truncate once and reuse this exact instant for both fields and the audit.
+        var utcTicks = DateTime.UtcNow.Ticks;
+        var now = new DateTime(utcTicks - utcTicks % 10, DateTimeKind.Utc);
 
         // Load-and-write the product row so the xmin token participates (ADR-004), and maintain
         // UpdatedAtUtc while doing so.
@@ -119,7 +121,7 @@ public sealed class ReleaseEngineeringChange(ForgePlmDbContext db)
         await db.SaveChangesAsync(cancellationToken);
 
         // 7–8. Release the new revision and mark the ECO applied.
-        approvedRevision.Release(effectiveAt);
+        approvedRevision.Release(releasedAtUtc: now, effectiveAtUtc: now);
         eco.MarkApplied(now);
 
         // 9. Audit event in the same transaction.
@@ -133,7 +135,8 @@ public sealed class ReleaseEngineeringChange(ForgePlmDbContext db)
                 ecoNumber = eco.EcoNumber,
                 revisionId = approvedRevision.Id,
                 revisionCode = approvedRevision.RevisionCode,
-                effectiveAtUtc = effectiveAt,
+                releasedAtUtc = now,
+                effectiveAtUtc = now,
                 supersededRevisionId = currentReleased.Id,
             }),
             now));
