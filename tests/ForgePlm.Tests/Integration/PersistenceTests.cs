@@ -215,6 +215,125 @@ public class PersistenceTests(PostgresFixture fixture)
         Assert.Contains("ux_bom_revisions_product_revision_code", postgres.Message);
     }
 
+    /// <summary>
+    /// IT-11 — the release ordering question from the 2026-10-21 code review, measured against
+    /// real PostgreSQL rather than assumed either way.
+    ///
+    /// The partial unique index (`status = 'Released'`) is evaluated per statement and cannot be
+    /// deferred: PostgreSQL only allows `DEFERRABLE` on table constraints, and a *partial* index
+    /// is not one. So ordering is load-bearing — releasing the new revision while the old one is
+    /// still `Released` is a 23505 no matter how the transaction is framed.
+    ///
+    /// This test proves the constraint holds for the real release-time shape (both revisions
+    /// already persisted), which IT-10 does not: IT-10 conflicts on a fresh INSERT, this one
+    /// conflicts on a second UPDATE setting `Released`.
+    /// </summary>
+    [Fact]
+    public async Task IT11_ReleasingTheNewRevisionBeforeSupersedingTheOldOneViolatesTheIndex()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        await using (var setup = database.CreateDbContext())
+        {
+            var product = await setup.Products.SingleAsync();
+            var component = await setup.Components.FirstAsync();
+
+            setup.BomRevisions.Add(BomRevision.CreateApproved(
+                product.Id,
+                "C",
+                [BomLine.Create(component.Id, 1, "Each")],
+                createdBy: "Test",
+                utcNow: DateTime.UtcNow,
+                sourceEcoId: Guid.NewGuid()));
+            await setup.SaveChangesAsync();
+        }
+
+        // Wrong order on purpose: release the new revision while the old one is still Released.
+        await using var db = database.CreateDbContext();
+        var old = await db.BomRevisions.SingleAsync(r => r.Status == BomRevisionStatus.Released);
+        var next = await db.BomRevisions.SingleAsync(r => r.Status == BomRevisionStatus.Approved);
+
+        next.Release(DateTime.UtcNow);
+
+        var ex = await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync());
+
+        var postgres = Assert.IsType<PostgresException>(ex.InnerException);
+        Assert.Equal(PostgresErrorCodes.UniqueViolation, postgres.SqlState);
+        Assert.Contains("ux_bom_revisions_one_released_per_product", postgres.Message);
+
+        // And the old revision is untouched — the failure rolled the whole batch back.
+        await using var verify = database.CreateDbContext();
+        Assert.Equal(BomRevisionStatus.Released, (await verify.BomRevisions.SingleAsync(r => r.Id == old.Id)).Status);
+        Assert.Equal(BomRevisionStatus.Approved, (await verify.BomRevisions.SingleAsync(r => r.Id == next.Id)).Status);
+    }
+
+    /// <summary>
+    /// IT-11's positive case, and the contract Slice 6's release use case has to honour:
+    /// supersede the old revision, save, release the new one, save — all inside one explicit
+    /// transaction.
+    ///
+    /// Two statements in a fixed order rather than one unordered batch. The transaction keeps
+    /// the pair atomic, so a failure on the second statement rolls the first one back and the
+    /// product is never left with zero released revisions.
+    ///
+    /// <para>
+    /// <b>Why not just let EF batch it.</b> The review predicted a single `SaveChanges` would
+    /// fail. Measured on 2026-10-21 against EF Core 10 + PostgreSQL 18: it did <b>not</b> fail,
+    /// stably across five runs — EF happened to order the supersede before the release. That is
+    /// an accident of batching, not a contract: EF Core guarantees ordering only for dependent
+    /// commands, and two updates to one table carry no such guarantee. So the ordered design is
+    /// still what Slice 6 ships, but the review's specific prediction was wrong and this comment
+    /// says so rather than quietly agreeing with it.
+    /// </para>
+    /// </summary>
+    [Fact]
+    public async Task IT11_OrderedTwoStepReleasePersistsAtomicallyInOneTransaction()
+    {
+        await using var database = await fixture.CreateDatabaseAsync();
+        await database.SeedAsync();
+
+        await using (var setup = database.CreateDbContext())
+        {
+            var product = await setup.Products.SingleAsync();
+            var component = await setup.Components.FirstAsync();
+
+            setup.BomRevisions.Add(BomRevision.CreateApproved(
+                product.Id,
+                "C",
+                [BomLine.Create(component.Id, 1, "Each")],
+                createdBy: "Test",
+                utcNow: DateTime.UtcNow,
+                sourceEcoId: Guid.NewGuid()));
+            await setup.SaveChangesAsync();
+        }
+
+        await using var db = database.CreateDbContext();
+        var old = await db.BomRevisions.SingleAsync(r => r.Status == BomRevisionStatus.Released);
+        var next = await db.BomRevisions.SingleAsync(r => r.Status == BomRevisionStatus.Approved);
+
+        await using (await db.Database.BeginTransactionAsync())
+        {
+            old.MarkSuperseded();
+            await db.SaveChangesAsync();
+
+            next.Release(DateTime.UtcNow);
+            await db.SaveChangesAsync();
+
+            await db.Database.CommitTransactionAsync();
+        }
+
+        // Verified against a fresh context so the assertions read the database, not the
+        // change tracker.
+        await using var verify = database.CreateDbContext();
+        var oldReloaded = await verify.BomRevisions.SingleAsync(r => r.Id == old.Id);
+        var nextReloaded = await verify.BomRevisions.SingleAsync(r => r.Id == next.Id);
+
+        Assert.Equal(BomRevisionStatus.Superseded, oldReloaded.Status);
+        Assert.Equal(BomRevisionStatus.Released, nextReloaded.Status);
+        Assert.Equal(1, await verify.BomRevisions.CountAsync(r => r.ProductId == old.ProductId && r.Status == BomRevisionStatus.Released));
+    }
+
     private static async Task<string> SnapshotAsync(IsolatedDatabase database)
     {
         await using var db = database.CreateDbContext();
