@@ -233,11 +233,12 @@ Already implemented:
 | `concurrency-conflict` | 409 | reload and retry |
 | `conflicting-released-revision` | 409 | two releases raced |
 
-**New codes the backend agent must add** (none exist yet):
+**Codes added while implementing Slices 4–6** (both additive; no shape changed):
 
 | Code | Status | Raised by |
 |---|---|---|
 | `no-released-revision` | 409 | creating an ECO for a product with no released BOM |
+| `effective-date-required` | 400 | release submitted without an effective date |
 
 ### The UI should prevent, not report, `invalid-transition`
 
