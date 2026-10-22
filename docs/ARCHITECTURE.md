@@ -77,7 +77,7 @@ out of endpoint delegates.
 | Authentication | None; client-supplied actor switch | Demo scope; production identity belongs in claims | Actor is **not** a security control |
 | Frontend state | No Redux/Zustand/React Query; two contexts + `useAsync` | The app has one user, short-lived screens, no cache needs | Every navigation refetches; not a large-app data layer |
 | Styling | Tailwind CSS 4 compiled at build time, design tokens in `styles.css` | Dense, consistent UI without a component library | Markup is verbose; tokens must be kept aligned with the mockup |
-| Testing | xUnit + real PostgreSQL; Vitest in Node for pure TS | Honest relational tests; fast frontend unit tests | No browser/E2E suite; UI screens are not covered |
+| Testing | xUnit + real PostgreSQL; Vitest + jsdom + React Testing Library | Honest relational tests; component tests for the critical screens | No browser/E2E suite; `EcoForm` and `ProductDetail` still lack tests |
 
 Explicitly **not** used, and worth saying why in an interview: MediatR, AutoMapper, a generic
 repository layer, a domain-event framework, event sourcing, a workflow engine, microservices,
@@ -590,12 +590,16 @@ No CORS, no separate web container, no environment-specific base URL. The client
 The strategy is a practical pyramid, with one deliberate exception: API and integration tests
 share the same real PostgreSQL engine as the demo.
 
+Current adjusted line coverage: **92.7% backend** and **61.7% frontend**. The backend figure
+excludes generated migrations and source-generator output; the frontend figure excludes
+bootstrap/composition files.
+
 ```mermaid
 flowchart TB
     Unit["Domain unit tests<br/>xUnit · no I/O<br/>invariants + value objects"]
     Api["API contract tests<br/>WebApplicationFactory + real PostgreSQL<br/>status codes · DTOs · error codes"]
     Int["Integration / use-case tests<br/>real PostgreSQL per test<br/>transactions · constraints · concurrency"]
-    Fe["Frontend unit tests<br/>Vitest (Node)<br/>pure helpers + API clients"]
+    Fe["Frontend tests<br/>Vitest + jsdom + RTL<br/>helpers, providers, screens"]
 
     Int --> Api
     Api --> Unit
@@ -624,18 +628,24 @@ Key mechanics:
   the spec auditable.
 - **`TestData`** builds domain objects in the demo's shape so tests read like the scenario.
 
-Current recorded state in [IMPLEMENTATION.md](IMPLEMENTATION.md#status): **163 backend tests**, 89.00% line coverage and
-49.31% branch coverage on the recorded run. Treat counts as a snapshot, not a permanent claim.
+Current recorded state in [IMPLEMENTATION.md](IMPLEMENTATION.md#status): **163 backend tests**, 89.00%
+raw line coverage and 49.31% raw branch coverage. Excluding generated migrations, Designer files,
+the model snapshot, and `obj/**` source-generator output, the same run is **92.7% lines / 75.5%
+branches**. Treat counts as a snapshot, not a permanent claim.
 
 ### Frontend
 
-- **Vitest in a Node environment**, colocated `*.test.ts` files. No jsdom, no React Testing
-  Library, no browser runner.
-- Tests cover **pure logic and transport**: status matrix, error mapping, formatting, release
-  confirmation text, `HttpClient`, and the live API clients with a fake `HttpClient`.
-- Coverage includes all of `src/**/*.{ts,tsx}`, which is honest but makes the headline number look
-  low because screens, providers, and the router have no automated coverage.
-- Recorded state: **39 tests in five files**, with low whole-`src` coverage. The gap is documented
+- **Vitest + jsdom + React Testing Library**, colocated `*.test.{ts,tsx}` files. The shared setup
+  (`src/test/setup.ts`) registers jest-dom matchers and cleans up rendered trees between tests.
+- Tests cover **pure logic, transport, providers, and the critical screens**: status matrix, error
+  mapping, formatting, release confirmation, `HttpClient`, the live API clients, `useAsync`,
+  `ActorProvider`, `ApiProvider`, product/ECO lists, and the ECO detail actions and dialogs.
+- Coverage includes all of `src/**/*.{ts,tsx}` except test files, `src/test/**`, and the Vite type
+  declaration. Bootstrap/composition files (`main.tsx`, `App.tsx`, `api/index.ts`) are excluded
+  from the adjusted number below because they add wiring, not behaviour.
+- Recorded state: **105 tests in 13 files**, **60.84% raw line coverage** and 48.97% raw branch
+  coverage; **61.7% lines** after excluding the bootstrap/composition files. Screen coverage is
+  36.3% because `EcoForm` and `ProductDetail` are still untested. The remaining gap is documented
   rather than hidden.
 
 Commands:
@@ -698,8 +708,9 @@ These are deliberate and should be stated as such, not discovered by a reviewer:
   provider path.
 - **No distributed concerns.** No outbox, broker, retries, or notifications. Audit rows and ECO
   records are shaped so one could be added later.
-- **Frontend has no screen-level tests or E2E suite.** The pure logic is tested; the UI is checked
-  manually and through HTTP smoke checks.
+- **The frontend has no browser/E2E suite.** Component tests cover the lists, ECO detail, providers,
+  and the data-loading hook; `EcoForm`, `ProductDetail`, `AppShell`, and the router are still
+  verified manually and through HTTP smoke checks.
 - **The API is coupled to EF Core.** That is the accepted cost of avoiding a repository layer with
   no second implementation.
 
@@ -736,8 +747,9 @@ Use these as practice questions; the answer should point at a file, not a genera
    Real PostgreSQL, a database per test, no in-memory provider for transactions/indexes, fresh
    contexts for persistence assertions.
 10. **What would you change first for production?**
-    Authentication/authorization, out-of-band migrations, structured observability, screen-level
-    and E2E tests, and a decision about component editing versus historical snapshots.
+    Authentication/authorization, out-of-band migrations, structured observability, the remaining
+    screen tests and E2E coverage, and a decision about component editing versus historical
+    snapshots.
 
 ---
 
@@ -761,5 +773,6 @@ Use these as practice questions; the answer should point at a file, not a genera
 | Client state | `frontend/src/state/` |
 | Pure client helpers | `frontend/src/lib/` |
 | Design tokens | `frontend/src/styles.css` |
+| Frontend test setup and fixtures | `frontend/src/test/` |
 | Backend tests | `tests/ForgePlm.Tests/` |
 | Compose demo | `docker-compose.yml`, `src/ForgePlm.Api/Dockerfile` |

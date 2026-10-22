@@ -86,6 +86,10 @@ Stop the containers and keep the database volume with `docker compose down`. To 
 - Docker Compose
 - xUnit and Vitest
 
+### Test coverage
+
+Current adjusted line coverage: **92.7% backend** and **61.7% frontend**. The backend figure excludes generated migrations and source-generator output; the frontend figure excludes bootstrap/composition files.
+
 ### Prototype limitations
 
 Release takes effect immediately. Scheduled future effectivity is unsupported; when an ECO requests a future date, the reviewer can release now or cancel. The release time (`ReleasedAtUtc`) and effective time (`EffectiveAtUtc`) are recorded separately; both are current UTC for a prototype release.

@@ -32,8 +32,9 @@ Status last verified 2026-10-21.
 
 - **Backend:** `dotnet test ForgePlm.slnx --no-restore` and `coverage.ps1` passed with **163 tests**;
   Cobertura reports **89.00% lines** and **49.31% branches**.
-- **Frontend:** production build passed; **39 tests** in five files. V8 whole-`src/` coverage measured
-  **13.59% statements, 8.36% branches, 15.42% functions, and 13.85% lines**.
+- **Frontend:** production build passed; **105 tests** in 13 files. V8 whole-`src/` coverage measured
+  **59.20% statements, 48.97% branches, 58.70% functions, and 60.84% lines**; excluding
+  bootstrap/composition files, line coverage is **61.7%**.
 - **Compose:** `docker compose up -d --build --wait` reached healthy. HTTP smoke checks returned the
   SPA shell for `/` and `/products`, loaded the JavaScript/CSS assets, returned 200 for the seeded
   product and current BOM APIs, and returned ProblemDetails 404 for an unknown `/api` route.
@@ -43,12 +44,12 @@ Status last verified 2026-10-21.
 ### Remaining work
 
 1. Run a visual browser check on a host where headless Chrome/Edge can initialize.
-2. Add screen and shared-component tests if higher whole-project coverage is wanted.
+2. Add tests for `EcoForm`, `ProductDetail`, `AppShell`, and the router, then consider an E2E suite.
 
-The frontend report measures mostly transport and domain helpers; screens, shared components,
-providers, and the router have no automated coverage. Integration tests require the Compose
-PostgreSQL service and use a per-run database prefix so concurrent runs do not drop each other's
-databases.
+The frontend report measures all of `src`. Transport, pure helpers, providers, the lists, and ECO
+detail now have component coverage; `EcoForm` and `ProductDetail` are the remaining large gaps.
+Integration tests require the Compose PostgreSQL service and use a per-run database prefix so
+concurrent runs do not drop each other's databases.
 
 ---
 
