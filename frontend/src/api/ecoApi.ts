@@ -14,7 +14,7 @@ import type {
   UpdateEcoRequest,
 } from './types';
 
-/** The ECO surface of docs/ECO-API-CONTRACT.md, served by the live API. */
+/** The ECO surface of docs/IMPLEMENTATION.md, served by the live API. */
 export interface EcoApi {
   listEcos(params?: ListEcosParams): Promise<PagedResponse<EcoSummary>>;
   getEco(ecoId: string): Promise<EcoDetail>;

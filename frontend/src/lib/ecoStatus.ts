@@ -3,7 +3,7 @@ export type EcoAction = 'submit' | 'approve' | 'reject' | 'release';
 export type EcoActionMatrix = Record<EcoAction, boolean>;
 
 /**
- * FE-02 status matrix, copied from docs/ECO-API-CONTRACT.md.
+ * FE-02 status matrix, copied from docs/IMPLEMENTATION.md.
  *
  * This table is the only place the UI decides whether an action is legal. A
  * `409 invalid-transition` reaching the UI means a guard here was missed.

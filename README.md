@@ -61,7 +61,7 @@ The ECO review screen above shows a submitted motherboard replacement. The blue 
 - Before-and-after BOM comparison and append-only application audit events.
 - PostgreSQL persistence, EF Core migrations, and demo baseline seeding.
 
-Catalog creation is available through the API, not the UI. A new active product can receive its first released BOM through `POST /api/products/{productId}/bom-revisions/initial`; later revisions must use ECOs. The acting person selector is a demo identity supplied by the client, not authentication or authorization. See [current implementation status](docs/STATUS.md) for known gaps.
+Catalog creation is available through the API, not the UI. A new active product can receive its first released BOM through `POST /api/products/{productId}/bom-revisions/initial`; later revisions must use ECOs. The acting person selector is a demo identity supplied by the client, not authentication or authorization. See [current implementation status](docs/IMPLEMENTATION.md#status) for known gaps.
 
 ## Run the demo
 
@@ -108,7 +108,7 @@ npm run dev
 
 The frontend is at <http://localhost:5173/> and proxies `/api` to the backend on port 5199. Run frontend checks from `frontend/` with `npm test`, `npm run build`, or `npm run coverage`. The backend suite runs from the repository root with `dotnet test ForgePlm.slnx`; `./coverage.ps1` collects .NET coverage.
 
-The [ECO API contract](docs/ECO-API-CONTRACT.md) documents API routes and lifecycle behavior. [Current status](docs/STATUS.md) records implementation boundaries and the latest verification state.
+The [implementation reference](docs/IMPLEMENTATION.md) documents API routes, lifecycle behavior, implementation boundaries, and the latest verification state.
 
 ## How it fits together
 
@@ -123,8 +123,6 @@ The API serves the built frontend and JSON endpoints from one origin. PostgreSQL
 
 ## Project guide
 
-- [Forge PLM Specification](docs/Forge-PLM-Spec.md) — product behavior, domain model, lifecycle, and demo scenario.
-- [Current status and developer commands](docs/STATUS.md) — implementation boundaries, setup, and checks.
-- [ECO API contract](docs/ECO-API-CONTRACT.md) — request and response shapes, status codes, and lifecycle behavior.
-- [Architecture decisions](docs/DECISIONS.md) — rationale behind key implementation choices.
-- [Concurrency decision record](docs/adr/ADR-004-concurrency-xmin-partial-index.md) — PostgreSQL revision concurrency and uniqueness rules.
+- [Forge PLM Specification](docs/SPECIFICATION.md) — product behavior, domain model, lifecycle, and demo scenario.
+- [Implementation reference](docs/IMPLEMENTATION.md) — current status, API contract, implementation decisions, and the concurrency record.
+- [Architecture notes](docs/ARCHITECTURE.md) — how the prototype is put together and the trade-offs behind it.

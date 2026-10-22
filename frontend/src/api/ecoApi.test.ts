@@ -5,7 +5,7 @@ import type { CreateEcoRequest, EcoDetail, PagedResponse, EcoSummary } from './t
 
 /**
  * The mock adapter is gone, so these pin the one thing the screens now depend on: that each
- * action calls the endpoint and method in docs/ECO-API-CONTRACT.md with the right body.
+ * action calls the endpoint and method in docs/IMPLEMENTATION.md with the right body.
  */
 const id = '11111111-1111-1111-1111-111111111111';
 

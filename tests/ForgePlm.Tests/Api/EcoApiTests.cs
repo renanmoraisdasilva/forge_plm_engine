@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 namespace ForgePlm.Tests.Api;
 
 /// <summary>
-/// Slices 4–6 through the real HTTP pipeline (spec §7, `docs/ECO-API-CONTRACT.md`).
+/// Slices 4–6 through the real HTTP pipeline (spec §7, `docs/IMPLEMENTATION.md`).
 ///
 /// The point of these tests is the contract as the frontend sees it: status codes, DTO shape,
 /// string enums, and the error codes. The use-case semantics — transactions, concurrency and

@@ -641,7 +641,7 @@ When code and this specification conflict, do not silently ignore the conflict. 
 
 ## 15. Decisions resolved in Phase 0
 
-These were open in the first draft and were settled during the requirements interview on 2026-10-21. Implementation-specific details are in `docs/DECISIONS.md`; the concurrency rationale and measured release-ordering behavior are recorded in `docs/adr/ADR-004-concurrency-xmin-partial-index.md`.
+These were open in the first draft and were settled during the requirements interview on 2026-10-21. Implementation-specific details and the concurrency rationale are in `docs/IMPLEMENTATION.md`, including its ADR-004 section.
 
 1. **Database:** PostgreSQL 18, run through the committed `docker-compose.yml`. The same container hosts a dedicated integration-test database. No SQL Server support. *(Owner decision, overriding the "SQL Server or PostgreSQL" option.)*
 2. **Revision identifiers:** `A`, `B`, `C`, … assigned per product. The code fails with a domain error rather than rolling over after `Z`.

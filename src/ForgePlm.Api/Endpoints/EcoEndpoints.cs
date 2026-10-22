@@ -6,7 +6,7 @@ using ForgePlm.Domain.EngineeringChanges;
 namespace ForgePlm.Api.Endpoints;
 
 /// <summary>
-/// Engineering-change write and read endpoints (spec §7, `docs/ECO-API-CONTRACT.md`).
+/// Engineering-change write and read endpoints (spec §7, `docs/IMPLEMENTATION.md`).
 ///
 /// Handlers stay thin: bind, delegate to one use case, return a DTO. They deliberately do not
 /// catch exceptions — the registered <see cref="Http.ForgePlmExceptionHandler"/> owns the
