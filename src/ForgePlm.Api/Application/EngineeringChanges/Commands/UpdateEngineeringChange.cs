@@ -6,6 +6,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ForgePlm.Api.Application;
 
+/// <summary>A draft edit. Product and creator are deliberately absent (they are not editable).</summary>
+public sealed record EcoEdit(
+    string? Title,
+    string? ReasonForChange,
+    string? ImpactAssessment,
+    DateTime? RequestedEffectiveAtUtc,
+    string? Actor,
+    IReadOnlyList<NewEcoLine>? Lines);
+
 /// <summary>
 /// Edit a draft ECO (spec §7: draft only). A submitted, approved, rejected or applied ECO is
 /// immutable in this prototype, and the domain's `UpdateDraft` raises `invalid-transition`.

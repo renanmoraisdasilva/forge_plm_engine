@@ -65,8 +65,9 @@ out of endpoint delegates.
 | Module boundaries | Folders by capability, not separate projects | `Products`, `Components`, `BillOfMaterials`, `EngineeringChanges`, `Audit` fit in one head | Boundaries are conventions, not compiler-enforced assemblies |
 | Domain isolation | `ForgePlm.Domain` has zero package references | Rules are testable in isolation; the domain cannot accidentally query the DB | Cross-aggregate checks must live in application services |
 | Persistence | One `ForgePlmDbContext`, no repository/UoW abstraction | EF Core already is the unit of work. A generic repository would add indirection with no second implementation | Application services are coupled to EF Core; accepted deliberately |
-| Write model | One application service class per command (`CreateEngineeringChange`, `ApproveEngineeringChange`, …) | Each use case has an explicit transaction boundary and a name you can point at | More small classes than a god-service |
+| Write model | One application service class per command (`CreateEngineeringChange`, `ApproveEngineeringChange`, …), with its request record in the same file | Each use case has an explicit transaction boundary and a name you can point at | More small classes than a god-service |
 | Read model | Static query classes returning DTOs (`EcoQueries`, `AuditQueries`, endpoint projections) | Reads do not need aggregates; projections avoid exposing tracked entities and avoid N+1 | Not a CQRS framework — command/query separation in code only |
+| Application layout | Folders mirror `Endpoints/` capabilities; `Commands/` and `Queries/` subfolders only where a capability has several use cases | "Everything about ECOs" is one tree, and the read/write split is visible without reading files | One nesting level more than a flat folder; C# namespace stays `ForgePlm.Api.Application` so moves need no `using` changes |
 | API style | Minimal APIs grouped by feature (`MapEcoEndpoints`, …) | Lowest ceremony; endpoints stay thin | No controller conventions/filters; cross-cutting concerns are explicit middleware/handler |
 | Error contract | RFC 7807 `ProblemDetails` with stable `code`/`conflictType` | UI reacts to machine codes, not prose; one mapper owns the mapping | Adding a domain code is an API contract change |
 | Database | PostgreSQL 18 only, no dual-provider abstraction | `xmin`, partial unique indexes, and real transactions are part of the design | Deliberately provider-specific |
@@ -759,8 +760,9 @@ Use these as practice questions; the answer should point at a file, not a genera
 |---|---|
 | Domain aggregates | `src/ForgePlm.Domain/{Products,Components,BillOfMaterials,EngineeringChanges,Audit}/` |
 | Value objects and errors | `src/ForgePlm.Domain/Common/` |
-| Use cases | `src/ForgePlm.Api/Application/` |
-| Read projections | `src/ForgePlm.Api/Application/EcoQueries.cs`, `AuditQueries.cs`, endpoint projections |
+| Use cases | `src/ForgePlm.Api/Application/<Capability>/` — `Products/`, `Components/`, `BillOfMaterials/`, `EngineeringChanges/`, `Audit/` |
+| Read projections | `Application/EngineeringChanges/Queries/EcoQueries.cs`, `Application/Audit/AuditQueries.cs`, endpoint projections |
+| Cross-aggregate and helper code | `Application/EngineeringChanges/{EcoRules,EcoNumberGenerator,EcoLineFactory}.cs`, `Application/Shared/UtcTimestamp.cs` |
 | HTTP surface | `src/ForgePlm.Api/Endpoints/` |
 | DTOs | `src/ForgePlm.Api/Contracts/` |
 | EF mapping and constraints | `src/ForgePlm.Api/Persistence/Configurations.cs` |

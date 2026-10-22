@@ -10,6 +10,27 @@ using Npgsql;
 namespace ForgePlm.Api.Application;
 
 /// <summary>
+/// One proposed change line as the API receives it. Kept separate from the API contract so the
+/// use cases can be driven directly by integration tests without constructing HTTP payloads.
+/// </summary>
+public sealed record NewEcoLine(
+    EngineeringChangeType ChangeType,
+    Guid TargetComponentId,
+    Guid? ReplacementComponentId,
+    int? NewQuantity,
+    string? Reason);
+
+/// <summary>Everything needed to open a draft. Base revision and ECO number are resolved server-side.</summary>
+public sealed record NewEco(
+    Guid ProductId,
+    string? Title,
+    string? ReasonForChange,
+    string? ImpactAssessment,
+    DateTime? RequestedEffectiveAtUtc,
+    string? Actor,
+    IReadOnlyList<NewEcoLine>? Lines);
+
+/// <summary>
 /// Create ECO (spec §8).
 ///
 /// Two contract points are load-bearing here:
