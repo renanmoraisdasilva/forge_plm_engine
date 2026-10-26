@@ -16,21 +16,22 @@
       Referencing it explicitly overrides the transitive 9.x/10.0.0 version; the alternative
       was suppressing NuGetAudit, which would hide the finding rather than fix it.
     -->
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
     <!--
       Transitive from Microsoft.AspNetCore.OpenApi at 2.0.0, which has GHSA-v5pm-xwqc-g5wc
       (CVE-2026-49451, stack overflow parsing a circular $ref). We only *generate* OpenAPI and
-      never parse untrusted documents, so we are not exposed — but 2.7.5 is the patched 2.x
-      release, and overriding it is cheaper than justifying a suppression.
+      never parse untrusted documents, so we are not exposed — but 2.7.5 was the first patched
+      2.x release, and overriding it is cheaper than justifying a suppression. 2.12.2 is the
+      patched 2.x line required by Microsoft.AspNetCore.OpenApi 10.0.14.
     -->
-    <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
+    <PackageReference Include="Microsoft.OpenApi" Version="2.12.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
   </ItemGroup>
 
   <ItemGroup>
